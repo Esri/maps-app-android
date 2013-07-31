@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ArcGIS Maps</string>
+
+    <string name="basemap_thumbnail">basemap thumbnail</string>
+    <!-- recreation webmap url -->
+	<string name="rec_webmap_url">http://www.arcgis.com/home/item.html?id=6929c43e567647fb85e261beee7f5774</string>
+	<!-- recreation webmap itemID -->
+	<string name="rec_webmap_id">6929c43e567647fb85e261beee7f5774</string>
+    <!-- geocode service -->
+    <string name="geocode_url">http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer</string>
+    <!-- route service -->
+    <string name="routingservice_url">http://sampleserver3.arcgisonline.com/ArcGIS/rest/services/Network/USA/NAServer/Route</string>
+    <!-- place search hint -->
+    <string name="address">San Diego Airport</string>
+    <!-- search action bar title -->
+    <string name="menu_search">Search</string>
+    <!-- route action bar title -->
+    <string name="menu_route">Route</string>
+    <!-- basemaps action bar title -->
+    <string name="menu_basemaps">Basemaps</string>
+    <!-- directions button text -->
+    <string name="directions_button">Get Directions</string>
+    <!-- location search hint -->
+    <string name="my_location">My Location</string>
+    <string name="title_activity_directions">Directions</string>
+    <!-- action bar titles -->
+    <string name="action_settings">Settings</string>
+    <string name="action_about">About</string>
+    <!-- popup menu items -->
+    <string name="menu_edit">edit</string>
+    <string name="menu_delete">delete</string>
+    <string name="menu_save">save</string>
+    <string name="menu_camera">attachment</string>
+
+</resources>

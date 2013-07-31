@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" >
+ 
+    <EditText
+        android:id="@+id/searchText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:hint="@string/address"
+        android:minWidth="150dp" 
+        android:inputType="text" >
+ 
+        <requestFocus
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </EditText>
+ 
+    <Button
+        android:id="@+id/searchButton"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignRight="@id/searchText"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="-50dp"
+        android:background="@drawable/menu_button"
+        android:onClick="locate"/>
+ 
+</RelativeLayout>

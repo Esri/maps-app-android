@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item android:id="@+id/menu_search"
+          android:title="@string/menu_search"
+          android:icon="@drawable/ic_menu_search"
+          android:showAsAction="ifRoom|collapseActionView"
+          android:actionLayout="@layout/search_layout" />
+    
+    <item android:id="@+id/route"
+        android:title="@string/menu_route"
+        android:icon="@drawable/action_route"
+        android:showAsAction="ifRoom|collapseActionView"/>
+    
+    <item android:id="@+id/basemaps" 
+        android:title="@string/menu_basemaps"
+        android:icon="@drawable/action_basemaps"
+        android:showAsAction="ifRoom|collapseActionView" />
+
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/action_about"/>
+
+</menu>
