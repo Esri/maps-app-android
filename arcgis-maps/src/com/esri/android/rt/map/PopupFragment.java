@@ -11,7 +11,7 @@
  *
  */
 
-package com.arcgis.android.app.map;
+package com.esri.android.rt.map;
 
 import java.util.ArrayList;
 
@@ -29,6 +29,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.arcgis.android.app.map.R;
 import com.esri.android.map.Layer;
 import com.esri.android.map.MapView;
 import com.esri.android.map.ags.ArcGISFeatureLayer;

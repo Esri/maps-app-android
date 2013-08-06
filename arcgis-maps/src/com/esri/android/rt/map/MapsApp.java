@@ -11,7 +11,7 @@
  *
  */
 
-package com.arcgis.android.app.map;
+package com.esri.android.rt.map;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -41,13 +41,14 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.Toast;
 
-import com.arcgis.android.app.map.PopupFragment.OnEditListener;
+import com.arcgis.android.app.map.R;
 import com.esri.android.map.GraphicsLayer;
 import com.esri.android.map.LocationService;
 import com.esri.android.map.MapView;
 import com.esri.android.map.ags.ArcGISFeatureLayer;
 import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.map.popup.Popup;
+import com.esri.android.rt.map.PopupFragment.OnEditListener;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.Geometry;
 import com.esri.core.geometry.GeometryEngine;

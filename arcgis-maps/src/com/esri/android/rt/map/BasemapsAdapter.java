@@ -11,7 +11,7 @@
  *
  */
 
-package com.arcgis.android.app.map;
+package com.esri.android.rt.map;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +26,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.arcgis.android.app.map.R;
 import com.esri.android.map.MapView;
 import com.esri.core.portal.BaseMap;
 import com.esri.core.portal.Portal;

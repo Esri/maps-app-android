@@ -11,7 +11,7 @@
  *
  */
 
-package com.arcgis.android.app.map;
+package com.esri.android.rt.map;
 
 import java.util.ArrayList;
 
@@ -19,6 +19,7 @@ import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 
+import com.arcgis.android.app.map.R;
 import com.esri.android.map.GroupLayer;
 import com.esri.android.map.Layer;
 import com.esri.android.map.MapView;

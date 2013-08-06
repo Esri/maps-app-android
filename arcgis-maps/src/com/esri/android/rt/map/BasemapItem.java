@@ -11,7 +11,7 @@
  *
  */
 
-package com.arcgis.android.app.map;
+package com.esri.android.rt.map;
 
 import android.graphics.Bitmap;
 

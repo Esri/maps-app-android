@@ -11,7 +11,9 @@
  * See the Sample code usage restrictions document for further information.
  *
  */
-package com.arcgis.android.app.map;
+package com.esri.android.rt.map;
+
+import com.arcgis.android.app.map.R;
 
 import android.os.Bundle;
 import android.app.Activity;
