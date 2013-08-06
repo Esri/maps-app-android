@@ -57,8 +57,10 @@ import com.esri.android.map.GraphicsLayer;
 import com.esri.android.map.LocationService;
 import com.esri.android.map.MapView;
 import com.esri.android.map.ags.ArcGISFeatureLayer;
+import com.esri.android.map.event.OnLongPressListener;
 import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.map.popup.Popup;
+import com.esri.android.rt.location.ReverseGeocoding;
 import com.esri.android.rt.map.PopupFragment.OnEditListener;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.Geometry;
@@ -167,7 +169,7 @@ public class MapsApp extends FragmentActivity implements
 
 		// attribute app and pan across dateline
 		addAttributes();
-
+		
 		// Zoom to device location and accept intent from route layout
 		mMapView.setOnStatusChangedListener(new OnStatusChangedListener() {
 
@@ -239,18 +241,24 @@ public class MapsApp extends FragmentActivity implements
 					});
 					ls.start();
 
-					// SingleTapListener singleTapListener = new
-					// SingleTapListener(
-					// mMapView);
-					// mMapView.setOnSingleTapListener(singleTapListener);
-
-					// setMapView(mMapView);
-
 				}
 
 			}
 		});
 
+        mMapView.setOnLongPressListener(new OnLongPressListener() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void onLongPress(float x, float y) {
+                Point mapPoint = mMapView.toMapPoint(x, y);
+
+                new ReverseGeocoding(MapsApp.this, mMapView).execute(mapPoint);
+
+            }
+        });
+		
 	}
 
 	public void setMapView(MapView mapView) {
