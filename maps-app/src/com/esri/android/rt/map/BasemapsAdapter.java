@@ -39,6 +39,8 @@ import android.widget.TextView;
 
 import com.arcgis.android.app.map.R;
 import com.esri.android.map.MapView;
+import com.esri.core.geometry.Envelope;
+import com.esri.core.geometry.Polygon;
 import com.esri.core.portal.BaseMap;
 import com.esri.core.portal.Portal;
 import com.esri.core.portal.WebMap;
@@ -52,6 +54,8 @@ public class BasemapsAdapter extends BaseAdapter {
 
 	MapView updateMapView;
 	Portal mPortal;
+	
+	Polygon mapExtent;
 
 	// recreation web map
 	WebMap recWebmap;
@@ -70,10 +74,11 @@ public class BasemapsAdapter extends BaseAdapter {
 	}
 
 	public BasemapsAdapter(Context c, ArrayList<BasemapItem> portalItems,
-			MapView aMapView) {
+			MapView aMapView, Polygon extent) {
 		mContext = c;
 		this.items = portalItems;
 		updateMapView = aMapView;
+		mapExtent = extent;
 	}
 
 	@Override
@@ -147,6 +152,10 @@ public class BasemapsAdapter extends BaseAdapter {
 				// reset the content view for the updated MapView
 				MapsApp basemapsActivity = (MapsApp) mContext;
 				basemapsActivity.setMapView(updateMapView);
+				
+				// honor the maps extent
+				updateMapView.setExtent(mapExtent);
+				
 			}
 		});
 

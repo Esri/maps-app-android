@@ -60,6 +60,7 @@ import com.esri.android.map.ags.ArcGISFeatureLayer;
 import com.esri.android.map.event.OnLongPressListener;
 import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.map.popup.Popup;
+import com.esri.android.rt.location.DirectionsActivity;
 import com.esri.android.rt.location.ReverseGeocoding;
 import com.esri.android.rt.map.PopupFragment.OnEditListener;
 import com.esri.core.geometry.Envelope;
@@ -320,7 +321,7 @@ public class MapsApp extends FragmentActivity implements
 			// create the custom basemap adapter and send basemap items and 
 			// mapview to switch basemaps
 			bAdapter = new BasemapsAdapter(MapsApp.this, itemDataList,
-					mMapView);
+					mMapView, mMapView.getExtent());
 			// set the adapter to the gridview
 			gridView.setAdapter(bAdapter);
 			// pull up the gridview
@@ -478,13 +479,11 @@ public class MapsApp extends FragmentActivity implements
 	@Override
 	protected void onPause() {
 		super.onPause();
-		mMapView.pause();
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		mMapView.unpause();
 	}
 
 	/*

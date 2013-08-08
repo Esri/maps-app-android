@@ -22,9 +22,10 @@
  *
  */
 
-package com.esri.android.rt.map;
+package com.esri.android.rt.location;
 
 import com.arcgis.android.app.map.R;
+import com.esri.android.rt.map.MapsApp;
 
 import android.os.Bundle;
 import android.app.Activity;

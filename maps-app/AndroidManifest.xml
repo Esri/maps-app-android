@@ -31,7 +31,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.esri.android.rt.map.DirectionsActivity"
+            android:name="com.esri.android.rt.location.DirectionsActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_directions" >
         </activity>
