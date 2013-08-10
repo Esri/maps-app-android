@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -153,8 +154,25 @@ public class BasemapsAdapter extends BaseAdapter {
 				MapsApp basemapsActivity = (MapsApp) mContext;
 				basemapsActivity.setMapView(updateMapView);
 				
-				// honor the maps extent
-				updateMapView.setExtent(mapExtent);
+				if(!updateMapView.isLoaded()){
+					// wait till map is loaded
+					final Handler handler = new Handler();
+					handler.postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							// honor the maps extent
+							updateMapView.setExtent(mapExtent);
+							
+						}
+					}, 250);
+					
+				}else{
+					// honor the maps extent
+					updateMapView.setExtent(mapExtent);
+				}
+				
+
 				
 			}
 		});
