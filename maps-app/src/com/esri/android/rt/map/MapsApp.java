@@ -155,10 +155,10 @@ public class MapsApp extends FragmentActivity implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// mGeocode = (GeocoderTask) getLastNonConfigurationInstance();
-		// if (mGeocode != null) {
-		// mGeocode.mActivity = new WeakReference<BasemapsActivity>(this);
-		// }
+//		 mGeocode = (GeocoderTask) getLastNonConfigurationInstance();
+//		 if (mGeocode != null) {
+//			 mGeocode.mActivity = new WeakReference<BasemapsActivity>(this);
+//		 }
 
 		// Retrieve the map and initial extent from recreation webmap
 		recWebMapURL = getString(R.string.rec_webmap_url);

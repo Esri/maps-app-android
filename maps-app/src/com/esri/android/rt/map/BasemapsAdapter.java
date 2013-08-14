@@ -127,7 +127,8 @@ public class BasemapsAdapter extends BaseAdapter {
 
 			@Override
 			public void onClick(View v) {
-				
+				// create an asynctask class to move off UI thread
+				// http://developer.android.com/training/displaying-bitmaps/process-bitmap.html
 				
 				String url = "http://www.arcgis.com";
 				mPortal = new Portal(url, null);
