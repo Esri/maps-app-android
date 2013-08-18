@@ -327,7 +327,7 @@ public class MapsApp extends FragmentActivity implements
 			// pull up the gridview
 			setContentView(gridView);
 			// populate the gridview with available basemaps
-			new GroupTask().execute();
+			new BasemapSearch().execute();
 
 			return true;
 
@@ -683,7 +683,7 @@ public class MapsApp extends FragmentActivity implements
 		}
 	}
 
-	private class GroupTask extends AsyncTask<Void, Void, Boolean> {
+	private class BasemapSearch extends AsyncTask<Void, Void, Boolean> {
 
 		@Override
 		protected void onPreExecute() {

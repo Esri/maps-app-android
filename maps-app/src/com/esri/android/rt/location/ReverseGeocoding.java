@@ -37,12 +37,12 @@ import com.esri.core.tasks.ags.geocode.Locator;
 import com.esri.core.tasks.ags.geocode.LocatorReverseGeocodeResult;
 
 public class ReverseGeocoding extends AsyncTask<Point, Void, LocatorReverseGeocodeResult> {
-    private Activity curActivity;
+    private Activity currentActivity;
     private MapView mapView;
 
-    public ReverseGeocoding(Activity _curActivity, MapView _mapView){
-        this.curActivity = _curActivity;
-        this.mapView = _mapView;
+    public ReverseGeocoding(Activity activity, MapView map){
+        this.currentActivity = activity;
+        this.mapView = map;
     }
 
     @Override
@@ -78,7 +78,7 @@ public class ReverseGeocoding extends AsyncTask<Point, Void, LocatorReverseGeoco
 
             // Show the results of the reverse geocoding in a toast.
             resultAddress = address.toString();
-            Toast.makeText(curActivity, resultAddress, Toast.LENGTH_LONG).show();
+            Toast.makeText(currentActivity, resultAddress, Toast.LENGTH_LONG).show();
         }
     }
 }

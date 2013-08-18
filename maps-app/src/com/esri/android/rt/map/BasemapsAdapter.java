@@ -29,7 +29,6 @@ import java.util.List;
 
 import android.content.Context;
 import android.os.Handler;
-import android.os.StrictMode;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -40,7 +39,9 @@ import android.widget.TextView;
 
 import com.arcgis.android.app.map.R;
 import com.esri.android.map.MapView;
-import com.esri.core.geometry.Envelope;
+import com.esri.android.map.event.OnLongPressListener;
+import com.esri.android.rt.location.ReverseGeocoding;
+import com.esri.core.geometry.Point;
 import com.esri.core.geometry.Polygon;
 import com.esri.core.portal.BaseMap;
 import com.esri.core.portal.Portal;
@@ -61,7 +62,7 @@ public class BasemapsAdapter extends BaseAdapter {
 	// recreation web map
 	WebMap recWebmap;
 	// base webmap service
-	WebMap baseWebmap;
+	WebMap baseWebmap = null;
 	// basemap selected from baseWebmap
 	BaseMap selectedBasemap;
 
@@ -109,10 +110,6 @@ public class BasemapsAdapter extends BaseAdapter {
 	 */
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
-		// TODO move off UI thread
-		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-		StrictMode.setThreadPolicy(policy); 
-		
 		if (convertView == null) {
 			LayoutInflater inflator = (LayoutInflater) mContext
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -126,52 +123,74 @@ public class BasemapsAdapter extends BaseAdapter {
 		image.setOnClickListener(new OnClickListener() {
 
 			@Override
-			public void onClick(View v) {
-				// create an asynctask class to move off UI thread
-				// http://developer.android.com/training/displaying-bitmaps/process-bitmap.html
-				
-				String url = "http://www.arcgis.com";
-				mPortal = new Portal(url, null);
-				
-				basemapID = items.get(position).item.getItemId();
-				try {
-					// recreation webmap item id to create a @WebMap
-					String itemID = mContext.getString(R.string.rec_webmap_id);
-					// create recreation Webmap
-					recWebmap = WebMap.newInstance(itemID, mPortal);
-					// create a new WebMap of selected basemap from default
-					// portal
-					baseWebmap = WebMap.newInstance(basemapID, mPortal);
-
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-				// Get the WebMaps basemap
-				selectedBasemap = baseWebmap.getBaseMap();
-				// switch basemaps on the recreation webmap
-				updateMapView = new MapView(mContext, recWebmap,
-						selectedBasemap, null, null);
-				// reset the content view for the updated MapView
-				MapsApp basemapsActivity = (MapsApp) mContext;
-				basemapsActivity.setMapView(updateMapView);
-				
-				if(!updateMapView.isLoaded()){
-					// wait till map is loaded
-					final Handler handler = new Handler();
-					handler.postDelayed(new Runnable() {
-						
-						@Override
-						public void run() {
-							// honor the maps extent
-							updateMapView.setExtent(mapExtent);
-							
-						}
-					}, 250);
+			public void onClick(final View view) {
+				new Thread(new Runnable() {
 					
-				}else{
-					// honor the maps extent
-					updateMapView.setExtent(mapExtent);
-				}
+					@Override
+					public void run() {
+						String url = "http://www.arcgis.com";
+						mPortal = new Portal(url, null);
+						basemapID = items.get(position).item.getItemId();
+						
+						try {
+							// recreation webmap item id to create a @WebMap
+							String itemID = mContext.getString(R.string.rec_webmap_id);
+							// create recreation Webmap
+							recWebmap = WebMap.newInstance(itemID, mPortal);
+							// create a new WebMap of selected basemap from default
+							// portal
+							baseWebmap = WebMap.newInstance(basemapID, mPortal);
+
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+						
+						view.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								// Get the WebMaps basemap
+								selectedBasemap = baseWebmap.getBaseMap();
+								// switch basemaps on the recreation webmap
+								updateMapView = new MapView(mContext, recWebmap,
+										selectedBasemap, null, null);
+								// reset the content view for the updated MapView
+								MapsApp basemapsActivity = (MapsApp) mContext;
+								basemapsActivity.setMapView(updateMapView);
+								
+								if(!updateMapView.isLoaded()){
+									// wait till map is loaded
+									final Handler handler = new Handler();
+									handler.postDelayed(new Runnable() {
+										
+										@Override
+										public void run() {
+											// honor the maps extent
+											updateMapView.setExtent(mapExtent);
+											
+										}
+									}, 250);
+									
+								}else{
+									// honor the maps extent
+									updateMapView.setExtent(mapExtent);
+								}
+								
+//								updateMapView.setOnLongPressListener(new OnLongPressListener() {
+//									
+//									@Override
+//									public void onLongPress(float x, float y) {
+//										Point mapPoint = updateMapView.toMapPoint(x, y);
+//										new ReverseGeocoding(MapsApp.this, updateMapView).execute(mapPoint);
+//										
+//									}
+//								});
+								
+							}
+						});
+	
+					}
+				}).start();
 				
 
 				
