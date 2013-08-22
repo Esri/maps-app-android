@@ -13,6 +13,7 @@ Your organisations mapping app built with the [ArcGIS Runtime SDK for Android](h
 ## Instructions
 
 ## Requirements
+Android SDK
 
 ## Resources
 
