@@ -411,6 +411,8 @@ public class MapsApp extends FragmentActivity implements
 	 * @param start
 	 * @param end
 	 */
+	@SuppressWarnings("unchecked")
+	// http://mail.openjdk.java.net/pipermail/coin-dev/2009-March/000217.html
 	private void setRouteParams(String start, String end) {
 		// create a list of start end point params
 		LocatorFindParameters routeStartParams = new LocatorFindParameters(

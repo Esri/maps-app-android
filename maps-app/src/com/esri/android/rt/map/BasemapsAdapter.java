@@ -39,9 +39,6 @@ import android.widget.TextView;
 
 import com.arcgis.android.app.map.R;
 import com.esri.android.map.MapView;
-import com.esri.android.map.event.OnLongPressListener;
-import com.esri.android.rt.location.ReverseGeocoding;
-import com.esri.core.geometry.Point;
 import com.esri.core.geometry.Polygon;
 import com.esri.core.portal.BaseMap;
 import com.esri.core.portal.Portal;
