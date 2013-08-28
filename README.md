@@ -26,6 +26,11 @@ Find a bug or want to request a new feature?  Please let us know by submitting a
 
 Anyone and everyone is welcome to contribute. We do accept pull requests.
 
+1. Get Involed
+2. Report Issues
+3. Contribute Code
+4. Improve Documentation
+
 ## Licensing
 Copyright 2013 Esri
 
