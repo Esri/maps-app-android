@@ -13,19 +13,27 @@ Your organisations mapping app built with the [ArcGIS Runtime SDK for Android](h
 * Routing
 
 ## Instructions
+1. Download and unzip the .zip file or clone the repo.
+2. Import project into Eclipse IDE
+
+ [New to Github? Get started here.](https://github.com/)
 
 ## Requirements
-* Android SDK
+* Java Development Kit SE 6
+* Eclipse Juno or Kepler
+* Android SDK 16+
+* Android ADT Eclipse plugin
 * ArcGIS Runtime SDK for Android v10.1.1-u1 (or above)
 
 ## Resources
+* [ArcGIS Runtime SDK for Android Developers Site](https://developers.arcgis.com/en/android/)
+* [ArcGIS Mobile Blog](http://blogs.esri.com/esri/arcgis/category/mobile/)
+* [twitter@esri](http://twitter.com/esri)
 
 ## Issues
-
 Find a bug or want to request a new feature?  Please let us know by submitting an issue.
 
 ## Contributing
-
 Anyone and everyone is welcome to contribute. We do accept pull requests.
 
 1. Get Involed
