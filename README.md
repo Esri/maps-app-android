@@ -3,6 +3,8 @@ maps-app-android
 
 Your organisations mapping app built with the [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/en/android/).  ArcGIS Maps is a modern Android app which aims to be a starting off point for developers looking to extend a basic interactive mapping app.
 
+![App](https://raw.github.com/Esri/maps-app-android/master/maps-app.png?login=doneill&token=1bb65838c2ba478c1d89df754ae9b52f)
+
 ## Features
 * Dynamically switching basemaps
 * Place Search
