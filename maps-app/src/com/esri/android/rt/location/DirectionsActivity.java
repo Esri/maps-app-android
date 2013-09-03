@@ -41,22 +41,22 @@ public class DirectionsActivity extends Activity {
 	// UI definitions
 	EditText startText;
 	EditText endText;
-	
+
 	int basemap;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.directions_layout);
-		
+
 		startText = (EditText) findViewById(R.id.myLocation);
 		endText = (EditText) findViewById(R.id.endPoint);
 		Bundle extras = getIntent().getExtras();
 		basemap = extras.getInt("basemap");
-		
+
 	}
-	
-	public void sendDirections(View view){
+
+	public void sendDirections(View view) {
 		// hide virtual keyboard
 		InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		inputManager.hideSoftInputFromWindow(
@@ -70,7 +70,7 @@ public class DirectionsActivity extends Activity {
 		intent.putExtra("end", endPoint);
 		intent.putExtra("basemap", basemap);
 		startActivity(intent);
-		
+
 	}
 
 	@Override

@@ -36,50 +36,52 @@ import com.esri.core.geometry.SpatialReference;
 import com.esri.core.tasks.ags.geocode.Locator;
 import com.esri.core.tasks.ags.geocode.LocatorReverseGeocodeResult;
 
-public class ReverseGeocoding extends AsyncTask<Point, Void, LocatorReverseGeocodeResult> {
-    private Activity currentActivity;
-    private MapView mapView;
+public class ReverseGeocoding extends
+		AsyncTask<Point, Void, LocatorReverseGeocodeResult> {
+	private Activity currentActivity;
+	private MapView mapView;
 
-    public ReverseGeocoding(Activity activity, MapView map){
-        this.currentActivity = activity;
-        this.mapView = map;
-    }
+	public ReverseGeocoding(Activity activity, MapView map) {
+		this.currentActivity = activity;
+		this.mapView = map;
+	}
 
-    @Override
-    protected LocatorReverseGeocodeResult doInBackground(Point... params) {
-        // create results object and set to null
-        LocatorReverseGeocodeResult result = null;
-        // set the geocode service
-        Locator locator = new Locator();
-        try {
+	@Override
+	protected LocatorReverseGeocodeResult doInBackground(Point... params) {
+		// create results object and set to null
+		LocatorReverseGeocodeResult result = null;
+		// set the geocode service
+		Locator locator = new Locator();
+		try {
 
-            // Attempt to reverse geocode the point.
-            // Our input and output spatial reference will be the same as the map.
-            SpatialReference mapRef = mapView.getSpatialReference();
-            result = locator.reverseGeocode(params[0], 50.0, mapRef, mapRef);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        // return the resulting point(s)
-        return result;
-    }
+			// Attempt to reverse geocode the point.
+			// Our input and output spatial reference will be the same as the
+			// map.
+			SpatialReference mapRef = mapView.getSpatialReference();
+			result = locator.reverseGeocode(params[0], 50.0, mapRef, mapRef);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		// return the resulting point(s)
+		return result;
+	}
 
-    protected void onPostExecute(LocatorReverseGeocodeResult result) {
+	protected void onPostExecute(LocatorReverseGeocodeResult result) {
 
-        String resultAddress;
+		String resultAddress;
 
-        // Construct a nicely formatted address from the results
-        StringBuilder address = new StringBuilder();
-        if (result != null && result.getAddressFields() != null) {
-            Map<String, String> addressFields = result.getAddressFields();
-            address.append(String.format("%s\n%s, %s %s",
-                    addressFields.get("Address"), addressFields.get("City"),
-                    addressFields.get("Region"), addressFields.get("Postal")));
+		// Construct a nicely formatted address from the results
+		StringBuilder address = new StringBuilder();
+		if (result != null && result.getAddressFields() != null) {
+			Map<String, String> addressFields = result.getAddressFields();
+			address.append(String.format("%s\n%s, %s %s",
+					addressFields.get("Address"), addressFields.get("City"),
+					addressFields.get("Region"), addressFields.get("Postal")));
 
-            // Show the results of the reverse geocoding in a toast.
-            resultAddress = address.toString();
-            Toast.makeText(currentActivity, resultAddress, Toast.LENGTH_LONG).show();
-        }
-    }
+			// Show the results of the reverse geocoding in a toast.
+			resultAddress = address.toString();
+			Toast.makeText(currentActivity, resultAddress, Toast.LENGTH_LONG)
+					.show();
+		}
+	}
 }
-

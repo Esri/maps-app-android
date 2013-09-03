@@ -50,274 +50,292 @@ import com.esri.core.tasks.ags.query.QueryTask;
 
 public class SingleTapListener implements OnSingleTapListener {
 
-  private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
+	private MapView mMapView;
+	private PopupFragment mPopupFragment;
+	private int tolerance = 40;
 
-  private MapView mMapView;
+	public SingleTapListener(MapView map) {
+		this.mMapView = map;
+	}
 
-  private PopupFragment mPopupFragment;
+	@Override
+	public void onSingleTap(float x, float y) {
 
-  private int tolerance = 40;
+		if (mMapView.isLoaded()) {
+			// Loop through each layer in the webmap
+			mPopupFragment = PopupFragment.newInstance(mMapView);
+			Envelope env = new Envelope(mMapView.toMapPoint(x, y), tolerance
+					* mMapView.getResolution(), tolerance
+					* mMapView.getResolution());
+			Layer[] layers = mMapView.getLayers();
+			for (Layer layer : layers) {
+				// If the layer has not been initialized or is invisible, do
+				// nothing.
+				if (!layer.isInitialized() || !layer.isVisible())
+					continue;
 
-  public SingleTapListener(MapView map) {
-    this.mMapView = map;
-  }
+				if (layer instanceof GroupLayer) {
+					Layer[] sublayers = ((GroupLayer) layer).getLayers();
+					if (sublayers != null) {
+						for (Layer flayer : sublayers) {
+							ArcGISFeatureLayer featureLayer = (ArcGISFeatureLayer) flayer;
+							checkAndQueryFeatureLayer(x, y, featureLayer);
+						}
+					}
+				} else if (layer instanceof ArcGISFeatureLayer) {
+					// Query feature layer and display popups
+					ArcGISFeatureLayer featureLayer = (ArcGISFeatureLayer) layer;
+					checkAndQueryFeatureLayer(x, y, featureLayer);
+				} else if (layer instanceof ArcGISDynamicMapServiceLayer
+						|| layer instanceof ArcGISTiledMapServiceLayer) {
+					// Query dynamic map service layer and display popups.
+					ArcGISLayerInfo[] layerinfos;
+					// Retrieve layer info for each sub-layer of the dynamic map
+					// service layer.
+					if (layer instanceof ArcGISDynamicMapServiceLayer)
+						layerinfos = ((ArcGISDynamicMapServiceLayer) layer)
+								.getAllLayers();
+					else
+						layerinfos = ((ArcGISTiledMapServiceLayer) layer)
+								.getAllLayers();
 
-  @Override
-  public void onSingleTap(float x, float y) {
+					if (layerinfos == null)
+						continue;
 
-    if (mMapView.isLoaded()) {
-      // Loop through each layer in the webmap
-      mPopupFragment = new PopupFragment(mMapView);
-      Envelope env = new Envelope(mMapView.toMapPoint(x, y), tolerance * mMapView.getResolution(), tolerance
-          * mMapView.getResolution());
-      Layer[] layers = mMapView.getLayers();
-      for (Layer layer : layers) {
-        // If the layer has not been initialized or is invisible, do nothing.
-        if (!layer.isInitialized() || !layer.isVisible())
-          continue;
+					// Loop through each sub-layer
+					for (ArcGISLayerInfo layerInfo : layerinfos) {
+						// Obtain PopupInfo for sub-layer.
+						// Has sublayer?
+						ArcGISLayerInfo[] children = layerInfo.getLayers();
+						if (children != null && children.length > 0)
+							continue;
 
-        if (layer instanceof GroupLayer) {
-          Layer[] sublayers = ((GroupLayer) layer).getLayers();
-          if (sublayers != null) {
-            for (Layer flayer : sublayers) {
-              ArcGISFeatureLayer featureLayer = (ArcGISFeatureLayer) flayer;
-              checkAndQueryFeatureLayer(x, y, featureLayer);
-            }
-          }
-        } else if (layer instanceof ArcGISFeatureLayer) {
-          // Query feature layer and display popups
-          ArcGISFeatureLayer featureLayer = (ArcGISFeatureLayer) layer;
-          checkAndQueryFeatureLayer(x, y, featureLayer);
-        } else if (layer instanceof ArcGISDynamicMapServiceLayer || layer instanceof ArcGISTiledMapServiceLayer) {
-          // Query dynamic map service layer and display popups.
-          ArcGISLayerInfo[] layerinfos;
-          // Retrieve layer info for each sub-layer of the dynamic map
-          // service layer.
-          if (layer instanceof ArcGISDynamicMapServiceLayer)
-            layerinfos = ((ArcGISDynamicMapServiceLayer) layer).getAllLayers();
-          else
-            layerinfos = ((ArcGISTiledMapServiceLayer) layer).getAllLayers();
+						checkAndQueryMapServiceSubLayer(x, y, env, layer,
+								layerInfo);
 
-          if (layerinfos == null)
-            continue;
+					}
+				}
+			}
+		}
+	}
 
-          // Loop through each sub-layer
-          for (ArcGISLayerInfo layerInfo : layerinfos) {
-            // Obtain PopupInfo for sub-layer.
-            // Has sublayer?
-            ArcGISLayerInfo[] children = layerInfo.getLayers();
-            if (children != null && children.length > 0)
-              continue;
+	private boolean checkScaleRange(double layerMaxScale, double layerMinScale,
+			PopupInfo popupInfo) {
+		// Check if the sub-layer is within the scale range
 
-            checkAndQueryMapServiceSubLayer(x, y, env, layer, layerInfo);
+		boolean inScale = false;
+		double maxScale = (layerMaxScale != 0) ? layerMaxScale
+				: (popupInfo == null ? 0 : popupInfo.getMaxScale());
+		double minScale = (layerMinScale != 0) ? layerMinScale
+				: (popupInfo == null ? 0 : popupInfo.getMinScale());
 
-          }
-        }
-      }
-    }
-  }
+		if ((maxScale == 0 || mMapView.getScale() > maxScale)
+				&& (minScale == 0 || mMapView.getScale() < minScale))
+			inScale = true;
 
-  private boolean checkScaleRange(double layerMaxScale, double layerMinScale, PopupInfo popupInfo) {
-    // Check if the sub-layer is within the scale range
+		return inScale;
+	}
 
-    boolean inScale = false;
-    double maxScale = (layerMaxScale != 0) ? layerMaxScale : (popupInfo == null ? 0 : popupInfo.getMaxScale());
-    double minScale = (layerMinScale != 0) ? layerMinScale : (popupInfo == null ? 0 : popupInfo.getMinScale());
+	private void checkAndQueryFeatureLayer(float x, float y,
+			ArcGISFeatureLayer featureLayer) {
+		if (featureLayer.getPopupInfo() != null
+				&& checkScaleRange(featureLayer.getMaxScale(),
+						featureLayer.getMinScale(), featureLayer.getPopupInfo())) {
+			// Query feature layer which is associated with a popup definition.
+			new RunQueryFeatureLayerTask(x, y, tolerance).execute(featureLayer);
+		}
+	}
 
-    if ((maxScale == 0 || mMapView.getScale() > maxScale) && (minScale == 0 || mMapView.getScale() < minScale))
-      inScale = true;
+	private boolean checkIfLayerHasVisibleParents(ArcGISLayerInfo layerInfo) {
+		// Check if a sub-layer is visible.
+		boolean isVisible = true;
+		ArcGISLayerInfo info = layerInfo;
+		while (info != null && info.isVisible())
+			info = info.getParentLayer();
+		// Skip invisible sub-layer
+		if (info != null && !info.isVisible())
+			isVisible = false;
 
-    return inScale;
-  }
+		return isVisible;
 
-  private void checkAndQueryFeatureLayer(float x, float y, ArcGISFeatureLayer featureLayer) {
-    if (featureLayer.getPopupInfo() != null
-        && checkScaleRange(featureLayer.getMaxScale(), featureLayer.getMinScale(), featureLayer.getPopupInfo())) {
-      // Query feature layer which is associated with a popup definition.
-      new RunQueryFeatureLayerTask(x, y, tolerance).execute(featureLayer);
-    }
-  }
+	}
 
-  private boolean checkIfLayerHasVisibleParents(ArcGISLayerInfo layerInfo) {
-    // Check if a sub-layer is visible.
-    boolean isVisible = true;
-    ArcGISLayerInfo info = layerInfo;
-    while (info != null && info.isVisible())
-      info = info.getParentLayer();
-    // Skip invisible sub-layer
-    if (info != null && !info.isVisible())
-      isVisible = false;
+	private void checkAndQueryMapServiceSubLayer(float x, float y,
+			Envelope env, Layer layer, ArcGISLayerInfo layerInfo) {
 
-    return isVisible;
+		int subLayerId = layerInfo.getId();
+		PopupInfo popupInfo = layer.getPopupInfo(subLayerId);
 
-  }
+		if (checkIfLayerHasVisibleParents(layerInfo)
+				&& popupInfo != null
+				&& checkScaleRange(layerInfo.getMaxScale(),
+						layerInfo.getMinScale(), popupInfo)) {
+			// Query sub-layer which is associated with a popup definition and
+			// is visible and in scale range.
+			String url = layer.getQueryUrl(subLayerId);
+			if (url == null || url.length() < 1)
+				url = layer.getUrl() + "/" + subLayerId;
+			new RunQueryDynamicLayerTask(env, layer, subLayerId, popupInfo,
+					layer.getSpatialReference()).execute(url);
+		}
 
-  private void checkAndQueryMapServiceSubLayer(float x, float y, Envelope env, Layer layer, ArcGISLayerInfo layerInfo) {
+	}
 
-    int subLayerId = layerInfo.getId();
-    PopupInfo popupInfo = layer.getPopupInfo(subLayerId);
+	// Display popup in a fragment
+	private void showPopup(PopupFragment fragment) {
+		if (fragment.isDisplayed())
+			return;
 
-    if (checkIfLayerHasVisibleParents(layerInfo) && popupInfo != null
-        && checkScaleRange(layerInfo.getMaxScale(), layerInfo.getMinScale(), popupInfo)) {
-      // Query sub-layer which is associated with a popup definition and
-      // is visible and in scale range.
-      String url = layer.getQueryUrl(subLayerId);
-      if (url == null || url.length() < 1)
-        url = layer.getUrl() + "/" + subLayerId;
-      new RunQueryDynamicLayerTask(env, layer, subLayerId, popupInfo, layer.getSpatialReference()).execute(url);
-    }
+		FragmentActivity activity = (FragmentActivity) mMapView.getContext();
+		FragmentTransaction transaction = activity.getSupportFragmentManager()
+				.beginTransaction();
+		transaction.setCustomAnimations(R.anim.popup_rotate_in,
+				R.anim.popup_rotate_out);
+		transaction.add(android.R.id.content, fragment, null);
+		transaction.addToBackStack(null);
+		transaction.commit();
+		fragment.setDisplayed(true);
+	}
 
-  }
+	// Query dynamic map service layer by QueryTask
+	private class RunQueryDynamicLayerTask extends
+			AsyncTask<String, Void, FeatureSet> {
 
-  // Display popup in a fragment
-  private void showPopup(PopupFragment fragment) {
-    if (fragment.isDisplayed())
-      return;
+		private Envelope env;
 
-    FragmentActivity activity = (FragmentActivity) mMapView.getContext();
-    FragmentTransaction transaction = activity.getSupportFragmentManager().beginTransaction();
-    transaction.setCustomAnimations(R.anim.popup_rotate_in, R.anim.popup_rotate_out);
-    transaction.add(android.R.id.content, fragment, null);
-    transaction.addToBackStack(null);
-    transaction.commit();
-    fragment.setDisplayed(true);
-  }
+		private SpatialReference sr;
 
-  // Query dynamic map service layer by QueryTask
-  private class RunQueryDynamicLayerTask extends AsyncTask<String, Void, FeatureSet> {
+		private Layer layer;
 
-    private Envelope env;
+		private int subLayerId;
 
-    private SpatialReference sr;
+		private PopupInfo popupInfo;
 
-    private Layer layer;
+		public RunQueryDynamicLayerTask(Envelope env, Layer layer,
+				int subLayerId, PopupInfo popupInfo, SpatialReference sr) {
+			super();
+			this.env = env;
+			this.sr = sr;
+			this.layer = layer;
+			this.subLayerId = subLayerId;
+			this.popupInfo = popupInfo;
+		}
 
-    private int subLayerId;
+		@Override
+		protected FeatureSet doInBackground(String... urls) {
 
-    private PopupInfo popupInfo;
+			for (String url : urls) {
+				if (popupInfo == null)
+					continue;
 
-    public RunQueryDynamicLayerTask(Envelope env, Layer layer, int subLayerId, PopupInfo popupInfo, SpatialReference sr) {
-      super();
-      this.env = env;
-      this.sr = sr;
-      this.layer = layer;
-      this.subLayerId = subLayerId;
-      this.popupInfo = popupInfo;
-    }
+				// Retrieve graphics within the envelope by query.
+				Query query = new Query();
+				query.setInSpatialReference(sr);
+				query.setOutSpatialReference(sr);
+				query.setGeometry(env);
+				query.setMaxFeatures(10);
+				query.setOutFields(new String[] { "*" });
+				query.setReturnGeometry(true);
 
-    @Override
-    protected FeatureSet doInBackground(String... urls) {
+				try {
+					QueryTask queryTask;
+					queryTask = new QueryTask(url);
+					FeatureSet results = queryTask.execute(query);
+					return results;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			return null;
+		}
 
-      for (String url : urls) {
-        if (popupInfo == null)
-          continue;
+		@Override
+		protected void onPostExecute(final FeatureSet result) {
+			// Validate parameter.
+			if (result == null) {
+				return;
+			}
+			Graphic[] graphics = result.getGraphics();
+			if (graphics == null || graphics.length == 0) {
+				return;
+			}
 
-        // Retrieve graphics within the envelope by query.
-        Query query = new Query();
-        query.setInSpatialReference(sr);
-        query.setOutSpatialReference(sr);
-        query.setGeometry(env);
-        query.setMaxFeatures(10);
-        query.setOutFields(new String[] { "*" });
-        query.setReturnGeometry(true);
+			for (Graphic gr : graphics) {
+				// Create popup
+				Popup popup = layer.createPopup(mMapView, subLayerId, gr);
+				// Add popup to frament
+				mPopupFragment.addPopup(popup);
+				// Display popup
+				showPopup(mPopupFragment);
+			}
+		}
+	}
 
-        try {
-          QueryTask queryTask;
-          queryTask = new QueryTask(url);
-          FeatureSet results = queryTask.execute(query);
-          return results;
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
-      return null;
-    }
+	// Query feature layer by hit test
+	private class RunQueryFeatureLayerTask extends
+			AsyncTask<ArcGISFeatureLayer, Void, Graphic[]> {
 
-    @Override
-    protected void onPostExecute(final FeatureSet result) {
-      // Validate parameter.
-      if (result == null) {
-        return;
-      }
-      Graphic[] graphics = result.getGraphics();
-      if (graphics == null || graphics.length == 0) {
-        return;
-      }
+		private int tolerance;
 
-      for (Graphic gr : graphics) {
-        // Create popup
-        Popup popup = layer.createPopup(mMapView, subLayerId, gr);
-        // Add popup to frament
-        mPopupFragment.addPopup(popup);
-        // Display popup
-        showPopup(mPopupFragment);
-      }
-    }
-  }
+		private float x;
 
-  // Query feature layer by hit test
-  private class RunQueryFeatureLayerTask extends AsyncTask<ArcGISFeatureLayer, Void, Graphic[]> {
+		private float y;
 
-    private int tolerance;
+		private ArcGISFeatureLayer featureLayer;
 
-    private float x;
+		private PopupInfo popupInfo;
 
-    private float y;
+		public RunQueryFeatureLayerTask(float x, float y, int tolerance) {
+			super();
+			this.x = x;
+			this.y = y;
+			this.tolerance = tolerance;
+		}
 
-    private ArcGISFeatureLayer featureLayer;
+		@Override
+		protected Graphic[] doInBackground(ArcGISFeatureLayer... params) {
+			for (ArcGISFeatureLayer featureLayer : params) {
+				// Get popupinfo
+				this.featureLayer = featureLayer;
+				popupInfo = featureLayer.getPopupInfo();
+				if (popupInfo == null)
+					continue;
 
-    private PopupInfo popupInfo;
+				// Retrieve graphic ids near the point.
+				int[] ids = featureLayer.getGraphicIDs(x, y, tolerance);
+				if (ids != null && ids.length > 0) {
+					ArrayList<Graphic> graphics = new ArrayList<Graphic>();
+					for (int id : ids) {
+						// Obtain graphic based on the id.
+						Graphic g = featureLayer.getGraphic(id);
+						if (g == null)
+							continue;
+						graphics.add(g);
+					}
+					// Return an array of graphics near the point.
+					return graphics.toArray(new Graphic[0]);
+				}
+			}
+			return null;
+		}
 
-    public RunQueryFeatureLayerTask(float x, float y, int tolerance) {
-      super();
-      this.x = x;
-      this.y = y;
-      this.tolerance = tolerance;
-    }
+		@Override
+		protected void onPostExecute(Graphic[] graphics) {
+			// Validate parameter.
+			if (graphics == null || graphics.length == 0) {
+				return;
+			}
 
-    @Override
-    protected Graphic[] doInBackground(ArcGISFeatureLayer... params) {
-      for (ArcGISFeatureLayer featureLayer : params) {
-        // Get popupinfo
-        this.featureLayer = featureLayer;
-        popupInfo = featureLayer.getPopupInfo();
-        if (popupInfo == null)
-          continue;
-
-        // Retrieve graphic ids near the point.
-        int[] ids = featureLayer.getGraphicIDs(x, y, tolerance);
-        if (ids != null && ids.length > 0) {
-          ArrayList<Graphic> graphics = new ArrayList<Graphic>();
-          for (int id : ids) {
-            // Obtain graphic based on the id.
-            Graphic g = featureLayer.getGraphic(id);
-            if (g == null)
-              continue;
-            graphics.add(g);
-          }
-          // Return an array of graphics near the point.
-          return graphics.toArray(new Graphic[0]);
-        }
-      }
-      return null;
-    }
-
-    @Override
-    protected void onPostExecute(Graphic[] graphics) {
-      // Validate parameter.
-      if (graphics == null || graphics.length == 0) {
-        return;
-      }
-
-      for (Graphic gr : graphics) {
-        // Create popup
-        Popup popup = featureLayer.createPopup(mMapView, 0, gr);
-        // Add popup to fragment
-        mPopupFragment.addPopup(popup);
-        // Display popup
-        showPopup(mPopupFragment);
-      }
-    }
-  }
+			for (Graphic gr : graphics) {
+				// Create popup
+				Popup popup = featureLayer.createPopup(mMapView, 0, gr);
+				// Add popup to fragment
+				mPopupFragment.addPopup(popup);
+				// Display popup
+				showPopup(mPopupFragment);
+			}
+		}
+	}
 
 }

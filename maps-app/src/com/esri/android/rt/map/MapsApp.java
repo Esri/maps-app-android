@@ -96,6 +96,11 @@ import com.esri.core.tasks.ags.na.RoutingResult;
 import com.esri.core.tasks.ags.na.RoutingTask;
 import com.esri.core.tasks.ags.na.StopGraphic;
 
+/**
+ * Entry point into the Maps App.  
+ *
+ */
+
 public class MapsApp extends FragmentActivity implements
 		OnEditListener {
 	// map definitions
@@ -154,11 +159,6 @@ public class MapsApp extends FragmentActivity implements
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-//		 mGeocode = (GeocoderTask) getLastNonConfigurationInstance();
-//		 if (mGeocode != null) {
-//			 mGeocode.mActivity = new WeakReference<BasemapsActivity>(this);
-//		 }
 
 		// Retrieve the map and initial extent from recreation webmap
 		recWebMapURL = getString(R.string.rec_webmap_url);
@@ -336,9 +336,6 @@ public class MapsApp extends FragmentActivity implements
 		}
 	}
 
-	// public Object onRetainNonConfigurationInstance() {
-	// return mGeocode;
-	// }
 
 	/**
 	 * Submit address for place search
@@ -552,8 +549,6 @@ public class MapsApp extends FragmentActivity implements
 				// zoom to geocode result
 
 				mMapView.zoomToResolution(geocodeResult.getLocation(), 2);
-				// create a runnable to be added to message queue
-				// handler.post(new MyRunnable());
 			}
 		}
 

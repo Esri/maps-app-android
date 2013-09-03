@@ -53,9 +53,7 @@ public class BasemapsAdapter extends BaseAdapter {
 
 	MapView updateMapView;
 	Portal mPortal;
-	
 	Polygon mapExtent;
-
 	// recreation web map
 	WebMap recWebmap;
 	// base webmap service
@@ -72,6 +70,7 @@ public class BasemapsAdapter extends BaseAdapter {
 		mContext = c;
 	}
 
+	
 	public BasemapsAdapter(Context c, ArrayList<BasemapItem> portalItems,
 			MapView aMapView, Polygon extent) {
 		mContext = c;
@@ -172,16 +171,6 @@ public class BasemapsAdapter extends BaseAdapter {
 									// honor the maps extent
 									updateMapView.setExtent(mapExtent);
 								}
-								
-//								updateMapView.setOnLongPressListener(new OnLongPressListener() {
-//									
-//									@Override
-//									public void onLongPress(float x, float y) {
-//										Point mapPoint = updateMapView.toMapPoint(x, y);
-//										new ReverseGeocoding(MapsApp.this, updateMapView).execute(mapPoint);
-//										
-//									}
-//								});
 								
 							}
 						});
