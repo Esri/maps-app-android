@@ -53,5 +53,5 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 A copy of the license is available in the repository's [license.txt](https://github.com/Esri/maps-app-android/blob/master/license.txt) file.
 
-[](Esri Tags: ArcGIS Android Java)
+[](Esri Tags: ArcGIS Android Mobile)
 [](Esri Language: Java)​
