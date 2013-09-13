@@ -10,7 +10,8 @@
     <item android:id="@+id/route"
         android:title="@string/menu_route"
         android:icon="@drawable/action_route"
-        android:showAsAction="ifRoom|collapseActionView"/>
+        android:showAsAction="ifRoom|collapseActionView"
+        android:actionLayout="@layout/directions_layout"/>
     
     <item android:id="@+id/basemaps" 
         android:title="@string/menu_basemaps"

@@ -171,7 +171,6 @@ public class BasemapsAdapter extends BaseAdapter {
 									// honor the maps extent
 									updateMapView.setExtent(mapExtent);
 								}
-								
 							}
 						});
 	

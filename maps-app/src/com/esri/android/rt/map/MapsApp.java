@@ -615,6 +615,7 @@ public class MapsApp extends FragmentActivity implements
 				// Get the full route summary and set it as our current label
 				routeLayer
 						.addGraphics(new Graphic[] { routeGraphic, endGraphic });
+				
 				// Zoom to the extent of the entire route with a padding
 				mMapView.setExtent(route.getEnvelope(), 100);
 
