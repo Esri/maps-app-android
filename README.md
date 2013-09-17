@@ -35,7 +35,7 @@ Your organisations mapping app built with the [ArcGIS Runtime SDK for Android](h
 Find a bug or want to request a new feature enhancement?  Please let us know by submitting an issue.
 
 ## Contributing
-Anyone and everyone is welcome to contribute. We do accept pull requests.
+Anyone and everyone is welcome to [contribute](https://github.com/Esri/maps-app-android/blob/master/CONTRIBUTING.md). We do accept pull requests.
 
 1. Get Involed
 2. Report Issues
