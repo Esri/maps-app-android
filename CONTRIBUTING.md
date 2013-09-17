@@ -6,7 +6,7 @@ Contributing to maps-app-android
  3. [Contributing Code](#contributing-code)
  4. [Improving Documentation](#improving-documentation)
 
- ## Getting Involved
+## Getting Involved
 
 Third-party patches are absolutely essential on our quest to create the best maps app on android.
 However, they're not the only way to get involved with the development of maps-app-android.
@@ -30,3 +30,27 @@ here are some tips for creating a helpful report that will make fixing it much e
  * Include **hardware & android api version** info in the description.
  * Offer plenty of details to help others understand the problem.
  * If possible, create a **simple reproducible test case** to demonstrates the bug.
+
+ ## Contributing Code
+ ### System Requirements
+ System requirements of the Android SDK are provided [here](https://developers.arcgis.com/en/android/system-reqs.html).  Below are the basic developer requirements to workign with ArcGIS Runtime SDK For Android in Eclipse: 
+
+ * [JDK 6](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+ * [Eclipse 3.7](http://www.eclipse.org/downloads/) (Indigo) or greater
+ * Eclipse [JDT](http://www.eclipse.org/jdt/) plugin (Included in most Eclipse IDE packages)
+ * Eclipse [EGit](http://www.eclipse.org/egit/) plugin (Included in Ecilpse 4.x and greater)
+ * Android [ADT Plugin](http://developer.android.com/tools/sdk/eclipse-adt.html)
+ * [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/en/android/)
+
+ ### Setting up your dev environment
+ Install and setup your Eclipse developer environment [here](https://developers.arcgis.com/en/android/install.html).  Once installed you can work with the project directly 
+
+ #### Import Project
+ * CLone the repo
+ * Expand the working directory to find the maps-app folder
+ * Right click the maps-app project folder and select **Import Projects**
+ * Ensure your project is selected and the **Import existing projects** radio button is selected and click Next
+ * Inspect the Import Projects dialog to ensure your project is selected and click **Finish**
+ * Change perspectives to **Java**
+ * Right click the project **ArcGIS Tools > Convert to ArcGIS Project**
+ * You can now work with the project as you would normally.
