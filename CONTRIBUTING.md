@@ -4,7 +4,6 @@ Contributing to maps-app-android
  1. [Getting Involved](#getting-involved)
  2. [Reporting Bugs](#reporting-bugs)
  3. [Contributing Code](#contributing-code)
- 4. [Improving Documentation](#improving-documentation)
 
 ## Getting Involved
 
@@ -68,7 +67,8 @@ $ git fetch upstream
 # Pulls in changes not present in your local repository, without modifying your files
 ```
 
-#### Import Project
+#### Import Project into Eclipse
+ * Open up Eclipse Git Repository Viewing Perspective
  * Expand the working directory to find the maps-app folder
  * Right click the maps-app project folder and select **Import Projects**
  * Ensure your project is selected and the **Import existing projects** radio button is selected and click Next
