@@ -31,9 +31,9 @@ here are some tips for creating a helpful report that will make fixing it much e
  * Offer plenty of details to help others understand the problem.
  * If possible, create a **simple reproducible test case** to demonstrates the bug.
 
- ## Contributing Code
- ### System Requirements
- System requirements of the Android SDK are provided [here](https://developers.arcgis.com/en/android/system-reqs.html).  Below are the basic developer requirements to workign with ArcGIS Runtime SDK For Android in Eclipse: 
+## Contributing Code
+### System Requirements
+System requirements of the Android SDK are provided [here](https://developers.arcgis.com/en/android/system-reqs.html).  Below are the basic developer requirements to workign with ArcGIS Runtime SDK For Android in Eclipse: 
 
  * [JDK 6](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
  * [Eclipse 3.7](http://www.eclipse.org/downloads/) (Indigo) or greater
@@ -42,11 +42,33 @@ here are some tips for creating a helpful report that will make fixing it much e
  * Android [ADT Plugin](http://developer.android.com/tools/sdk/eclipse-adt.html)
  * [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/en/android/)
 
- ### Setting up your dev environment
- Install and setup your Eclipse developer environment [here](https://developers.arcgis.com/en/android/install.html).  Once installed you can work with the project directly 
+### Setting up your dev environment
+Install and setup your Eclipse developer environment [here](https://developers.arcgis.com/en/android/install.html).Once installed you can work with the project directly 
 
- #### Import Project
- * CLone the repo
+#### Fork the repo
+If you haven't already, got to https://github.com/Esri/maps-app-android and click the [Fork](https://github.com/Esri/maps-app-android/fork) button.
+
+#### Clone the repo
+Open your terminal, navigate to your working folder of choice, and use ```git clone``` to get a copy of the repo you just forked.
+
+
+```
+$ git clone https://github.com/username/maps-app-android.git
+# Clones your fork of the repository into the current directory in terminal
+```
+#### Configure remotes
+Move into the directory the cloning process just created (should be maps-app-android), then make sure your local git knows about all the remotes and branches.
+
+```
+$ cd maps-app-android
+# Changes the active directory in the prompt to the newly cloned "maps-app-android" directory
+$ git remote add upstream https://github.com/Esri/maps-app-android.git
+# Assigns the original repository to a remote called "upstream"
+$ git fetch upstream
+# Pulls in changes not present in your local repository, without modifying your files
+```
+
+#### Import Project
  * Expand the working directory to find the maps-app folder
  * Right click the maps-app project folder and select **Import Projects**
  * Ensure your project is selected and the **Import existing projects** radio button is selected and click Next
