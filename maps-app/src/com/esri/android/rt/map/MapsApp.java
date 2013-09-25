@@ -104,7 +104,7 @@ import com.esri.core.tasks.ags.na.StopGraphic;
 public class MapsApp extends FragmentActivity implements
 		OnEditListener {
 	// map definitions
-	static MapView mMapView = null;
+	MapView mMapView = null;
 
 	// Recreation webmap URL
 	String recWebMapURL;
