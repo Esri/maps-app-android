@@ -490,6 +490,7 @@ public class MapsApp extends FragmentActivity implements
 	private class GeocoderTask extends
 			AsyncTask<LocatorFindParameters, Void, List<LocatorGeocodeResult>> {
 
+		@SuppressWarnings("unused")
 		WeakReference<MapsApp> mActivity;
 
 		GeocoderTask(MapsApp activity) {
