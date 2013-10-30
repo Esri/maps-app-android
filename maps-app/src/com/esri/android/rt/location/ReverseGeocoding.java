@@ -33,8 +33,8 @@ import android.widget.Toast;
 import com.esri.android.map.MapView;
 import com.esri.core.geometry.Point;
 import com.esri.core.geometry.SpatialReference;
-import com.esri.core.tasks.ags.geocode.Locator;
-import com.esri.core.tasks.ags.geocode.LocatorReverseGeocodeResult;
+import com.esri.core.tasks.geocode.Locator;
+import com.esri.core.tasks.geocode.LocatorReverseGeocodeResult;
 
 public class ReverseGeocoding extends
 		AsyncTask<Point, Void, LocatorReverseGeocodeResult> {
@@ -51,7 +51,7 @@ public class ReverseGeocoding extends
 		// create results object and set to null
 		LocatorReverseGeocodeResult result = null;
 		// set the geocode service
-		Locator locator = new Locator();
+		Locator locator = Locator.createOnlineLocator();
 		try {
 
 			// Attempt to reverse geocode the point.

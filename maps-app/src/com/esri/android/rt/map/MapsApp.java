@@ -83,18 +83,17 @@ import com.esri.core.portal.PortalQueryParams;
 import com.esri.core.portal.PortalQueryParams.PortalQuerySortOrder;
 import com.esri.core.portal.PortalQueryResultSet;
 import com.esri.core.symbol.PictureMarkerSymbol;
-import com.esri.core.symbol.SimpleLineSymbol;
 import com.esri.core.symbol.SimpleMarkerSymbol;
 import com.esri.core.symbol.TextSymbol;
-import com.esri.core.tasks.ags.geocode.Locator;
-import com.esri.core.tasks.ags.geocode.LocatorFindParameters;
-import com.esri.core.tasks.ags.geocode.LocatorGeocodeResult;
-import com.esri.core.tasks.ags.na.NAFeaturesAsFeature;
-import com.esri.core.tasks.ags.na.Route;
-import com.esri.core.tasks.ags.na.RoutingParameters;
-import com.esri.core.tasks.ags.na.RoutingResult;
-import com.esri.core.tasks.ags.na.RoutingTask;
-import com.esri.core.tasks.ags.na.StopGraphic;
+import com.esri.core.tasks.geocode.Locator;
+import com.esri.core.tasks.geocode.LocatorFindParameters;
+import com.esri.core.tasks.geocode.LocatorGeocodeResult;
+import com.esri.core.tasks.na.NAFeaturesAsFeature;
+import com.esri.core.tasks.na.Route;
+import com.esri.core.tasks.na.RouteParameters;
+import com.esri.core.tasks.na.RouteResult;
+import com.esri.core.tasks.na.RouteTask;
+import com.esri.core.tasks.na.StopGraphic;
 
 /**
  * Entry point into the Maps App.  
@@ -145,9 +144,10 @@ public class MapsApp extends FragmentActivity implements
 	String endText;
 	Point routePnt;
 	// routing result definition
-	RoutingResult routeResult;
+	RouteResult routeResult;
 	// route definition
 	Route route;
+	RouteTask routeTask;
 	String routeSummary;
 	// graphics layer to show routes
 	GraphicsLayer routeLayer;
@@ -252,11 +252,10 @@ public class MapsApp extends FragmentActivity implements
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void onLongPress(float x, float y) {
+            public boolean onLongPress(float x, float y) {
                 Point mapPoint = mMapView.toMapPoint(x, y);
-
                 new ReverseGeocoding(MapsApp.this, mMapView).execute(mapPoint);
-
+                return true;
             }
         });
 		
@@ -420,14 +419,14 @@ public class MapsApp extends FragmentActivity implements
 		routeParams.add(routeStartParams);
 		routeParams.add(routeEndParams);
 		// run asych route task
-		new RouteTask().execute(routeParams);
+		new RouteAsyncTask().execute(routeParams);
 
 	}
 
 	@Override
 	public void onDelete(ArcGISFeatureLayer fl, Popup popup) {
 		// Commit deletion to server
-		Graphic gr = popup.getGraphic();
+		Graphic gr = (Graphic) popup.getFeature();
 		if (gr == null)
 			return;
 		fl.applyEdits(null, new Graphic[] { gr }, null,
@@ -449,15 +448,14 @@ public class MapsApp extends FragmentActivity implements
 	@Override
 	public void onSave(ArcGISFeatureLayer fl, Popup popup) {
 		// Commit edits to server
-		Graphic gr = popup.getGraphic();
+		Graphic gr = (Graphic) popup.getFeature();
 		if (gr != null) {
 			Map<String, Object> attributes = gr.getAttributes();
 			Map<String, Object> updatedAttrs = popup.getUpdatedAttributes();
 			for (Entry<String, Object> entry : updatedAttrs.entrySet()) {
 				attributes.put(entry.getKey(), entry.getValue());
 			}
-			Graphic newgr = new Graphic(gr.getGeometry(), null, attributes,
-					null);
+			Graphic newgr = new Graphic(gr.getGeometry(), null, attributes);
 			fl.applyEdits(null, null, new Graphic[] { newgr },
 					new EditCallbackListener(this, fl, popup, true,
 							"Saving feature"));
@@ -492,6 +490,7 @@ public class MapsApp extends FragmentActivity implements
 	private class GeocoderTask extends
 			AsyncTask<LocatorFindParameters, Void, List<LocatorGeocodeResult>> {
 
+		@SuppressWarnings("unused")
 		WeakReference<MapsApp> mActivity;
 
 		GeocoderTask(MapsApp activity) {
@@ -558,7 +557,7 @@ public class MapsApp extends FragmentActivity implements
 			// create results object and set to null
 			List<LocatorGeocodeResult> results = null;
 			// set the geocode service
-			locator = new Locator();
+			locator = Locator.createOnlineLocator();
 
 			try {
 
@@ -574,8 +573,8 @@ public class MapsApp extends FragmentActivity implements
 
 	}
 
-	private class RouteTask extends
-			AsyncTask<List<LocatorFindParameters>, Void, RoutingResult> {
+	private class RouteAsyncTask extends
+			AsyncTask<List<LocatorFindParameters>, Void, RouteResult> {
 
 		@Override
 		protected void onPreExecute() {
@@ -585,7 +584,7 @@ public class MapsApp extends FragmentActivity implements
 		}
 
 		@Override
-		protected void onPostExecute(RoutingResult result) {
+		protected void onPostExecute(RouteResult result) {
 			if (dialog.isShowing()) {
 				dialog.dismiss();
 			}
@@ -599,14 +598,10 @@ public class MapsApp extends FragmentActivity implements
 				toast.show();
 			} else {
 				route = result.getRoutes().get(0);
-				// Symbols for the route and the destination
-				SimpleLineSymbol routeSymbol = new SimpleLineSymbol(Color.BLUE,
-						3);
-				PictureMarkerSymbol destinationSymbol = new PictureMarkerSymbol(
+				PictureMarkerSymbol destinationSymbol = new PictureMarkerSymbol(mMapView.getContext(),
 						getResources().getDrawable(R.drawable.stat_finish));
 				// graphic to mark route
-				Graphic routeGraphic = new Graphic(route.getRoute()
-						.getGeometry(), routeSymbol);
+				Graphic routeGraphic = route.getRouteGraphic();
 				Graphic endGraphic = new Graphic(
 						((Polyline) routeGraphic.getGeometry()).getPoint(((Polyline) routeGraphic
 								.getGeometry()).getPointCount() - 1),
@@ -623,7 +618,7 @@ public class MapsApp extends FragmentActivity implements
 		}
 
 		@Override
-		protected RoutingResult doInBackground(
+		protected RouteResult doInBackground(
 				List<LocatorFindParameters>... params) {
 			
 			// define route objects
@@ -631,12 +626,13 @@ public class MapsApp extends FragmentActivity implements
 			List<LocatorGeocodeResult> geocodeEndResult = null;
 			Point startPoint = null;
 			Point endPoint = null;
+			RouteParameters routeParams = null;
 
 			// parse LocatorFindParameters
 			LocatorFindParameters startParam = params[0].get(0);
 			LocatorFindParameters endParam = params[0].get(1);
 			// create a new locator to geocode start/end points
-			Locator locator = new Locator();
+			Locator locator = Locator.createOnlineLocator();
 
 			try {
 				// if GPS then location known and can be reprojected
@@ -657,8 +653,16 @@ public class MapsApp extends FragmentActivity implements
 				e.printStackTrace();
 			}
 
-			// build routing parameters
-			RoutingParameters routeParams = new RoutingParameters();
+			// Create a new routing task pointing to an
+			// NAService
+			try {
+				routeTask = RouteTask.createOnlineRouteTask(getString(R.string.routingservice_url), null);
+				// build routing parameters
+				routeParams = routeTask.retrieveDefaultRouteTaskParameters();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+
 			NAFeaturesAsFeature routeFAF = new NAFeaturesAsFeature();
 			// Create the stop points
 			StopGraphic sgStart = new StopGraphic(startPoint);
@@ -667,13 +671,10 @@ public class MapsApp extends FragmentActivity implements
 			routeFAF.setCompressedRequest(true);
 			routeParams.setStops(routeFAF);
 			routeParams.setOutSpatialReference(mMapView.getSpatialReference());
-			// Create a new routing task pointing to an
-			// NAService
-			RoutingTask routingTask = new RoutingTask(
-					getString(R.string.routingservice_url));
+
 			try {
 				// Solve the route
-				routeResult = routingTask.solve(routeParams);
+				routeResult = routeTask.solve(routeParams);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
