@@ -167,6 +167,16 @@ public class MapsApp extends FragmentActivity implements
 		// set the content view to the map
 		// setContentView(mMapView);
 		setMapView(mMapView);
+		
+		// setup progress dialog
+		mProgressDialog = new ProgressDialog(this){
+		  public void onBackPressed(){
+		    // Back key pressed - dismiss the dialog and finish the activity
+		    mProgressDialog.dismiss();
+		    finish();
+		  }
+		};
+		
 
 		// attribute app and pan across dateline
 		addAttributes();
