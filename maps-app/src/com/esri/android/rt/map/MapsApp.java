@@ -129,7 +129,7 @@ public class MapsApp extends FragmentActivity implements
 	final SpatialReference egs = SpatialReference.create(4326);
 
 	// create UI components
-	static ProgressDialog dialog;
+	static ProgressDialog mProgressDialog;
 	// Edit text box for entering search items
 	EditText searchText;
 
@@ -500,7 +500,7 @@ public class MapsApp extends FragmentActivity implements
 		@Override
 		protected void onPreExecute() {
 			// show progress dialog while geocoding address
-			dialog = ProgressDialog.show(mMapView.getContext(), "Geocoder",
+			mProgressDialog = ProgressDialog.show(mMapView.getContext(), "Geocoder",
 					"Searching for address ...");
 		}
 
@@ -509,8 +509,8 @@ public class MapsApp extends FragmentActivity implements
 		@Override
 		protected void onPostExecute(List<LocatorGeocodeResult> result) {
 
-			if (dialog.isShowing()) {
-				dialog.dismiss();
+			if (mProgressDialog.isShowing()) {
+				mProgressDialog.dismiss();
 			}
 
 			// The result of geocode task is passed as a parameter to map the
@@ -579,14 +579,14 @@ public class MapsApp extends FragmentActivity implements
 		@Override
 		protected void onPreExecute() {
 			// show progress dialog while geocoding address
-			dialog = ProgressDialog.show(mMapView.getContext(), "Routing",
+			mProgressDialog = ProgressDialog.show(mMapView.getContext(), "Routing",
 					"Searching for route ...");
 		}
 
 		@Override
 		protected void onPostExecute(RouteResult result) {
-			if (dialog.isShowing()) {
-				dialog.dismiss();
+			if (mProgressDialog.isShowing()) {
+				mProgressDialog.dismiss();
 			}
 
 			// The result of geocode task is passed as a parameter to map the
@@ -687,7 +687,7 @@ public class MapsApp extends FragmentActivity implements
 		@Override
 		protected void onPreExecute() {
 			// show progress dialog while searching basemaps
-			dialog = ProgressDialog.show(mMapView.getContext(), "Basemaps View",
+			mProgressDialog = ProgressDialog.show(mMapView.getContext(), "Basemaps View",
 					"Searching Basemaps ...");
 
 		}
@@ -705,8 +705,8 @@ public class MapsApp extends FragmentActivity implements
 		@Override
 		protected void onPostExecute(Boolean update) {
 			// dismiss dialog
-			if (dialog.isShowing()) {
-				dialog.dismiss();
+			if (mProgressDialog.isShowing()) {
+				mProgressDialog.dismiss();
 			}
 
 			if (update == true) {
