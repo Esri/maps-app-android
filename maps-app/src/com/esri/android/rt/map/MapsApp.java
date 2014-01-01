@@ -176,7 +176,7 @@ public class MapsApp extends FragmentActivity implements
 		    finish();
 		  }
 		};
-		
+		mProgressDialog.setTitle(getString(R.string.app_name));
 
 		// attribute app and pan across dateline
 		addAttributes();
