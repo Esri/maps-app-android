@@ -696,9 +696,13 @@ public class MapsApp extends FragmentActivity implements
 
 		@Override
 		protected void onPreExecute() {
+		  // set the message of the progress dialog
+		  mProgressDialog.setMessage(getString(R.string.fetching_basemaps));
+		  // display the progress dialog on the UI thread
+		  mProgressDialog.show();
 			// show progress dialog while searching basemaps
-			mProgressDialog = ProgressDialog.show(mMapView.getContext(), "Basemaps View",
-					"Searching Basemaps ...");
+//			mProgressDialog = ProgressDialog.show(mMapView.getContext(), "Basemaps View",
+//					"Searching Basemaps ...");
 
 		}
 
