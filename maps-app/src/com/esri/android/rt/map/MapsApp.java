@@ -593,9 +593,14 @@ public class MapsApp extends FragmentActivity implements
 
 		@Override
 		protected void onPreExecute() {
+      // set the message of the progress dialog
+      mProgressDialog.setMessage(getString(R.string.route_search));
+      // display the progress dialog on the UI thread
+      mProgressDialog.show();
+		  
 			// show progress dialog while geocoding address
-			mProgressDialog = ProgressDialog.show(mMapView.getContext(), "Routing",
-					"Searching for route ...");
+//			mProgressDialog = ProgressDialog.show(mMapView.getContext(), "Routing",
+//					"Searching for route ...");
 		}
 
 		@Override
