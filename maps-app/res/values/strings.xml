@@ -33,5 +33,9 @@
     <string name="menu_delete">delete</string>
     <string name="menu_save">save</string>
     <string name="menu_camera">attachment</string>
+    <!-- progress dialog messages -->
+    <string name="fetching_basemaps">Fetching Basemaps</string>
+    <string name="address_search">Searching for Address</string>
+    <string name="route_search">Searching for Route</string>
 
 </resources>
