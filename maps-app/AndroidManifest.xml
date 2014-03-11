@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.arcgis.android.app.map"
+    package="com.esri.android.mapsapp"
     android:versionCode="1"
     android:versionName="1.0" >
 
     <uses-sdk
         android:minSdkVersion="16"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -17,12 +17,12 @@
         android:required="true" />
 
     <application
+        android:allowBackup="true"
         android:icon="@drawable/basemaps_launcher"
         android:label="@string/app_name"
-        android:uiOptions="splitActionBarWhenNarrow"
-        android:allowBackup="true" >
+        android:uiOptions="splitActionBarWhenNarrow" >
         <activity
-            android:name="com.esri.android.rt.map.MapsApp"
+            android:name="com.esri.android.mapsapp.map.MapsAppActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/app_name" >
             <intent-filter>
@@ -30,11 +30,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name="com.esri.android.rt.location.DirectionsActivity"
-            android:configChanges="orientation"
-            android:label="@string/title_activity_directions" >
         </activity>
     </application>
 
