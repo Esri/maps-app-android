@@ -61,6 +61,7 @@ import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogLi
 import com.esri.android.mapsapp.location.DirectionsDialogFragment;
 import com.esri.android.mapsapp.location.RoutingDialogFragment;
 import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogListener;
+import com.esri.android.mapsapp.tools.MeasuringTool;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.LinearUnit;
@@ -374,7 +375,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
         routingFrag.setArguments(arguments);
         routingFrag.show(getFragmentManager(), null);
         return true;
-
+        
       case R.id.basemaps:
         // Show BasemapsDialogFragment to offer a choice if basemaps.
         // This calls back to onBasemapChanged() if one is selected.
@@ -382,7 +383,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
         basemapsFrag.setBasemapsDialogListener(this);
         basemapsFrag.show(getFragmentManager(), null);
         return true;
-
+        
       case R.id.location:
         // Toggle location tracking on or off
         if (mIsLocationTracking) {
@@ -392,14 +393,18 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
           startLocationTracking();
         }
         return true;
-
+        
       case R.id.directions:
         // Launch a DirectionsListFragment to display list of directions
         DirectionsDialogFragment frag = new DirectionsDialogFragment();
         frag.setRoutingDirections(mRoutingDirections);
         getFragmentManager().beginTransaction().add(frag, null).commit();
         return true;
-
+        
+      case R.id.action_settings:
+        startActionMode(new MeasuringTool(mMapView));
+        return true;   
+        
       default:
         return super.onOptionsItemSelected(item);
     }
