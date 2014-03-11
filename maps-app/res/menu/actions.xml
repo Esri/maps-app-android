@@ -26,7 +26,13 @@
         android:id="@+id/directions"
         android:icon="@drawable/ic_routing_take_center_fork_dark"
         android:showAsAction="ifRoom"
-        android:visible="false"
-        android:title="@string/action_directions"/>
-    
+        android:title="@string/action_directions"
+        android:visible="false"/>
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom"
+        android:title="@string/action_settings"/>
+
 </menu>

@@ -28,6 +28,7 @@
     <string name="menu_basemaps">Basemaps</string>
     <string name="action_location">Toggle Location Tracking</string>
     <string name="action_directions">Driving Directions</string>
+    <string name="action_settings">Settings</string>
 
     <!-- directions button text -->
     <string name="get_route">Get Route</string>
