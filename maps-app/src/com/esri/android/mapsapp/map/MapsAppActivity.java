@@ -273,6 +273,9 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
 
   }
 
+  /**
+   * Clears all graphics out of the location layer and the route layer.
+   */
   void resetGraphicsLayers() {
     mLocationLayer.removeAll();
     mRouteLayer.removeAll();
@@ -282,6 +285,26 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
     mActionItemDirections.setVisible(false);
   }
 
+  /**
+   * Adds location layer and the route layer to the MapView.
+   */
+  void addGraphicLayers() {
+    // Add location layer
+    if (mLocationLayer == null) {
+      mLocationLayer = new GraphicsLayer();
+    }
+    mMapView.addLayer(mLocationLayer);
+
+    // Add the route graphic layer
+    if (mRouteLayer == null) {
+      mRouteLayer = new GraphicsLayer();
+    }
+    mMapView.addLayer(mRouteLayer);
+  }
+
+  /**
+   * Starts tracking GPS location.
+   */
   void startLocationTracking() {
     LocationDisplayManager locDispMgr = mMapView.getLocationDisplayManager();
     locDispMgr.setAutoPanMode(AutoPanMode.OFF);
@@ -290,8 +313,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
 
       boolean locationChanged = false;
 
-      // Zooms to the current location when first GPS fix
-      // arrives.
+      // Zooms to the current location when first GPS fix arrives
       @Override
       public void onLocationChanged(Location loc) {
         if (!locationChanged) {
@@ -323,20 +345,6 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
     });
     locDispMgr.start();
     mIsLocationTracking = true;
-  }
-
-  void addGraphicLayers() {
-    // Add location layer
-    if (mLocationLayer == null) {
-      mLocationLayer = new GraphicsLayer();
-    }
-    mMapView.addLayer(mLocationLayer);
-
-    // Add the route graphic layer
-    if (mRouteLayer == null) {
-      mRouteLayer = new GraphicsLayer();
-    }
-    mMapView.addLayer(mRouteLayer);
   }
 
   @Override
@@ -376,6 +384,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
         return true;
 
       case R.id.location:
+        // Toggle location tracking on or off
         if (mIsLocationTracking) {
           mMapView.getLocationDisplayManager().stop();
           mIsLocationTracking = false;
@@ -452,7 +461,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
     InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
     inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
 
-    // remove any previous graphics and routes
+    // Memove any previous graphics and routes
     resetGraphicsLayers();
 
     // Obtain address and execute locator task
@@ -475,10 +484,8 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
     // Calculate distance for find operation
     Envelope mapExtent = new Envelope();
     mMapView.getExtent().queryEnvelope(mapExtent);
-    // assume map is in metres, other units wont work
-    // double current envelope
+    // assume map is in metres, other units wont work, double current envelope
     double distance = (mapExtent != null && mapExtent.getWidth() > 0) ? mapExtent.getWidth() * 2 : 10000;
-
     findParams.setDistance(distance);
     findParams.setMaxLocations(2);
 
@@ -501,14 +508,16 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
    */
   @Override
   public boolean onGetRoute(String startPoint, String endPoint) {
+    // Check if we need a location fix
     if (startPoint.equals(getString(R.string.my_location)) && mLocation == null) {
       Toast.makeText(MapsAppActivity.this, getString(R.string.need_location_fix), Toast.LENGTH_LONG).show();
       return false;
     }
-    // remove any previous graphics and routes
+    // Remove any previous graphics and routes
     resetGraphicsLayers();
     mSearchEditText.setText("");
-    // set parameters to geocode address for points
+
+    // Do the routing
     executeRoutingTask(startPoint, endPoint);
     return true;
   }
@@ -520,14 +529,16 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
    * @param end
    */
   private void executeRoutingTask(String start, String end) {
-    // create a list of start end point params
+    // Create a list of start end point params
     LocatorFindParameters routeStartParams = new LocatorFindParameters(start);
     LocatorFindParameters routeEndParams = new LocatorFindParameters(end);
     List<LocatorFindParameters> routeParams = new ArrayList<LocatorFindParameters>();
-    // add params to list
+
+    // Add params to list
     routeParams.add(routeStartParams);
     routeParams.add(routeEndParams);
-    // run asych route task
+
+    // Execute async task to do the routing
     new RouteAsyncTask().execute(routeParams);
   }
 
