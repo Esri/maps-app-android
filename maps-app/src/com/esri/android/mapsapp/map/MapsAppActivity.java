@@ -317,14 +317,13 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
       // Zooms to the current location when first GPS fix arrives
       @Override
       public void onLocationChanged(Location loc) {
+        double locy = loc.getLatitude();
+        double locx = loc.getLongitude();
+        Point wgspoint = new Point(locx, locy);
+        mLocation = (Point) GeometryEngine.project(wgspoint, SpatialReference.create(4326),
+            mMapView.getSpatialReference());
         if (!locationChanged) {
           locationChanged = true;
-          double locy = loc.getLatitude();
-          double locx = loc.getLongitude();
-          Point wgspoint = new Point(locx, locy);
-          mLocation = (Point) GeometryEngine.project(wgspoint, SpatialReference.create(4326),
-              mMapView.getSpatialReference());
-
           Unit mapUnit = mMapView.getSpatialReference().getUnit();
           double zoomWidth = Unit.convertUnits(SEARCH_RADIUS, Unit.create(LinearUnit.Code.MILE_US), mapUnit);
           Envelope zoomExtent = new Envelope(mLocation, zoomWidth, zoomWidth);
