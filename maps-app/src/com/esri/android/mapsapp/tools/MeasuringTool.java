@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.view.ActionMode;
 import android.view.ActionMode.Callback;
 import android.view.ActionProvider;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -125,9 +126,10 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
 
   @Override
   public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-    MenuItem item = menu.add(Menu.NONE, MENU_RESULT, 0, "preferences");
+    MenuItem item = menu.add(Menu.NONE, MENU_RESULT, 0, "results");
     mResultView = new ResultView(mContext);
     item.setActionProvider(mResultView);
+    item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
     item = menu.add(Menu.NONE, MENU_DELETE, 1, "clear");
     item.setIcon(android.R.drawable.ic_menu_delete);
     item = menu.add(Menu.NONE, MENU_PREF, 2, "preferences");
@@ -235,6 +237,7 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
     public View onCreateActionView() {
       text = new TextView(mContext);
       text.setTextColor(Color.WHITE);
+      text.setGravity(Gravity.CENTER);
       return text;
     }
     
