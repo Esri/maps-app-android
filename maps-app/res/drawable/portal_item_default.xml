@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+
+	<item>
+		<shape android:shape="rectangle" >
+			<solid android:color="@color/app_tertiary_background" />
+
+			<corners android:radius="@dimen/map_details_radius" />
+		</shape>
+	</item>
+	<item android:bottom="@dimen/portal_item_bottom">
+		<shape android:shape="rectangle" >
+			<solid android:color="@color/portal_item_background" />
+
+			<corners android:radius="@dimen/map_details_radius" />
+		</shape>
+	</item>
+
+</layer-list>

@@ -1,0 +1,9 @@
+<resources>
+
+	<dimen name="basemap_grid_item_status_text_size">13sp</dimen>
+
+	<!-- Card layout -->
+	<dimen name="card_layout_outer_padding">8dp</dimen>
+	<dimen name="card_layout_inner_padding">6dp</dimen>
+
+</resources>

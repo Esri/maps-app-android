@@ -2,31 +2,28 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content" >
- 
+
+    <ImageButton
+        android:id="@+id/searchButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:background="#000000"
+        android:contentDescription="@string/menu_search"
+        android:onClick="onSearchButtonClicked"
+        android:src="@android:drawable/ic_menu_search" />
+
     <EditText
         android:id="@+id/searchText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@id/searchButton"
         android:hint="@string/address"
-        android:minWidth="150dp" 
-        android:inputType="text" >
- 
-        <requestFocus
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        android:inputType="text"
+        android:minWidth="150dp" >
 
+        <requestFocus />
     </EditText>
- 
-    <Button
-        android:id="@+id/searchButton"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_alignRight="@id/searchText"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="-50dp"
-        android:background="@drawable/menu_button"
-        android:onClick="locate"/>
- 
+
 </RelativeLayout>

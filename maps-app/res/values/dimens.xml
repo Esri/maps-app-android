@@ -4,4 +4,30 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
+    <!-- Browse card -->
+    <dimen name="portal_item_bottom">2dp</dimen>
+    <dimen name="map_details_radius">2dp</dimen>
+
+    <!-- Basemap fragment -->
+    <dimen name="basemap_root_layout_padding">8dp</dimen>
+    <dimen name="basemap_gridview_horizontal_spacing">8dp</dimen>
+    <dimen name="basemap_gridview_vertical_spacing">8dp</dimen>
+
+    <!-- Basemap grid item -->
+    <dimen name="basemap_grid_item_overlay_height">25dp</dimen>
+    <dimen name="basemap_grid_item_title_text_size">13sp</dimen>
+    <dimen name="basemap_grid_item_status_text_size">12sp</dimen>
+    <dimen name="basemap_grid_item_progressbar_margin">10dp</dimen>
+    <dimen name="basemap_grid_item_info_imageview_padding_left">1dp</dimen>
+    <dimen name="basemap_grid_item_info_imageview_padding_right">0dp</dimen>
+    <dimen name="basemap_grid_item_title_padding_left">4dp</dimen>
+    <dimen name="basemap_grid_item_title_vertical_padding">3dp</dimen>
+    <dimen name="basemap_grid_item_title_padding_right">1dp</dimen>
+    <dimen name="basemap_grid_item_status_padding_left">4dp</dimen>
+    <dimen name="basemap_grid_item_status_padding_right">1dp</dimen>
+    <dimen name="basemap_grid_item_status_padding_bottom">2dp</dimen>
+    <dimen name="route_overview_layout_margin">8dp</dimen>
+    <dimen name="route_overview_text_size">17sp</dimen>
+    
+
 </resources>
