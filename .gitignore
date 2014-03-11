@@ -31,6 +31,10 @@ proguard/
 *.iws
 .idea/
 
+# SublimeText
+/*.sublime-project
+*.sublime-workspace
+
 # OS generated files #
 ######################
 .DS_Store
