@@ -44,19 +44,19 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
 
   public enum MeasureType {
     LINEAR, AREA;
-    
+
     static public MeasureType getType(int i) {
       switch (i) {
-        case 0:
-          return LINEAR;
-        case 1:
-          return AREA;
-        default:
-          return LINEAR;
+      case 0:
+        return LINEAR;
+      case 1:
+        return AREA;
+      default:
+        return LINEAR;
       }
     }
   }
-  
+
   private static final int MENU_DELETE = 0;
   private static final int MENU_PREF = 1;
   private static final int MENU_RESULT = 2;
@@ -80,7 +80,7 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
   private FillSymbol mFillSymbol;
   private int mPolygonID;
   private int mLineID;
-  
+
   public MeasuringTool(MapView map) {
     this.mMap = map;
     mContext = mMap.getContext();
@@ -93,33 +93,28 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
     mText = new TextView(mContext);
     mText.setBackgroundColor(Color.TRANSPARENT);
     mMap.addView(mText);
-    mDefaultLinearUnits = new Unit[] {
-        Unit.create(LinearUnit.Code.METER),
-        Unit.create(LinearUnit.Code.KILOMETER),
-        Unit.create(LinearUnit.Code.FOOT),
-        Unit.create(LinearUnit.Code.MILE_STATUTE) };
-    mDefaultAreaUnits = new Unit[] {
-        Unit.create(AreaUnit.Code.SQUARE_METER),
-        Unit.create(AreaUnit.Code.SQUARE_KILOMETER),
-        Unit.create(AreaUnit.Code.SQUARE_FOOT),
-        Unit.create(AreaUnit.Code.SQUARE_MILE_STATUTE)};
+    mDefaultLinearUnits = new Unit[] { Unit.create(LinearUnit.Code.METER), Unit.create(LinearUnit.Code.KILOMETER),
+        Unit.create(LinearUnit.Code.FOOT), Unit.create(LinearUnit.Code.MILE_STATUTE) };
+    mDefaultAreaUnits = new Unit[] { Unit.create(AreaUnit.Code.SQUARE_METER),
+        Unit.create(AreaUnit.Code.SQUARE_KILOMETER), Unit.create(AreaUnit.Code.SQUARE_FOOT),
+        Unit.create(AreaUnit.Code.SQUARE_MILE_STATUTE) };
     mPoints = new ArrayList<Point>();
     mFillSymbol = new SimpleFillSymbol(Color.argb(100, 225, 225, 0));
     mFillSymbol.setOutline(new SimpleLineSymbol(Color.TRANSPARENT, 0));
   }
-  
+
   @Override
   public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
     switch (item.getItemId()) {
-      case MENU_DELETE:
-        mLayer.removeAll();
-        mResult = 0;
-        mPoints.clear();
-        mResultView.update();
-        break;
+    case MENU_DELETE:
+      mLayer.removeAll();
+      mResult = 0;
+      mPoints.clear();
+      mResultView.update();
+      break;
 
-      default:
-        break;
+    default:
+      break;
     }
     return false;
   }
@@ -157,11 +152,12 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
     if (mPoints.size() < 2)
       return;
     Polyline pline = new Polyline();
-    pline.startPath(mPoints.get(mPoints.size()-2));
-    pline.lineTo(mPoints.get(mPoints.size()-1));
+    pline.startPath(mPoints.get(mPoints.size() - 2));
+    pline.lineTo(mPoints.get(mPoints.size() - 1));
     mLayer.addGraphic(new Graphic(pline, mLineSymbol));
     if (mMeasureMode == MeasureType.LINEAR) {
-      mResult += GeometryEngine.geodesicLength(pline, mMap.getSpatialReference(), (LinearUnit) getLinearUnit(mCurrentLinearUnit));
+      mResult += GeometryEngine.geodesicLength(pline, mMap.getSpatialReference(),
+          (LinearUnit) getLinearUnit(mCurrentLinearUnit));
       mResultView.update();
     } else if (mMeasureMode == MeasureType.AREA) {
       mLayer.removeGraphic(mLineID);
@@ -172,55 +168,56 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
         polygon.lineTo(mPoints.get(i));
       }
       Polyline line = new Polyline();
-      line.startPath(mPoints.get(mPoints.size()-1));
+      line.startPath(mPoints.get(mPoints.size() - 1));
       line.lineTo(mPoints.get(0));
       mLineID = mLayer.addGraphic(new Graphic(line, mLineSymbol));
       mPolygonID = mLayer.addGraphic(new Graphic(polygon, mFillSymbol));
-      mResult = GeometryEngine.geodesicArea(polygon, mMap.getSpatialReference(), (AreaUnit) getAreaUnit(mCurrentAreaUnit));
+      mResult = GeometryEngine.geodesicArea(polygon, mMap.getSpatialReference(),
+          (AreaUnit) getAreaUnit(mCurrentAreaUnit));
       mResultView.update();
     }
   }
-  
+
   public void setLinearUnits(Unit[] linearUnits) {
     mLinearUnits = linearUnits;
   }
-  
+
   Unit getLinearUnit(int position) {
     return mLinearUnits == null ? mDefaultLinearUnits[position] : mLinearUnits[position];
   }
-  
+
   int getAreaUnitSize() {
     return mAreaUnits == null ? mDefaultAreaUnits.length : mAreaUnits.length;
   }
-  
+
   public void setAreaUnits(Unit[] areaUnits) {
     mAreaUnits = areaUnits;
   }
-  
+
   Unit getAreaUnit(int position) {
     return mAreaUnits == null ? mDefaultAreaUnits[position] : mAreaUnits[position];
   }
-  
+
   int getLinearUnitSize() {
     return mLinearUnits == null ? mDefaultLinearUnits.length : mLinearUnits.length;
   }
-  
+
   int getUnitSize() {
-    return mMeasureMode == MeasureType.LINEAR ? getLinearUnitSize():getAreaUnitSize();
+    return mMeasureMode == MeasureType.LINEAR ? getLinearUnitSize() : getAreaUnitSize();
   }
-  
+
   Unit getUnit(int position) {
-    return mMeasureMode == MeasureType.LINEAR ? getLinearUnit(position):getAreaUnit(position); 
+    return mMeasureMode == MeasureType.LINEAR ? getLinearUnit(position) : getAreaUnit(position);
   }
-  
+
   public void setLineSymbol(LineSymbol symbol) {
     mLineSymbol = symbol;
   }
-  
+
   public void setMarkerSymbol(MarkerSymbol symbol) {
     mMarkerSymbol = symbol;
   }
-  
+
   public void setFillSymbol(FillSymbol symbol) {
     mFillSymbol = symbol;
   }
@@ -240,16 +237,20 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
       text.setGravity(Gravity.CENTER);
       return text;
     }
-    
+
     public void update() {
       if (mResult > 0) {
-        text.setText(String.format("%.2f", mResult)+" "+(mMeasureMode == MeasureType.LINEAR ? getLinearUnit(mCurrentLinearUnit).getAbbreviation():getAreaUnit(mCurrentAreaUnit).getAbbreviation()));
+        text.setText(String.format("%.2f", mResult)
+            + " "
+            + (mMeasureMode == MeasureType.LINEAR ? getLinearUnit(mCurrentLinearUnit).getAbbreviation() : getAreaUnit(
+                mCurrentAreaUnit).getAbbreviation()));
       } else {
         text.setText("");
       }
     }
-    
+
   }
+
   class Preferences extends ActionProvider {
 
     private ImageView imageView;
@@ -262,7 +263,7 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
 
     @Override
     public View onCreateActionView() {
-      
+
       Spinner spinner = new Spinner(mContext);
       spinner.setAdapter(new BaseAdapter() {
 
@@ -270,10 +271,10 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
         public View getView(int position, View convertView, ViewGroup parent) {
           return imageView;
         }
-        
+
         @Override
         public View getDropDownView(int position, View convertView, ViewGroup parent) {
-//          Log.i(IoUtil.AGSASDK_LOG_TAG, "position = "+position);
+          // Log.i(IoUtil.AGSASDK_LOG_TAG, "position = "+position);
           if (position == 0) {
             LinearLayout layout = new LinearLayout(mContext);
             layout.setOrientation(LinearLayout.VERTICAL);
@@ -290,15 +291,15 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
 
             group.addView(r1);
             group.addView(r2);
-            group.check(mMeasureMode == MeasureType.LINEAR ? r1.getId():r2.getId());
+            group.check(mMeasureMode == MeasureType.LINEAR ? r1.getId() : r2.getId());
             layout.addView(group);
             layout.setPadding(10, 10, 10, 10);
             group.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-              
+
               @Override
               public void onCheckedChanged(RadioGroup group, int checkedId) {
-                for (int i = 0; i < group.getChildCount(); i++) {                  
-                  if (group.getChildAt(i).getId() == checkedId) {                    
+                for (int i = 0; i < group.getChildCount(); i++) {
+                  if (group.getChildAt(i).getId() == checkedId) {
                     mMeasureMode = MeasureType.getType(i);
                     notifyDataSetChanged();
                   }
@@ -319,22 +320,22 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
             RadioButton r = new RadioButton(mContext);
             r.setText(getUnit(i).getDisplayName());
             group.addView(r);
-            if (i == (mMeasureMode == MeasureType.LINEAR ? mCurrentLinearUnit:mCurrentAreaUnit)) {
+            if (i == (mMeasureMode == MeasureType.LINEAR ? mCurrentLinearUnit : mCurrentAreaUnit)) {
               group.check(r.getId());
             }
           }
           group.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            
+
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-              for (int i = 0; i < group.getChildCount(); i++) {                  
-                if (group.getChildAt(i).getId() == checkedId) {                    
+              for (int i = 0; i < group.getChildCount(); i++) {
+                if (group.getChildAt(i).getId() == checkedId) {
                   if (mMeasureMode == MeasureType.LINEAR) {
                     if (mResult > 0) {
                       mResult = LinearUnit.convertUnits(mResult, getLinearUnit(mCurrentLinearUnit), getLinearUnit(i));
                       mCurrentLinearUnit = i;
                       mResultView.update();
-                    } else {                        
+                    } else {
                       mCurrentLinearUnit = i;
                     }
                   } else {
@@ -355,17 +356,17 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
           layout.setPadding(10, 10, 10, 10);
           return layout;
         }
-        
+
         @Override
         public long getItemId(int position) {
           return position;
         }
-        
+
         @Override
         public Object getItem(int position) {
           return null;
         }
-        
+
         @Override
         public int getCount() {
           return 2;
