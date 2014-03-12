@@ -12,6 +12,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -25,6 +27,21 @@ public class DirectionsDialogFragment extends DialogFragment {
 
   private static final String TAG = "DirectionsDialogFragment";
 
+  /**
+   * A callback interface that all activities containing this fragment must implement, to be informed when a particular
+   * direction is selected from the list.
+   */
+  public interface DirectionsDialogListener {
+    /**
+     * Callback for when a particular direction is selected from the list.
+     * 
+     * @param position Position in Routing Directions list of the selected direction.
+     */
+    public void onDirectionSelected(int position);
+  }
+
+  DirectionsDialogListener mDirectionsDialogListener;
+
   List<RouteDirection> mRoutingDirections;
 
   /**
@@ -33,16 +50,16 @@ public class DirectionsDialogFragment extends DialogFragment {
   public DirectionsDialogFragment() {
   }
 
-  public void setRoutingDirections(List<RouteDirection> routingDirections) {
+  public void setRoutingDirections(List<RouteDirection> routingDirections, DirectionsDialogListener listener) {
     mRoutingDirections = routingDirections;
+    mDirectionsDialogListener = listener;
   }
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    
+
     setStyle(DialogFragment.STYLE_NORMAL, 0);
-    setRetainInstance(true); // TODO need this??
   }
 
   @Override
@@ -52,6 +69,17 @@ public class DirectionsDialogFragment extends DialogFragment {
 
     // Setup list adapter
     ListView listView = (ListView) view.findViewById(R.id.directions_list_view);
+    listView.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+      @Override
+      public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
+        mDirectionsDialogListener.onDirectionSelected(position);
+      }
+
+      @Override
+      public void onNothingSelected(AdapterView<?> parent) {
+      }
+    });
     listView.setAdapter(new DirectionsListAdapter(mRoutingDirections));
     return view;
   }
@@ -91,7 +119,7 @@ public class DirectionsDialogFragment extends DialogFragment {
       RouteDirection direction = getItem(position);
       ImageView imageView = (ImageView) v.findViewById(R.id.directions_maneuver_imageview);
       Drawable drawable = getRoutingIcon(direction.getManeuver());
-      if ( drawable != null) {
+      if (drawable != null) {
         imageView.setImageDrawable(drawable);
       }
       TextView textView = (TextView) v.findViewById(R.id.directions_text_textview);
@@ -101,7 +129,7 @@ public class DirectionsDialogFragment extends DialogFragment {
       textView.setText(lengthString);
       return v;
     }
-    
+
     private Drawable getRoutingIcon(RouteManeuverType maneuver) {
       Context context = getActivity();
       int id;

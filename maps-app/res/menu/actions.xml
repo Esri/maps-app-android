@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
+        android:id="@+id/basemaps"
+        android:icon="@drawable/action_basemaps"
+        android:showAsAction="ifRoom"
+        android:title="@string/menu_basemaps"/>
+    <item
         android:id="@+id/menu_search"
         android:actionLayout="@layout/search_layout"
         android:icon="@drawable/ic_menu_search"
@@ -13,26 +18,20 @@
         android:showAsAction="ifRoom"
         android:title="@string/menu_route"/>
     <item
-        android:id="@+id/basemaps"
-        android:icon="@drawable/action_basemaps"
-        android:showAsAction="ifRoom"
-        android:title="@string/menu_basemaps"/>
-    <item
-        android:id="@+id/location"
-        android:icon="@android:drawable/ic_menu_mylocation"
-        android:showAsAction="ifRoom"
-        android:title="@string/action_location"/>
-    <item
         android:id="@+id/directions"
         android:icon="@drawable/ic_routing_take_center_fork_dark"
         android:showAsAction="ifRoom"
         android:title="@string/action_directions"
         android:visible="false"/>
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_measure"
         android:icon="@android:drawable/ic_menu_edit"
-        android:orderInCategory="100"
         android:showAsAction="ifRoom"
-        android:title="@string/action_settings"/>
-
+        android:title="@string/action_measure"/>
+    <item
+        android:id="@+id/location"
+        android:icon="@android:drawable/ic_menu_mylocation"
+        android:showAsAction="ifRoom"
+        android:title="@string/action_location"/>
+    
 </menu>
