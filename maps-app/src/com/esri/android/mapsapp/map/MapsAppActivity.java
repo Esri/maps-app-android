@@ -41,10 +41,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnKeyListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -59,6 +61,7 @@ import com.esri.android.mapsapp.R;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogListener;
 import com.esri.android.mapsapp.location.DirectionsDialogFragment;
+import com.esri.android.mapsapp.location.DirectionsDialogFragment.DirectionsDialogListener;
 import com.esri.android.mapsapp.location.RoutingDialogFragment;
 import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogListener;
 import com.esri.android.mapsapp.tools.MeasuringTool;
@@ -167,7 +170,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
     mProgressDialog.show();
 
     // Create MapView to show the default basemap
-    String defaultBaseMapURL = getString(R.string.topo_basemap_url);
+    String defaultBaseMapURL = getString(R.string.default_basemap_url);
     mMapView = new MapView(this, defaultBaseMapURL, "", "");
     mLocationLayer = null;
     mRouteLayer = null;
@@ -259,7 +262,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
       public boolean onDragPointerUp(MotionEvent from, final MotionEvent to) {
         if (mLongPressEvent != null) {
           // This is the end of a long-press that will have displayed the magnifier.
-          // Perform reverse-geocoding of the pint that was pressed
+          // Perform reverse-geocoding of the point that was pressed
           Point mapPoint = mMapView.toMapPoint(to.getX(), to.getY());
           new ReverseGeocodingAsyncTask().execute(mapPoint);
           mLongPressEvent = null;
@@ -351,9 +354,24 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
   public boolean onCreateOptionsMenu(Menu menu) {
     // Inflate the menu items for use in the action bar
     getMenuInflater().inflate(R.menu.actions, menu);
+
     // Get a reference to the EditText widget for the search option
     View searchRef = menu.findItem(R.id.menu_search).getActionView();
     mSearchEditText = (EditText) searchRef.findViewById(R.id.searchText);
+
+    // Set key listener to start search if Enter key pressed
+    mSearchEditText.setOnKeyListener(new OnKeyListener() {
+      @Override
+      public boolean onKey(View v, int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_ENTER) {
+          onSearchButtonClicked(mSearchEditText);
+          return true;
+        }
+        return false;
+      }
+    });
+
+    // Save a reference to the Directions button
     mActionItemDirections = menu.findItem(R.id.directions);
     return super.onCreateOptionsMenu(menu);
   }
@@ -374,7 +392,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
         routingFrag.setArguments(arguments);
         routingFrag.show(getFragmentManager(), null);
         return true;
-        
+
       case R.id.basemaps:
         // Show BasemapsDialogFragment to offer a choice if basemaps.
         // This calls back to onBasemapChanged() if one is selected.
@@ -382,7 +400,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
         basemapsFrag.setBasemapsDialogListener(this);
         basemapsFrag.show(getFragmentManager(), null);
         return true;
-        
+
       case R.id.location:
         // Toggle location tracking on or off
         if (mIsLocationTracking) {
@@ -392,18 +410,28 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
           startLocationTracking();
         }
         return true;
-        
+
       case R.id.directions:
         // Launch a DirectionsListFragment to display list of directions
-        DirectionsDialogFragment frag = new DirectionsDialogFragment();
-        frag.setRoutingDirections(mRoutingDirections);
+        final DirectionsDialogFragment frag = new DirectionsDialogFragment();
+        frag.setRoutingDirections(mRoutingDirections, new DirectionsDialogListener() {
+
+          @Override
+          public void onDirectionSelected(int position) {
+            // User has selected a particular direction - dismiss the dialog and zoom to the selected direction
+            frag.dismiss();
+            RouteDirection direction = mRoutingDirections.get(position);
+            mMapView.setExtent(direction.getGeometry());
+          }
+
+        });
         getFragmentManager().beginTransaction().add(frag, null).commit();
         return true;
-        
-      case R.id.action_settings:
+
+      case R.id.action_measure:
         startActionMode(new MeasuringTool(mMapView));
-        return true;   
-        
+        return true;
+
       default:
         return super.onOptionsItemSelected(item);
     }
@@ -465,7 +493,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
     InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
     inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
 
-    // Memove any previous graphics and routes
+    // Remove any previous graphics and routes
     resetGraphicsLayers();
 
     // Obtain address and execute locator task
@@ -499,7 +527,6 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
     // Execute async task to find the address
     new LocatorAsyncTask().execute(findParams);
     mLocationLayerPointString = address;
-
   }
 
   /**
@@ -532,6 +559,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
    * @param start
    * @param end
    */
+  @SuppressWarnings("unchecked")
   private void executeRoutingTask(String start, String end) {
     // Create a list of start end point params
     LocatorFindParameters routeStartParams = new LocatorFindParameters(start);
@@ -658,9 +686,9 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
       List<LocatorGeocodeResult> geocodeEndResult = null;
       Point startPoint = null;
       Point endPoint = null;
-      RouteParameters routeParams = null;
 
-      // Create a new locator to geocode start/end points
+      // Create a new locator to geocode start/end points;
+      // by default uses ArcGIS online world geocoding service
       Locator locator = Locator.createOnlineLocator();
 
       try {
@@ -688,11 +716,12 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
         return null;
       }
 
-      // Create a new routing task pointing to an NAService
+      // Create a new routing task pointing to an ArcGIS Network Analysis Service
       RouteTask routeTask;
+      RouteParameters routeParams = null;
       try {
         routeTask = RouteTask.createOnlineRouteTask(getString(R.string.routingservice_url), null);
-        // build routing parameters
+        // Retrieve default routing parameters
         routeParams = routeTask.retrieveDefaultRouteTaskParameters();
       } catch (Exception e) {
         mException = e;
@@ -702,7 +731,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
         return null;
       }
 
-      // Setup route parameters
+      // Customize the route parameters
       NAFeaturesAsFeature routeFAF = new NAFeaturesAsFeature();
       StopGraphic sgStart = new StopGraphic(startPoint);
       StopGraphic sgEnd = new StopGraphic(endPoint);
@@ -743,13 +772,17 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
       SimpleLineSymbol lineSymbol = new SimpleLineSymbol(Color.RED, 2, STYLE.SOLID);
       Graphic routeGraphic = new Graphic(route.getRouteGraphic().getGeometry(), lineSymbol);
 
+      // Create point graphic to mark start of route
+      Point startPoint = ((Polyline) routeGraphic.getGeometry()).getPoint(0);
+      Graphic startGraphic = createMarkerGraphic(startPoint);
+
       // Create point graphic to mark end of route
       int endPointIndex = ((Polyline) routeGraphic.getGeometry()).getPointCount() - 1;
       Point endPoint = ((Polyline) routeGraphic.getGeometry()).getPoint(endPointIndex);
       Graphic endGraphic = createMarkerGraphic(endPoint);
 
-      // route and end point graphics to route layer
-      mRouteLayer.addGraphics(new Graphic[] { routeGraphic, endGraphic });
+      // Add these graphics to route layer
+      mRouteLayer.addGraphics(new Graphic[] { routeGraphic, startGraphic, endGraphic });
 
       // Zoom to the extent of the entire route with a padding
       mMapView.setExtent(route.getEnvelope(), 100);
@@ -789,7 +822,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
       try {
         // Our input and output spatial reference will be the same as the map
         SpatialReference mapRef = mMapView.getSpatialReference();
-        result = locator.reverseGeocode(mPoint, 50.0, mapRef, mapRef);
+        result = locator.reverseGeocode(mPoint, 100.0, mapRef, mapRef);
         mLocationLayerPoint = mPoint;
       } catch (Exception e) {
         mException = e;
