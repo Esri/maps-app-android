@@ -423,6 +423,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
             RouteDirection direction = mRoutingDirections.get(position);
             mMapView.setExtent(direction.getGeometry());
           }
+
         });
         getFragmentManager().beginTransaction().add(frag, null).commit();
         return true;
@@ -685,7 +686,6 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
       List<LocatorGeocodeResult> geocodeEndResult = null;
       Point startPoint = null;
       Point endPoint = null;
-      RouteParameters routeParams = null;
 
       // Create a new locator to geocode start/end points;
       // by default uses ArcGIS online world geocoding service
@@ -718,6 +718,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
 
       // Create a new routing task pointing to an ArcGIS Network Analysis Service
       RouteTask routeTask;
+      RouteParameters routeParams = null;
       try {
         routeTask = RouteTask.createOnlineRouteTask(getString(R.string.routingservice_url), null);
         // Retrieve default routing parameters

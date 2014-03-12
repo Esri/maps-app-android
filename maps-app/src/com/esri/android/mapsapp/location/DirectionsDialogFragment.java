@@ -13,7 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -69,16 +69,13 @@ public class DirectionsDialogFragment extends DialogFragment {
 
     // Setup list adapter
     ListView listView = (ListView) view.findViewById(R.id.directions_list_view);
-    listView.setOnItemSelectedListener(new OnItemSelectedListener() {
+    listView.setOnItemClickListener(new OnItemClickListener() {
 
       @Override
-      public void onItemSelected(AdapterView<?> parent, View v, int position, long id) {
+      public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
         mDirectionsDialogListener.onDirectionSelected(position);
       }
 
-      @Override
-      public void onNothingSelected(AdapterView<?> parent) {
-      }
     });
     listView.setAdapter(new DirectionsListAdapter(mRoutingDirections));
     return view;
