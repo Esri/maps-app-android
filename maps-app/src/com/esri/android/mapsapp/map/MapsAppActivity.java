@@ -72,6 +72,7 @@ import com.esri.core.geometry.Unit;
 import com.esri.core.map.Graphic;
 import com.esri.core.portal.WebMap;
 import com.esri.core.symbol.PictureMarkerSymbol;
+import com.esri.core.symbol.SimpleFillSymbol;
 import com.esri.core.symbol.SimpleLineSymbol;
 import com.esri.core.symbol.SimpleLineSymbol.STYLE;
 import com.esri.core.symbol.SimpleMarkerSymbol;
@@ -361,7 +362,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
 
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
-
+    SimpleFillSymbol fillSymbol;
     switch (item.getItemId()) {
       case R.id.route:
         // Show RoutingDialogFragment to get routing start and end points.
@@ -401,8 +402,33 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
         getFragmentManager().beginTransaction().add(frag, null).commit();
         return true;
         
+      
       case R.id.action_settings:
-        startActionMode(new MeasuringTool(mMapView));
+     // initialize some resources for the measure tool, optional.  
+        Unit[] linearUnits = new Unit[] {
+            Unit.create(LinearUnit.Code.CENTIMETER),
+            Unit.create(LinearUnit.Code.METER),
+            Unit.create(LinearUnit.Code.KILOMETER),
+            Unit.create(LinearUnit.Code.INCH),
+            Unit.create(LinearUnit.Code.FOOT),
+            Unit.create(LinearUnit.Code.YARD),
+            Unit.create(LinearUnit.Code.MILE_STATUTE)
+            };
+        SimpleMarkerSymbol markerSymbol = new SimpleMarkerSymbol(Color.BLUE, 10, com.esri.core.symbol.SimpleMarkerSymbol.STYLE.DIAMOND);
+        SimpleLineSymbol lineSymbol = new SimpleLineSymbol(Color.YELLOW, 3);
+        fillSymbol = new SimpleFillSymbol(Color.argb(100, 0, 225, 255));
+        fillSymbol.setOutline(new SimpleLineSymbol(Color.TRANSPARENT, 0));
+        
+        // create the tool, required.
+        MeasuringTool measuringTool = new MeasuringTool(mMapView);
+        // customize the tool, optional.
+        measuringTool.setLinearUnits(linearUnits);
+        measuringTool.setMarkerSymbol(markerSymbol);
+        measuringTool.setLineSymbol(lineSymbol);
+        measuringTool.setFillSymbol(fillSymbol);
+        
+        // fire up the tool, required.
+        startActionMode(measuringTool);
         return true;   
         
       default:
