@@ -274,7 +274,6 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
 
         @Override
         public View getDropDownView(int position, View convertView, ViewGroup parent) {
-          // Log.i(IoUtil.AGSASDK_LOG_TAG, "position = "+position);
           if (position == 0) {
             LinearLayout layout = new LinearLayout(mContext);
             layout.setOrientation(LinearLayout.VERTICAL);
