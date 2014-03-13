@@ -75,6 +75,7 @@ import com.esri.core.geometry.Unit;
 import com.esri.core.map.Graphic;
 import com.esri.core.portal.WebMap;
 import com.esri.core.symbol.PictureMarkerSymbol;
+import com.esri.core.symbol.SimpleFillSymbol;
 import com.esri.core.symbol.SimpleLineSymbol;
 import com.esri.core.symbol.SimpleLineSymbol.STYLE;
 import com.esri.core.symbol.SimpleMarkerSymbol;
@@ -100,8 +101,10 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
 
   private static final String KEY_IS_LOCATION_TRACKING = "IsLocationTracking";
 
-  // The circle area specified by search_radius and input lat/lon serves searching purpose.
-  // It is also used to construct the extent which map zooms to after the first GPS fix is retrieved.
+  // The circle area specified by search_radius and input lat/lon serves
+  // searching purpose.
+  // It is also used to construct the extent which map zooms to after the first
+  // GPS fix is retrieved.
   final static double SEARCH_RADIUS = 10;
 
   // MapView stuff
@@ -163,7 +166,8 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
     mProgressDialog.setOnDismissListener(new OnDismissListener() {
       @Override
       public void onDismiss(DialogInterface arg0) {
-        // During initial loading only we will finish the activity if progress dialog is dismissed
+        // During initial loading only we will finish the activity if progress
+        // dialog is dismissed
         finish();
       }
     });
@@ -181,8 +185,9 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
   }
 
   /**
-   * Takes a MapView that has already been instantiated to show a WebMap, completes its setup by setting various
-   * listeners and attributes, and sets it as the activity's content view.
+   * Takes a MapView that has already been instantiated to show a WebMap,
+   * completes its setup by setting various listeners and attributes, and sets
+   * it as the activity's content view.
    * 
    * @param mapView
    */
@@ -197,7 +202,8 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
       mMapView.removeLayer(mLocationLayer);
       mMapView.removeLayer(mRouteLayer);
 
-      // Need this to be sure that old MapView's resources are freed up and location tracking is disabled
+      // Need this to be sure that old MapView's resources are freed up and
+      // location tracking is disabled
       mMapView.getLocationDisplayManager().stop();
       mMapView.recycle();
     }
@@ -220,7 +226,8 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
         Log.i(TAG, "MapView.setOnStatusChangedListener() status=" + status.toString());
         if (source == mMapView && status == STATUS.INITIALIZED) {
           if (mMapViewState == null) {
-            // Initial loading of default basemap is complete - dismiss the progress dialog, having first removed the
+            // Initial loading of default basemap is complete - dismiss the
+            // progress dialog, having first removed the
             // onDismiss listener
             mProgressDialog.setOnDismissListener(null);
             mProgressDialog.dismiss();
@@ -261,7 +268,8 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
       @Override
       public boolean onDragPointerUp(MotionEvent from, final MotionEvent to) {
         if (mLongPressEvent != null) {
-          // This is the end of a long-press that will have displayed the magnifier.
+          // This is the end of a long-press that will have displayed the
+          // magnifier.
           // Perform reverse-geocoding of the point that was pressed
           Point mapPoint = mMapView.toMapPoint(to.getX(), to.getY());
           new ReverseGeocodingAsyncTask().execute(mapPoint);
@@ -378,62 +386,87 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
 
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
-
+    SimpleFillSymbol fillSymbol;
     switch (item.getItemId()) {
-      case R.id.route:
-        // Show RoutingDialogFragment to get routing start and end points.
-        // This calls back to onGetRoute() to do the routing.
-        RoutingDialogFragment routingFrag = new RoutingDialogFragment();
-        routingFrag.setRoutingDialogListener(this);
-        Bundle arguments = new Bundle();
-        if (mLocationLayerPoint != null) {
-          arguments.putString(RoutingDialogFragment.ARG_END_POINT_DEFAULT, mLocationLayerPointString);
+    case R.id.route:
+      // Show RoutingDialogFragment to get routing start and end points.
+      // This calls back to onGetRoute() to do the routing.
+      RoutingDialogFragment routingFrag = new RoutingDialogFragment();
+      routingFrag.setRoutingDialogListener(this);
+      Bundle arguments = new Bundle();
+      if (mLocationLayerPoint != null) {
+        arguments.putString(RoutingDialogFragment.ARG_END_POINT_DEFAULT, mLocationLayerPointString);
+      }
+      routingFrag.setArguments(arguments);
+      routingFrag.show(getFragmentManager(), null);
+      return true;
+
+    case R.id.basemaps:
+      // Show BasemapsDialogFragment to offer a choice if basemaps.
+      // This calls back to onBasemapChanged() if one is selected.
+      BasemapsDialogFragment basemapsFrag = new BasemapsDialogFragment();
+      basemapsFrag.setBasemapsDialogListener(this);
+      basemapsFrag.show(getFragmentManager(), null);
+      return true;
+
+    case R.id.location:
+      // Toggle location tracking on or off
+      if (mIsLocationTracking) {
+        mMapView.getLocationDisplayManager().stop();
+        mIsLocationTracking = false;
+      } else {
+        startLocationTracking();
+      }
+      return true;
+
+    case R.id.directions:
+      // Launch a DirectionsListFragment to display list of directions
+      final DirectionsDialogFragment frag = new DirectionsDialogFragment();
+      frag.setRoutingDirections(mRoutingDirections, new DirectionsDialogListener() {
+
+        @Override
+        public void onDirectionSelected(int position) {
+          // User has selected a particular direction - dismiss the dialog and
+          // zoom to the selected direction
+          frag.dismiss();
+          RouteDirection direction = mRoutingDirections.get(position);
+          mMapView.setExtent(direction.getGeometry());
         }
-        routingFrag.setArguments(arguments);
-        routingFrag.show(getFragmentManager(), null);
-        return true;
 
-      case R.id.basemaps:
-        // Show BasemapsDialogFragment to offer a choice if basemaps.
-        // This calls back to onBasemapChanged() if one is selected.
-        BasemapsDialogFragment basemapsFrag = new BasemapsDialogFragment();
-        basemapsFrag.setBasemapsDialogListener(this);
-        basemapsFrag.show(getFragmentManager(), null);
-        return true;
+      });
+      getFragmentManager().beginTransaction().add(frag, null).commit();
+      return true;
 
-      case R.id.location:
-        // Toggle location tracking on or off
-        if (mIsLocationTracking) {
-          mMapView.getLocationDisplayManager().stop();
-          mIsLocationTracking = false;
-        } else {
-          startLocationTracking();
-        }
-        return true;
+    case R.id.action_measure:
+   // initialize some resources for the measure tool, optional.
+      Unit[] linearUnits = new Unit[] {
+          Unit.create(LinearUnit.Code.CENTIMETER),
+          Unit.create(LinearUnit.Code.METER),
+          Unit.create(LinearUnit.Code.KILOMETER),
+          Unit.create(LinearUnit.Code.INCH),
+          Unit.create(LinearUnit.Code.FOOT),
+          Unit.create(LinearUnit.Code.YARD),
+          Unit.create(LinearUnit.Code.MILE_STATUTE)
+          };
+      SimpleMarkerSymbol markerSymbol = new SimpleMarkerSymbol(Color.BLUE, 10, com.esri.core.symbol.SimpleMarkerSymbol.STYLE.DIAMOND);
+      SimpleLineSymbol lineSymbol = new SimpleLineSymbol(Color.YELLOW, 3);
+      fillSymbol = new SimpleFillSymbol(Color.argb(100, 0, 225, 255));
+      fillSymbol.setOutline(new SimpleLineSymbol(Color.TRANSPARENT, 0));
+      
+      // create the tool, required.
+      MeasuringTool measuringTool = new MeasuringTool(mMapView);
+      // customize the tool, optional.
+      measuringTool.setLinearUnits(linearUnits);
+      measuringTool.setMarkerSymbol(markerSymbol);
+      measuringTool.setLineSymbol(lineSymbol);
+      measuringTool.setFillSymbol(fillSymbol);
+      
+      // fire up the tool, required.
+      startActionMode(measuringTool);
+      return true;
 
-      case R.id.directions:
-        // Launch a DirectionsListFragment to display list of directions
-        final DirectionsDialogFragment frag = new DirectionsDialogFragment();
-        frag.setRoutingDirections(mRoutingDirections, new DirectionsDialogListener() {
-
-          @Override
-          public void onDirectionSelected(int position) {
-            // User has selected a particular direction - dismiss the dialog and zoom to the selected direction
-            frag.dismiss();
-            RouteDirection direction = mRoutingDirections.get(position);
-            mMapView.setExtent(direction.getGeometry());
-          }
-
-        });
-        getFragmentManager().beginTransaction().add(frag, null).commit();
-        return true;
-
-      case R.id.action_measure:
-        startActionMode(new MeasuringTool(mMapView));
-        return true;
-
-      default:
-        return super.onOptionsItemSelected(item);
+    default:
+      return super.onOptionsItemSelected(item);
     }
   }
 
@@ -532,10 +565,13 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
   /**
    * Called by RoutingDialogFragment when user presses Get Route button.
    * 
-   * @param startPoint String entered by user to define start point.
-   * @param endPoint String entered by user to define end point.
-   * @return true if routing task executed, false if parameters rejected. If this method rejects the parameters it must
-   *         display an explanatory Toast to the user before returning.
+   * @param startPoint
+   *          String entered by user to define start point.
+   * @param endPoint
+   *          String entered by user to define end point.
+   * @return true if routing task executed, false if parameters rejected. If
+   *         this method rejects the parameters it must display an explanatory
+   *         Toast to the user before returning.
    */
   @Override
   public boolean onGetRoute(String startPoint, String endPoint) {
@@ -575,8 +611,9 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
   }
 
   /*
-   * This class provides an AsyncTask that performs a geolocation request on a background thread and displays the first
-   * result on the map on the UI thread.
+   * This class provides an AsyncTask that performs a geolocation request on a
+   * background thread and displays the first result on the map on the UI
+   * thread.
    */
   private class LocatorAsyncTask extends AsyncTask<LocatorFindParameters, Void, List<LocatorGeocodeResult>> {
     private Exception mException;
@@ -597,7 +634,8 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
       mException = null;
       List<LocatorGeocodeResult> results = null;
 
-      // Create locator using default online geocoding service and tell it to find the given address
+      // Create locator using default online geocoding service and tell it to
+      // find the given address
       Locator locator = Locator.createOnlineLocator();
       try {
         results = locator.find(params[0]);
@@ -654,8 +692,9 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
   }
 
   /**
-   * This class provides an AsyncTask that performs a routing request on a background thread and displays the resultant
-   * route on the map on the UI thread.
+   * This class provides an AsyncTask that performs a routing request on a
+   * background thread and displays the resultant route on the map on the UI
+   * thread.
    */
   private class RouteAsyncTask extends AsyncTask<List<LocatorFindParameters>, Void, RouteResult> {
     private Exception mException;
@@ -716,7 +755,8 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
         return null;
       }
 
-      // Create a new routing task pointing to an ArcGIS Network Analysis Service
+      // Create a new routing task pointing to an ArcGIS Network Analysis
+      // Service
       RouteTask routeTask;
       RouteParameters routeParams = null;
       try {
@@ -795,8 +835,9 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
   }
 
   /**
-   * This class provides an AsyncTask that performs a reverse geocoding request on a background thread and displays the
-   * resultant point on the map on the UI thread.
+   * This class provides an AsyncTask that performs a reverse geocoding request
+   * on a background thread and displays the resultant point on the map on the
+   * UI thread.
    */
   public class ReverseGeocodingAsyncTask extends AsyncTask<Point, Void, LocatorReverseGeocodeResult> {
     private Exception mException;
@@ -817,7 +858,8 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
       LocatorReverseGeocodeResult result = null;
       mPoint = params[0];
 
-      // Create locator using default online geocoding service and tell it to find the given point
+      // Create locator using default online geocoding service and tell it to
+      // find the given point
       Locator locator = Locator.createOnlineLocator();
       try {
         // Our input and output spatial reference will be the same as the map
@@ -858,7 +900,8 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
         mLocationLayerPointString = address.toString();
 
         // Show the results of the reverse geocoding in a toast.
-        // Toast.makeText(MapsAppActivity.this, mLocationLayerPointString, Toast.LENGTH_LONG).show();
+        // Toast.makeText(MapsAppActivity.this, mLocationLayerPointString,
+        // Toast.LENGTH_LONG).show();
 
         // create text symbol for result address
         TextSymbol textSymbol = new TextSymbol(20, address.toString(), Color.BLACK);
@@ -877,7 +920,8 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
   Graphic createMarkerGraphic(Point point) {
     Drawable marker = getResources().getDrawable(R.drawable.marker);
     PictureMarkerSymbol destinationSymbol = new PictureMarkerSymbol(mMapView.getContext(), marker);
-    // NOTE: marker's bounds not set till marker is used to create destinationSymbol
+    // NOTE: marker's bounds not set till marker is used to create
+    // destinationSymbol
     float offsetY = convertPixelsToDp(MapsAppActivity.this, marker.getBounds().bottom);
     destinationSymbol.setOffsetY(offsetY);
     return new Graphic(point, destinationSymbol);
@@ -887,7 +931,8 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
    * Converts device specific pixels to density independent pixels.
    * 
    * @param context
-   * @param px number of device specific pixels
+   * @param px
+   *          number of device specific pixels
    * @return number of density independent pixels
    */
   private float convertPixelsToDp(Context context, float px) {

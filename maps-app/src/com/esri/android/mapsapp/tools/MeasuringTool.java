@@ -258,7 +258,7 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
     public Preferences(Context context) {
       super(context);
       imageView = new ImageView(mContext);
-      imageView.setBackgroundResource(android.R.drawable.ic_menu_manage);
+      imageView.setImageDrawable(context.getResources().getDrawable(android.R.drawable.ic_menu_manage));
     }
 
     @Override
@@ -274,7 +274,6 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
 
         @Override
         public View getDropDownView(int position, View convertView, ViewGroup parent) {
-          // Log.i(IoUtil.AGSASDK_LOG_TAG, "position = "+position);
           if (position == 0) {
             LinearLayout layout = new LinearLayout(mContext);
             layout.setOrientation(LinearLayout.VERTICAL);
