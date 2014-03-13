@@ -258,7 +258,7 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
     public Preferences(Context context) {
       super(context);
       imageView = new ImageView(mContext);
-      imageView.setBackgroundResource(android.R.drawable.ic_menu_manage);
+      imageView.setImageDrawable(context.getResources().getDrawable(android.R.drawable.ic_menu_manage));
     }
 
     @Override
