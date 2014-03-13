@@ -1,15 +1,15 @@
 maps-app-android
 =======================
 
-Your organisations mapping app built with the [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/en/android/).  ArcGIS Maps is a modern Android app which aims to be a starting off point for developers looking to extend a basic interactive mapping app.
+Your organizations mapping app built with the [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/en/android/).  ArcGIS Maps is a modern Android app which aims to be a starting off point for developers looking to extend a basic interactive mapping app.
 
-![App](https://raw.github.com/Esri/maps-app-android/master/maps-app.png?login=doneill&token=1bb65838c2ba478c1d89df754ae9b52f)
+![App](https://raw.github.com/Esri/maps-app-android/master/maps-app.png)
 
 ## Features
 * Dynamically switching basemaps
 * Place Search
 * Geocode addresses
-* Reverse gecode
+* Reverse geocode
 * Routing
 
 ## Instructions
@@ -37,7 +37,7 @@ Find a bug or want to request a new feature enhancement?  Please let us know by 
 ## Contributing
 Anyone and everyone is welcome to [contribute](https://github.com/Esri/maps-app-android/blob/master/CONTRIBUTING.md). We do accept pull requests.
 
-1. Get Involed
+1. Get Involved
 2. Report Issues
 3. Contribute Code
 4. Improve Documentation
