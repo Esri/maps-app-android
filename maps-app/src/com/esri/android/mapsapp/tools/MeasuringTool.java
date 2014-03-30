@@ -42,6 +42,9 @@ import com.esri.core.symbol.SimpleMarkerSymbol.STYLE;
 
 public class MeasuringTool implements Callback, OnSingleTapListener {
 
+  // default serial
+  private static final long serialVersionUID = 1L;
+
   public enum MeasureType {
     LINEAR, AREA;
 
