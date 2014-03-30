@@ -42,6 +42,9 @@ import com.esri.core.symbol.SimpleMarkerSymbol.STYLE;
 
 public class MeasuringTool implements Callback, OnSingleTapListener {
 
+  // default serial
+  private static final long serialVersionUID = 1L;
+
   public enum MeasureType {
     LINEAR, AREA;
 
@@ -331,7 +334,7 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
                 if (group.getChildAt(i).getId() == checkedId) {
                   if (mMeasureMode == MeasureType.LINEAR) {
                     if (mResult > 0) {
-                      mResult = LinearUnit.convertUnits(mResult, getLinearUnit(mCurrentLinearUnit), getLinearUnit(i));
+                      mResult = Unit.convertUnits(mResult, getLinearUnit(mCurrentLinearUnit), getLinearUnit(i));
                       mCurrentLinearUnit = i;
                       mResultView.update();
                     } else {
@@ -339,7 +342,7 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
                     }
                   } else {
                     if (mResult > 0) {
-                      mResult = AreaUnit.convertUnits(mResult, getAreaUnit(mCurrentAreaUnit), getAreaUnit(i));
+                      mResult = Unit.convertUnits(mResult, getAreaUnit(mCurrentAreaUnit), getAreaUnit(i));
                       mCurrentAreaUnit = i;
                       mResultView.update();
                     } else {
