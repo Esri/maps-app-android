@@ -23,10 +23,10 @@ Your organizations mapping app built with the [ArcGIS Runtime SDK for Android](h
 * Eclipse Juno or Kepler
 * Android SDK 16+
 * Android ADT Eclipse plugin
-* [ArcGIS Runtime SDK for Android v10.1.1-u1 +](http://www.esri.com/apps/products/download/index.cfm?fuseaction=download.main&downloadid=982)
+* [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/android/)
 
 ## Resources
-* [ArcGIS Runtime SDK for Android Developers Site](https://developers.arcgis.com/en/android/)
+* [ArcGIS Runtime SDK for Android Developers Site](https://developers.arcgis.com/android/)
 * [ArcGIS Mobile Blog](http://blogs.esri.com/esri/arcgis/category/mobile/)
 * [ArcGIS Developer Blog](http://blogs.esri.com/esri/arcgis/category/developer/)
 * [twitter@esri](http://twitter.com/esri)
