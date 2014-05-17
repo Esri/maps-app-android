@@ -35,14 +35,14 @@ here are some tips for creating a helpful report that will make fixing it much e
 System requirements of the Android SDK are provided [here](https://developers.arcgis.com/en/android/system-reqs.html).  Below are the basic developer requirements to workign with ArcGIS Runtime SDK For Android in Eclipse: 
 
  * [JDK 6](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
- * [Eclipse 3.7](http://www.eclipse.org/downloads/) (Indigo) or greater
+ * [Eclipse 3.7.2](http://www.eclipse.org/downloads/) (Indigo) or greater
  * Eclipse [JDT](http://www.eclipse.org/jdt/) plugin (Included in most Eclipse IDE packages)
  * Eclipse [EGit](http://www.eclipse.org/egit/) plugin (Included in Ecilpse 4.x and greater)
  * Android [ADT Plugin](http://developer.android.com/tools/sdk/eclipse-adt.html)
- * [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/en/android/)
+ * [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/android/)
 
 ### Setting up your dev environment
-Install and setup your Eclipse developer environment [here](https://developers.arcgis.com/en/android/install.html).Once installed you can work with the project directly 
+Install and setup your Eclipse developer environment [here](https://developers.arcgis.com/android/guide/install-and-set-up.htm).Once installed you can work with the project directly 
 
 #### Fork the repo
 If you haven't already, got to https://github.com/Esri/maps-app-android and click the [Fork](https://github.com/Esri/maps-app-android/fork) button.
