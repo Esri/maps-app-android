@@ -1,3 +1,27 @@
+/* Copyright 1995-2013 Esri
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * For additional information, contact:
+ * Environmental Systems Research Institute, Inc.
+ * Attn: Contracts Dept
+ * 380 New York Street
+ * Redlands, California, USA 92373
+ *
+ * email: contracts@esri.com
+ *
+ */
+
 package com.esri.android.mapsapp.basemaps;
 
 import java.util.ArrayList;
@@ -40,7 +64,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
   public interface BasemapsDialogListener {
     /**
      * Callback for when a new basemap is selected.
-     * 
+     *
      * @param webMap WebMap object containing the new basemap.
      */
     public void onBasemapChanged(WebMap webMap);
@@ -60,7 +84,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 
   /**
    * Sets listener for selection of new basemap.
-   * 
+   *
    * @param listener
    */
   public void setBasemapsDialogListener(BasemapsDialogListener listener) {
@@ -170,7 +194,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 
     /**
      * Connects to portal and fetches info about basemaps.
-     * 
+     *
      * @throws Exception
      */
     private void fetchBasemapItems() throws Exception {
@@ -209,7 +233,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 
     /**
      * Creates query string to fetch portal items for all our basemaps.
-     * 
+     *
      * @return Query string, e.g. "id:portalId1 OR id:portalId2".
      */
     private String createQueryString() {
