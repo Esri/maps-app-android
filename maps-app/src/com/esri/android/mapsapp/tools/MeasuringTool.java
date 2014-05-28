@@ -1,3 +1,27 @@
+/* Copyright 1995-2013 Esri
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * For additional information, contact:
+ * Environmental Systems Research Institute, Inc.
+ * Attn: Contracts Dept
+ * 380 New York Street
+ * Redlands, California, USA 92373
+ *
+ * email: contracts@esri.com
+ *
+ */
+
 package com.esri.android.mapsapp.tools;
 
 import java.util.ArrayList;
@@ -44,9 +68,9 @@ import com.esri.core.symbol.SimpleMarkerSymbol;
 import com.esri.core.symbol.SimpleMarkerSymbol.STYLE;
 
 /**
- * The Measuring Tool follows Android's 
+ * The Measuring Tool follows Android's
  * <a href="http://developer.android.com/design/patterns/actionbar.html#contextual">
- * Contextual Action Bars</a> design pattern to provide basic measuring and 
+ * Contextual Action Bars</a> design pattern to provide basic measuring and
  * sketching capabilities in a self-contained tool. The tool can be readily plugged
  * into your existing app provided the following two requirements are met:
  * <ul><li>
@@ -54,10 +78,10 @@ import com.esri.core.symbol.SimpleMarkerSymbol.STYLE;
  * <li>
  * an <a href="http://developer.android.com/design/patterns/actionbar.html">Action Bar</a>.
  * </ul>
- * 
+ *
  * To wire the measure tool to your Action Bar, first copy the Measuring tool java class
  * to your application project's src folder. Next, you need to create a new action button,
- * which can usually be achieved by adding a {@link MenuItem} to the menu xml that populates 
+ * which can usually be achieved by adding a {@link MenuItem} to the menu xml that populates
  * the Action Bar.
  *
  * <pre><code>
@@ -68,10 +92,10 @@ import com.esri.core.symbol.SimpleMarkerSymbol.STYLE;
  *       android:showAsAction="ifRoom"
  *       android:title="@string/measure"/&gt;
  * </code></pre>
- * 
+ *
  * Then add the following code snippet to your {@link Activity} or {@link Fragment} that
  * contains the {@link MapView} to start the Measuring tool when the Action Button is clicked.
- * 
+ *
  * <pre><code>
  *   @Override
  * public boolean onOptionsItemSelected(MenuItem item) {
@@ -85,14 +109,14 @@ import com.esri.core.symbol.SimpleMarkerSymbol.STYLE;
  *  return super.onOptionsItemSelected(item);
  * }
  * </code></pre>
- * 
+ *
  * The symbols used to draw lines and polygons can be customized by calling:
  * <ul>
  * <li>{@link #setMarkerSymbol(MarkerSymbol)}
  * <li>{@link #setLineSymbol(LineSymbol)}
  * <li>{@link #setFillSymbol(FillSymbol)}
  * </ul>
- * 
+ *
  * The linear and area units in the drop down list can also be customized by calling:
  * <ul>
  * <li>{@link #setLinearUnits(Unit[])}
@@ -104,7 +128,7 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
 
   public enum MeasureType {
     LINEAR, AREA;
-    
+
     static public MeasureType getType(int i) {
       switch (i) {
         case 0:
@@ -116,7 +140,7 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
       }
     }
   }
-  
+
   private static final int MENU_DELETE = 0;
   private static final int MENU_PREF = 1;
   private static final int MENU_UNDO = 2;
@@ -141,7 +165,7 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
   private ActionMode mMode;
   private Polyline mLine;
   private Polygon mPolygon;
-  
+
   public MeasuringTool(MapView map) {
     this.mMap = map;
     mContext = mMap.getContext();
@@ -168,7 +192,7 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
     mMap.addLayer(mLayer);
     mPoints = new ArrayList<Point>();
   }
-  
+
   //Called when the user selects a contextual menu item
   @Override
   public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
@@ -202,11 +226,11 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
     item = menu.add(Menu.NONE, MENU_UNDO, 1, "undo");
     item.setIcon(android.R.drawable.ic_menu_revert);
     item.setVisible(false);
-    
+
     item = menu.add(Menu.NONE, MENU_DELETE, 2, "clear");
     item.setIcon(android.R.drawable.ic_menu_delete);
     item.setVisible(false);
-    
+
     item = menu.add(Menu.NONE, MENU_PREF, 3, "preferences");
     item.setIcon(android.R.drawable.ic_menu_manage);
     item.setActionProvider(new Preferences(mContext));
@@ -239,13 +263,13 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
   public void onSingleTap(float x, float y) {
     addPoint(x, y);
   }
-  
+
   private void addPoint(float x, float y) {
     Point point = mMap.toMapPoint(x, y);
     mPoints.add(point);
     clearAndDraw();
   }
-  
+
   private void undo() {
     mPoints.remove(mPoints.size()-1);
     clearAndDraw();
@@ -257,7 +281,7 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
     mLayer.removeGraphics(oldGraphics);
     updateMenu();
   }
-  
+
   private void draw() {
     if (mPoints.size() == 0) {
       return;
@@ -297,7 +321,7 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
       showResult((float) screenPoint.getX(), (float) screenPoint.getY());
     }
   }
-  
+
   private void updateMenu() {
     mMode.getMenu().findItem(MENU_DELETE).setVisible(mPoints.size() > 0);
     mMode.getMenu().findItem(MENU_UNDO).setVisible(mPoints.size() > 0);
@@ -315,7 +339,7 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
       mCallout.hide();
     }
   }
-  
+
   private void showResult() {
     if (mResult > 0) {
       mText.setText(getResultString());
@@ -327,85 +351,85 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
 
   /**
    * Customize linear units
-   * 
+   *
    * @param linearUnits Array of Unit for measurement of dimensions
    */
   public void setLinearUnits(Unit[] linearUnits) {
     mLinearUnits = linearUnits;
   }
-  
+
   Unit getLinearUnit(int position) {
     return mLinearUnits == null ? mDefaultLinearUnits[position] : mLinearUnits[position];
   }
-  
+
   int getAreaUnitSize() {
     return mAreaUnits == null ? mDefaultAreaUnits.length : mAreaUnits.length;
   }
-  
+
   /**
    * Customize the area units
-   * 
+   *
    * @param areaUnits Array of Unit for measurement of dimensions
    */
   public void setAreaUnits(Unit[] areaUnits) {
     mAreaUnits = areaUnits;
   }
-  
+
   Unit getAreaUnit(int position) {
     return mAreaUnits == null ? mDefaultAreaUnits[position] : mAreaUnits[position];
   }
-  
+
   int getLinearUnitSize() {
     return mLinearUnits == null ? mDefaultLinearUnits.length : mLinearUnits.length;
   }
-  
+
   int getUnitSize() {
     return mMeasureMode == MeasureType.LINEAR ? getLinearUnitSize():getAreaUnitSize();
   }
-  
+
   Unit getUnit(int position) {
-    return mMeasureMode == MeasureType.LINEAR ? getLinearUnit(position):getAreaUnit(position); 
+    return mMeasureMode == MeasureType.LINEAR ? getLinearUnit(position):getAreaUnit(position);
   }
-  
+
   Unit getCurrentUnit() {
     return getUnit(mMeasureMode == MeasureType.LINEAR ? mCurrentLinearUnit:mCurrentAreaUnit);
   }
-  
+
   /**
    * Customize the line symbol
-   * 
+   *
    * @param symbol To draw lines on GraphicsLayer
    */
   public void setLineSymbol(LineSymbol symbol) {
     mLineSymbol = symbol;
   }
-  
+
   /**
    * Customize the marker symbol
-   * 
+   *
    * @param symbol To draw marker symbol on GraphicsLayer
    */
   public void setMarkerSymbol(MarkerSymbol symbol) {
     mMarkerSymbol = symbol;
   }
-  
+
   /**
    * Customize the fill symbol
-   * 
+   *
    * @param symbol To draw fill symbol on GraphicsLayer
    */
   public void setFillSymbol(FillSymbol symbol) {
     mFillSymbol = symbol;
   }
-  
+
   MultiPath getGeometry() {
     return (mMeasureMode == MeasureType.LINEAR) ? mLine:mPolygon;
   }
-  
+
   private String getResultString() {
     return mResult > 0 ? String.format("%.2f", mResult)+" "+(getCurrentUnit().getAbbreviation()):"";
   }
-  
+
   class Preferences extends ActionProvider {
 
     private ImageView imageView;
@@ -418,7 +442,7 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
 
     @Override
     public View onCreateActionView() {
-      
+
       Spinner spinner = new Spinner(mContext);
       spinner.setAdapter(new BaseAdapter() {
 
@@ -426,7 +450,7 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
         public View getView(int position, View convertView, ViewGroup parent) {
           return imageView;
         }
-        
+
         @Override
         public View getDropDownView(int position, View convertView, ViewGroup parent) {
           if (position == 0) {
@@ -449,11 +473,11 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
             layout.addView(group);
             layout.setPadding(10, 10, 10, 10);
             group.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-              
+
               @Override
               public void onCheckedChanged(RadioGroup rGroup, int checkedId) {
-                for (int i = 0; i < rGroup.getChildCount(); i++) {                  
-                  if (rGroup.getChildAt(i).getId() == checkedId) {                    
+                for (int i = 0; i < rGroup.getChildCount(); i++) {
+                  if (rGroup.getChildAt(i).getId() == checkedId) {
                     mMeasureMode = MeasureType.getType(i);
                     notifyDataSetChanged();
                     clearAndDraw();
@@ -480,17 +504,17 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
             }
           }
           group.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-            
+
             @Override
             public void onCheckedChanged(RadioGroup rGroup, int checkedId) {
-              for (int i = 0; i < rGroup.getChildCount(); i++) {                  
-                if (rGroup.getChildAt(i).getId() == checkedId) {                    
+              for (int i = 0; i < rGroup.getChildCount(); i++) {
+                if (rGroup.getChildAt(i).getId() == checkedId) {
                   if (mMeasureMode == MeasureType.LINEAR) {
                     if (mResult > 0) {
                       mResult = Unit.convertUnits(mResult, getLinearUnit(mCurrentLinearUnit), getLinearUnit(i));
                       mCurrentLinearUnit = i;
                       showResult();
-                    } else {                        
+                    } else {
                       mCurrentLinearUnit = i;
                     }
                   } else {
@@ -511,17 +535,17 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
           layout.setPadding(10, 10, 10, 10);
           return layout;
         }
-        
+
         @Override
         public long getItemId(int position) {
           return position;
         }
-        
+
         @Override
         public Object getItem(int position) {
           return null;
         }
-        
+
         @Override
         public int getCount() {
           return 2;
