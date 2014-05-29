@@ -12,9 +12,10 @@ Your organizations mapping app built with the [ArcGIS Runtime SDK for Android](h
 * Reverse geocode
 * Routing
 
-## Instructions
-1. Download and unzip the .zip file or clone the repo.
-2. Import project into Eclipse IDE
+## Development Instructions
+1. [Fork and clone Maps App Android](https://help.github.com/articles/fork-a-repo)
+2. ```cd``` into the ```maps-app-android``` folder
+3. Make your changes and create a [pull request](https://help.github.com/articles/creating-a-pull-request)
 
  [New to Github? Get started here.](https://github.com/)
 
