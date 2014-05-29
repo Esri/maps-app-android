@@ -19,10 +19,13 @@ The Maps App Android project is an Eclipse Android Application Project which can
 Click the **Fork** button in the [Maps App Android](https://github.com/Esri/maps-app-android) repo
 
 ### Eclipse
-2. [Clone the Maps App Android project in Eclipse](http://wiki.eclipse.org/EGit/User_Guide#Cloning_Remote_Repositories)
-3. [Import the project](http://wiki.eclipse.org/EGit/User_Guide#Project_Import) into Eclipse
+1. [Clone the Maps App Android project in Eclipse](http://wiki.eclipse.org/EGit/User_Guide#Cloning_Remote_Repositories)
+2. [Import the project](http://wiki.eclipse.org/EGit/User_Guide#Project_Import) into Eclipse
+
 ![Import](https://raw.githubusercontent.com/Esri/maps-app-android/master/import-project.png)
-4. Right Click the imported project and select **Convert to ArcGIS Android Project**
+
+3. Right Click the imported project and select **Convert to ArcGIS Android Project**
+
 ![Convert Project](https://raw.githubusercontent.com/Esri/maps-app-android/master/convert-to-arcgis-project.png)
 
 ### Command line Git
