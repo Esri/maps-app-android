@@ -13,7 +13,18 @@ Your organizations mapping app built with the [ArcGIS Runtime SDK for Android](h
 * Routing
 
 ## Development Instructions
-1. [Fork and clone Maps App Android](https://help.github.com/articles/fork-a-repo)
+The Maps App Android project is an Eclipse Android Application Project which can be directly cloned and imported into Eclipse.  
+
+### Fork the Repo
+Click the **Fork** button in the [Maps App Android](https://github.com/Esri/maps-app-android) repo
+
+### Eclipse
+2. [Clone the Maps App Android project in Eclipse](http://wiki.eclipse.org/EGit/User_Guide#Cloning_Remote_Repositories)
+3. [Import the project](http://wiki.eclipse.org/EGit/User_Guide#Project_Import)
+4. Right Click the imported project and select **Convert to ArcGIS Android Project**
+
+### Command line Git
+1. [Clone the Maps App Android](https://help.github.com/articles/fork-a-repo)
 2. ```cd``` into the ```maps-app-android``` folder
 3. Make your changes and create a [pull request](https://help.github.com/articles/creating-a-pull-request)
 
