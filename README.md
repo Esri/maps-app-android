@@ -38,10 +38,12 @@ Click the **Fork** button in the [Maps App Android](https://github.com/Esri/maps
  [New to Github? Get started here.](https://github.com/)
 
 ## Requirements
-* Java Development Kit SE 6
-* Eclipse Juno or Kepler
-* Android SDK 16+
-* Android ADT Eclipse plugin
+* [JDK 6 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+* [ADT Bundle](http://developer.android.com/sdk/index.html) 
+
+ Or
+
+* [Eclipse 4.2 +](https://www.eclipse.org/downloads/) wtih [ADT Plugin](http://developer.android.com/tools/sdk/eclipse-adt.html)
 * [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/android/)
 
 ## Resources
