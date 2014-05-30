@@ -18,7 +18,9 @@ The Maps App Android project is an Eclipse Android Application Project which can
 ### Fork the Repo
 Click the **Fork** button in the [Maps App Android](https://github.com/Esri/maps-app-android) repo
 
-### Eclipse
+### Clone the repo
+
+#### Eclipse
 1. [Clone the Maps App Android project in Eclipse](http://wiki.eclipse.org/EGit/User_Guide#Cloning_Remote_Repositories)
 2. [Import the project](http://wiki.eclipse.org/EGit/User_Guide#Project_Import) into Eclipse
 
@@ -28,7 +30,7 @@ Click the **Fork** button in the [Maps App Android](https://github.com/Esri/maps
 
   ![Convert Project](https://raw.githubusercontent.com/Esri/maps-app-android/master/convert-to-arcgis-project.png)
 
-### Command line Git
+#### Command line Git
 1. [Clone the Maps App Android](https://help.github.com/articles/fork-a-repo#step-2-clone-your-fork)
 2. ```cd``` into the ```maps-app-android``` folder
 3. Make your changes and create a [pull request](https://help.github.com/articles/creating-a-pull-request)
