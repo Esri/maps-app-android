@@ -45,13 +45,21 @@ Install and setup your Eclipse developer environment [here](https://developers.a
 If you haven't already, got to https://github.com/Esri/maps-app-android and click the [Fork](https://github.com/Esri/maps-app-android/fork) button.
 
 #### Clone the repo
-Open your terminal, navigate to your working folder of choice, and use ```git clone``` to get a copy of the repo you just forked.
+#### Eclipse
+1. [Clone the Maps App Android project in Eclipse](http://wiki.eclipse.org/EGit/User_Guide#Cloning_Remote_Repositories)
+2. [Import the project](http://wiki.eclipse.org/EGit/User_Guide#Project_Import) into Eclipse
 
+  ![Import](https://raw.githubusercontent.com/Esri/maps-app-android/master/import-project.png)
 
-```
-$ git clone https://github.com/username/maps-app-android.git
-# Clones your fork of the repository into the current directory in terminal
-```
+3. Right Click the imported project and select **Convert to ArcGIS Android Project**
+
+  ![Convert Project](https://raw.githubusercontent.com/Esri/maps-app-android/master/convert-to-arcgis-project.png)
+
+#### Command line Git
+1. [Clone the Maps App Android](https://help.github.com/articles/fork-a-repo#step-2-clone-your-fork)
+2. ```cd``` into the ```maps-app-android``` folder
+3. Make your changes and create a [pull request](https://help.github.com/articles/creating-a-pull-request)
+
 #### Configure remotes
 Move into the directory the cloning process just created (should be maps-app-android), then make sure your local git knows about all the remotes and branches.
 
