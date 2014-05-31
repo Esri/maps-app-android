@@ -35,8 +35,6 @@ Click the **Fork** button in the [Maps App Android](https://github.com/Esri/maps
 2. ```cd``` into the ```maps-app-android``` folder
 3. Make your changes and create a [pull request](https://help.github.com/articles/creating-a-pull-request)
 
- [New to Github? Get started here.](https://github.com/)
-
 ## Requirements
 * [JDK 6 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 * [ADT Bundle](http://developer.android.com/sdk/index.html) **or** [Eclipse 4.2 +](https://www.eclipse.org/downloads/) with [ADT Plugin](http://developer.android.com/tools/sdk/eclipse-adt.html)
