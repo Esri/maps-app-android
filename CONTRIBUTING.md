@@ -58,11 +58,9 @@ If you haven't already, got to https://github.com/Esri/maps-app-android and clic
 #### Command line Git
 1. [Clone the Maps App Android](https://help.github.com/articles/fork-a-repo#step-2-clone-your-fork)
 2. ```cd``` into the ```maps-app-android``` folder
-3. Make your changes and create a [pull request](https://help.github.com/articles/creating-a-pull-request)
 
 #### Configure remotes
 Move into the directory the cloning process just created (should be maps-app-android), then make sure your local git knows about all the remotes and branches.
-
 ```
 $ cd maps-app-android
 # Changes the active directory in the prompt to the newly cloned "maps-app-android" directory
@@ -80,4 +78,4 @@ $ git fetch upstream
  * Inspect the Import Projects dialog to ensure your project is selected and click **Finish**
  * Change perspectives to **Java**
  * Right click the project **ArcGIS Tools > Convert to ArcGIS Project**
- * You can now work with the project as you would normally.
+ * Make your changes and create a [pull request](https://help.github.com/articles/creating-a-pull-request)
