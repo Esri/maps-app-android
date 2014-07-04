@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -39,6 +40,8 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -116,12 +119,16 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
    */
   FrameLayout mContentFrame;
 
-  // MapView stuff
-  MapView mMapView = null;
+  /**
+   * Helper component that ties the action bar to the navigation drawer.
+   */
+  private ActionBarDrawerToggle mDrawerToggle;
+
+  MapView mMapView;
 
   String mMapViewState;
 
-  // GPS location tracking stuff
+  // GPS location tracking
   boolean mIsLocationTracking;
 
   Point mLocation = null;
@@ -157,8 +164,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
     super.onCreate(savedInstanceState);
 
     setContentView(R.layout.maps_app_activity);
-    mDrawerLayout = (DrawerLayout) findViewById(R.id.maps_app_activity_drawer_layout);
-    mContentFrame = (FrameLayout) findViewById(R.id.maps_app_activity_content_frame);
+    setupDrawer();
 
     // Reinstate saved instance state (if any)
     if (savedInstanceState == null) {
@@ -195,6 +201,55 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
 
     // Complete setup of MapView and set it as the content view
     setMapView(mMapView);
+  }
+
+  /**
+   * Initializes the navigation drawer.
+   */
+  public void setupDrawer() {
+    mDrawerLayout = (DrawerLayout) findViewById(R.id.maps_app_activity_drawer_layout);
+    mContentFrame = (FrameLayout) findViewById(R.id.maps_app_activity_content_frame);
+
+    // set a custom shadow that overlays the main content when the drawer opens
+    mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+    // set up the drawer's list view with items and click listener
+
+    ActionBar actionBar = getActionBar();
+    actionBar.setDisplayHomeAsUpEnabled(true);
+    actionBar.setHomeButtonEnabled(true);
+
+    // ActionBarDrawerToggle ties together the the proper interactions
+    // between the navigation drawer and the action bar app icon.
+    mDrawerToggle = new ActionBarDrawerToggle(this, /* host Activity */
+    mDrawerLayout, /* DrawerLayout object */
+    R.drawable.ic_drawer, /* nav drawer image to replace 'Up' caret */
+    R.string.navigation_drawer_open, /* "open drawer" description for accessibility */
+    R.string.navigation_drawer_close /* "close drawer" description for accessibility */
+    ) {
+      @Override
+      public void onDrawerClosed(View drawerView) {
+        super.onDrawerClosed(drawerView);
+
+        invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+      }
+
+      @Override
+      public void onDrawerOpened(View drawerView) {
+        super.onDrawerOpened(drawerView);
+
+        invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+      }
+    };
+
+    // Defer code dependent on restoration of previous instance state.
+    mDrawerLayout.post(new Runnable() {
+      @Override
+      public void run() {
+        mDrawerToggle.syncState();
+      }
+    });
+
+    mDrawerLayout.setDrawerListener(mDrawerToggle);
   }
 
   /**

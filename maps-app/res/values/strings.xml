@@ -3,6 +3,10 @@
 
     <string name="app_name">Maps App</string>
     <string name="basemap_thumbnail">basemap thumbnail</string>
+    
+    <!-- navigation drawer -->
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
 
     <!-- webmap urls -->
     <string name="portal_url">http://www.arcgis.com</string>
