@@ -39,6 +39,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -49,6 +50,7 @@ import android.view.View;
 import android.view.View.OnKeyListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.esri.android.map.GraphicsLayer;
@@ -107,6 +109,13 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
   // GPS fix is retrieved.
   final static double SEARCH_RADIUS = 10;
 
+  DrawerLayout mDrawerLayout;
+
+  /**
+   * The FrameLayout that hosts the main content of the activity, such as the MapView
+   */
+  FrameLayout mContentFrame;
+
   // MapView stuff
   MapView mMapView = null;
 
@@ -146,6 +155,10 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+    setContentView(R.layout.maps_app_activity);
+    mDrawerLayout = (DrawerLayout) findViewById(R.id.maps_app_activity_drawer_layout);
+    mContentFrame = (FrameLayout) findViewById(R.id.maps_app_activity_content_frame);
 
     // Reinstate saved instance state (if any)
     if (savedInstanceState == null) {
@@ -213,8 +226,8 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
     mMapView.setEsriLogoVisible(true);
     mMapView.enableWrapAround(true);
 
-    // Sets it as the activity's content view
-    setContentView(mMapView);
+    // set MapView into the activity layout
+    mContentFrame.addView(mMapView);
 
     // Setup listener for map initialized
     mMapView.setOnStatusChangedListener(new OnStatusChangedListener() {
