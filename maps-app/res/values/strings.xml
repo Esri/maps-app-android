@@ -7,6 +7,12 @@
     <!-- navigation drawer -->
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
+    
+    <!-- sign in activity -->
+    <string name="specify_portal_url">Specify a portal url:</string>
+    <string name="continue_label">Continue</string>
+    <string name="cancel">Cancel</string>
+    <string name="verifying_portal">Verifying portal</string>
 
     <!-- webmap urls -->
     <string name="portal_url">http://www.arcgis.com</string>
