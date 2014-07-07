@@ -52,8 +52,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnKeyListener;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.esri.android.map.GraphicsLayer;
@@ -118,6 +122,11 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
    * The FrameLayout that hosts the main content of the activity, such as the MapView
    */
   FrameLayout mContentFrame;
+
+  /**
+   * The list of menu items in the navigation drawer
+   */
+  private ListView mDrawerList;
 
   /**
    * Helper component that ties the action bar to the navigation drawer.
@@ -209,6 +218,13 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
   public void setupDrawer() {
     mDrawerLayout = (DrawerLayout) findViewById(R.id.maps_app_activity_drawer_layout);
     mContentFrame = (FrameLayout) findViewById(R.id.maps_app_activity_content_frame);
+    mDrawerList = (ListView) findViewById(R.id.maps_app_activity_left_drawer);
+
+    // Set the adapter for the list view
+    mDrawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
+        new String[] { "Sign In" }));
+    // Set the list's click listener
+    mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
     // set a custom shadow that overlays the main content when the drawer opens
     mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
@@ -673,6 +689,18 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
 
     // Execute async task to do the routing
     new RouteAsyncTask().execute(routeParams);
+  }
+
+  /**
+   * Handles selection of items in the navigation drawer.
+   */
+  private class DrawerItemClickListener implements OnItemClickListener {
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+      // TODO Auto-generated method stub
+
+    }
   }
 
   /*
