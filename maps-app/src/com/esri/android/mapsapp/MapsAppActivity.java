@@ -285,6 +285,8 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
   private void showSignInActivity() {
     Intent intent = new Intent(this, SignInActivity.class);
     startActivity(intent);
+
+    mDrawerLayout.closeDrawers();
   }
 
   /**
