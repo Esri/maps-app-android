@@ -51,4 +51,8 @@ public class AccountManager {
   public void setPortal(Portal portal) {
     mPortal = portal;
   }
+
+  public boolean isSignedIn() {
+    return mPortal != null;
+  }
 }
