@@ -21,9 +21,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.esri.android.mapsapp.R;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
@@ -39,6 +41,12 @@ import com.esri.core.portal.PortalInfo;
  * Implements the sign in UX to ArcGIS portal accounts. Handles sign in to OAuth and non-OAuth secured portals.
  */
 public class SignInActivity extends Activity implements OnClickListener, TextWatcher {
+
+  public static final String TAG = SignInActivity.class.getSimpleName();
+
+  private static final String HTTPS = "https://";
+
+  private static final String HTTP = "http://";
 
   private static final int OAUTH_EXPIRATION_NEVER = -1;
 
@@ -104,6 +112,10 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 
   private void signInWithOAuth() {
 
+    if (mPortalUrl.startsWith(HTTP)) {
+      mPortalUrl = mPortalUrl.replace(HTTP, HTTPS);
+    }
+
     // create an OAuthView and show it
     OAuthView oAuthView = new OAuthView(this, mPortalUrl,
         getString(R.string.app_oauth_id),
@@ -114,9 +126,13 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
             if (credentials != null) {
               Portal portal = new Portal(mPortalUrl, credentials);
 
-              // fetch the portal info and user details, they will be cached in the Portal instance
-              portal.fetchPortalInfo();
-              portal.fetchUser();
+              try {
+                // fetch the portal info and user details, they will be cached in the Portal instance
+                portal.fetchPortalInfo();
+                portal.fetchUser();
+              } catch (Exception e) {
+                onError(e);
+              }
 
               // hold on to the initialized portal for later use
               AccountManager.getInstance().setPortal(portal);
@@ -128,7 +144,8 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 
           @Override
           public void onError(Throwable e) {
-
+            Toast.makeText(SignInActivity.this, "Failed to sign in", Toast.LENGTH_SHORT).show();
+            finish();
           }
         });
 
@@ -164,6 +181,12 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
       int authType = TYPE_UNDEFINED;
       try {
         mPortalUrl = mPortalUrlEditText.getText().toString();
+        if (!mPortalUrl.startsWith(HTTP)) {
+          mPortalUrl = new StringBuilder(HTTP).append(mPortalUrl).toString();
+        }
+        
+        Log.d(TAG, mPortalUrl);
+
         Portal portal = new Portal(mPortalUrl, null);
         PortalInfo portalInfo = portal.fetchPortalInfo();
 
