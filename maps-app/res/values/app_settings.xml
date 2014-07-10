@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- OAuth App ID -->
+    <string name="app_oauth_id">explorerandroid</string>
+
+</resources>

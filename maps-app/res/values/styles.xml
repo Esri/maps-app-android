@@ -1,5 +1,40 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res/com.esri.arcgis.viewer">
 
+    <!--
+        Base application theme, dependent on API level. This theme is replaced
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+    -->
+    <style name="AppBaseTheme" parent="android:Theme.Light">
+        <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        -->
+    </style>
+
+    <!-- Application theme. -->
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    </style>
+
+    <!-- ContentBrowserFragment Styles -->
+    <style name="map_item_title_text">
+        <item name="android:textSize">17sp</item>
+    </style>
+
+    <!-- navigation drawer styles -->
+    <style name="listView_style" parent="@android:style/Widget.ListView">
+        <item name="android:listSelector">@drawable/list_selector_light</item>
+        <item name="android:cacheColorHint">@android:color/transparent</item>
+        <item name="android:dividerHeight">@dimen/listview_divider_height</item>
+        <item name="android:divider">@drawable/horizontal_divider</item>
+        <item name="android:drawSelectorOnTop">false</item>
+    </style>
+
+    <style name="drawer_listView_style" parent="@style/listView_style">
+        <item name="android:divider">@drawable/drawer_horizontal_divider</item>
+    </style>
+
     <!-- Basemap grid -->
     <style name="basemap_gridview">
         <item name="android:horizontalSpacing">@dimen/basemap_gridview_horizontal_spacing</item>

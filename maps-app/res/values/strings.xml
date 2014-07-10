@@ -9,10 +9,14 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     
     <!-- sign in activity -->
+    <string name="title_sign_in_activity">Sign In</string>
     <string name="specify_portal_url">Specify a portal url:</string>
     <string name="continue_label">Continue</string>
     <string name="cancel">Cancel</string>
     <string name="verifying_portal">Verifying portal</string>
+    
+    <!-- content browser -->
+    <string name="fetching_maps">Fetching maps</string>
 
     <!-- webmap urls -->
     <string name="portal_url">http://www.arcgis.com</string>
