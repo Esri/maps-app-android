@@ -2,28 +2,35 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="10dp"
+    android:gravity="center_vertical"
     android:orientation="vertical" >
 
     <TextView
         android:id="@+id/sign_in_activity_portal_url_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/specify_portal_url" />
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp"
+        android:text="@string/specify_portal_url"
+        android:textSize="17sp" />
 
     <EditText
         android:id="@+id/sign_in_activity_portal_url_edittext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
+        android:hint="@string/portal_url_hint"
         android:inputType="textUri" >
 
         <requestFocus />
     </EditText>
 
     <LinearLayout
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="?android:attr/buttonBarStyle" >
+        android:gravity="right" >
 
         <Button
             android:id="@+id/sign_in_activity_continue_button"
@@ -34,10 +41,10 @@
 
         <Button
             android:id="@+id/sign_in_activity_cancel_button"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/cancel"
-            style="?android:attr/buttonBarButtonStyle" />
+            android:text="@string/cancel" />
 
     </LinearLayout>
 
