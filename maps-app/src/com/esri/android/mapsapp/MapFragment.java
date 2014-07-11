@@ -88,7 +88,7 @@ import com.esri.core.tasks.na.RouteTask;
 import com.esri.core.tasks.na.StopGraphic;
 
 /**
- * Implements the view that shows a map.
+ * Implements the view that shows the map.
  */
 public class MapFragment extends Fragment implements BasemapsDialogListener, RoutingDialogListener {
   public static final String TAG = MapFragment.class.getSimpleName();
