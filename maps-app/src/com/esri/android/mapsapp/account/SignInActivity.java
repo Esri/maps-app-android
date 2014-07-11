@@ -144,7 +144,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 
           @Override
           public void onError(Throwable e) {
-            Toast.makeText(SignInActivity.this, "Failed to sign in", Toast.LENGTH_SHORT).show();
+            Toast.makeText(SignInActivity.this, getString(R.string.failed_sign_in), Toast.LENGTH_SHORT).show();
             finish();
           }
         });
