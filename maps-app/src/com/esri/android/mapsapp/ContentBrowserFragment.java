@@ -69,7 +69,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
       case R.id.map_item_linearlayout:
         // a map item has been clicked - open it
         ViewHolder viewHolder = (ViewHolder) view.getTag();
-        ((MapsAppActivity) getActivity()).showMap(viewHolder.portalItem);
+        ((MapsAppActivity) getActivity()).showMap(viewHolder.portalItem.getItemId());
         break;
     }
   }
@@ -164,7 +164,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 
       viewHolder.title.setText(portalItem.getTitle());
       viewHolder.thumbnailImageView.setImageBitmap(null);
-      viewHolder.portalItem = new PortalItemParcelable(portalItem);
+      viewHolder.portalItem = portalItem;
       viewHolder.fetchTumbnail();
 
       return view;
@@ -179,7 +179,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 
     ImageView thumbnailImageView;
 
-    PortalItemParcelable portalItem;
+    PortalItem portalItem;
 
     Future<Void> thumbnailFetchTask;
 
@@ -192,14 +192,8 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
         thumbnailFetchTask.cancel(true);
       }
 
-      if (portalItem.getThumbnail() != null) {
-        // we already have a cached thumbnail for the PortalItem
-        thumbnailImageView.setImageBitmap(portalItem.getThumbnail());
-      } else {
-        // need to fetch the thumbnail
-        thumbnailImageView.setImageBitmap(null);
-        thumbnailFetchTask = TaskExecutor.getInstance().getThreadPool().submit(new FetchPortalItemThumbnailTask(this));
-      }
+      thumbnailImageView.setImageBitmap(null);
+      thumbnailFetchTask = TaskExecutor.getInstance().getThreadPool().submit(new FetchPortalItemThumbnailTask(this));
     }
   }
 
@@ -225,7 +219,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
       }
 
       if (mViewHolder != null) {
-        thumbnailBytes = mViewHolder.portalItem.getPortalItem().fetchThumbnail();
+        thumbnailBytes = mViewHolder.portalItem.fetchThumbnail();
       }
 
       // check if task has been cancelled
@@ -243,9 +237,6 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
           @Override
           public void run() {
             mViewHolder.thumbnailImageView.setImageBitmap(bmp);
-
-            // cache the thumbnail with the PortalItem so we don't need to re-fetch it
-            mViewHolder.portalItem.setThumbnail(bmp);
           }
         });
       }
