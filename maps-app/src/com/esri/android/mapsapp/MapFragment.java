@@ -19,6 +19,7 @@ package com.esri.android.mapsapp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import android.app.Fragment;
 import android.app.ProgressDialog;
@@ -53,6 +54,7 @@ import com.esri.android.map.LocationDisplayManager.AutoPanMode;
 import com.esri.android.map.MapOnTouchListener;
 import com.esri.android.map.MapView;
 import com.esri.android.map.event.OnStatusChangedListener;
+import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogListener;
 import com.esri.android.mapsapp.location.DirectionsDialogFragment;
@@ -60,6 +62,7 @@ import com.esri.android.mapsapp.location.DirectionsDialogFragment.DirectionsDial
 import com.esri.android.mapsapp.location.RoutingDialogFragment;
 import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogListener;
 import com.esri.android.mapsapp.tools.MeasuringTool;
+import com.esri.android.mapsapp.util.TaskExecutor;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.LinearUnit;
@@ -93,7 +96,7 @@ import com.esri.core.tasks.na.StopGraphic;
 public class MapFragment extends Fragment implements BasemapsDialogListener, RoutingDialogListener {
   public static final String TAG = MapFragment.class.getSimpleName();
 
-  private static final String KEY_PORTAL_ITEM = "KEY_PORTAL_ITEM";
+  private static final String KEY_PORTAL_ITEM_ID = "KEY_PORTAL_ITEM_ID";
 
   private static final String KEY_IS_LOCATION_TRACKING = "IsLocationTracking";
 
@@ -101,52 +104,52 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
   // searching purpose.
   // It is also used to construct the extent which map zooms to after the first
   // GPS fix is retrieved.
-  final static double SEARCH_RADIUS = 10;
+  private final static double SEARCH_RADIUS = 10;
+
+  private String mPortalItemId;
 
   private FrameLayout mMapContainer;
 
-  private PortalItemParcelable mPortalItem;
+  private MapView mMapView;
 
-  MapView mMapView;
-
-  String mMapViewState;
+  private String mMapViewState;
 
   // GPS location tracking
-  boolean mIsLocationTracking;
+  private boolean mIsLocationTracking;
 
-  Point mLocation = null;
+  private Point mLocation = null;
 
   // Graphics layer to show geocode and reverse geocode results
-  GraphicsLayer mLocationLayer;
+  private GraphicsLayer mLocationLayer;
 
-  Point mLocationLayerPoint;
+  private Point mLocationLayerPoint;
 
-  String mLocationLayerPointString;
+  private String mLocationLayerPointString;
 
   // Graphics layer to show routes
-  GraphicsLayer mRouteLayer;
+  private GraphicsLayer mRouteLayer;
 
-  List<RouteDirection> mRoutingDirections;
+  private List<RouteDirection> mRoutingDirections;
 
-  MenuItem mActionItemDirections;
+  private MenuItem mActionItemDirections;
 
   // Spatial references used for projecting points
-  final SpatialReference mWm = SpatialReference.create(102100);
+  private final SpatialReference mWm = SpatialReference.create(102100);
 
-  final SpatialReference mEgs = SpatialReference.create(4326);
+  private final SpatialReference mEgs = SpatialReference.create(4326);
 
   // Other UI components
-  static ProgressDialog mProgressDialog;
+  private static ProgressDialog mProgressDialog;
 
-  EditText mSearchEditText;
+  private EditText mSearchEditText;
 
-  MotionEvent mLongPressEvent;
+  private MotionEvent mLongPressEvent;
 
-  public static MapFragment newInstance(PortalItemParcelable portalItem) {
+  public static MapFragment newInstance(String portalItemId) {
     MapFragment mapFragment = new MapFragment();
 
     Bundle args = new Bundle();
-    args.putParcelable(KEY_PORTAL_ITEM, portalItem);
+    args.putString(KEY_PORTAL_ITEM_ID, portalItemId);
 
     mapFragment.setArguments(args);
     return mapFragment;
@@ -162,11 +165,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
 
     setHasOptionsMenu(true);
 
-    // Reinstate saved instance state (if any)
-    if (savedInstanceState == null) {
-      mIsLocationTracking = false;
-    } else {
-      mIsLocationTracking = savedInstanceState.getBoolean(KEY_IS_LOCATION_TRACKING);
+    Bundle args = savedInstanceState != null ? savedInstanceState : getArguments();
+    if (args != null) {
+      mIsLocationTracking = args.getBoolean(KEY_IS_LOCATION_TRACKING);
+      mPortalItemId = args.getString(KEY_PORTAL_ITEM_ID);
     }
   }
 
@@ -174,8 +176,15 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     mMapContainer = (FrameLayout) inflater.inflate(R.layout.map_fragment_layout, null);
 
-    if (mPortalItem != null) {
-      // TODO: load WebMap
+    if (mPortalItemId != null) {
+      // load the WebMap asynchronously
+      TaskExecutor.getInstance().getThreadPool().submit(new Callable<Void>() {
+        @Override
+        public Void call() throws Exception {
+          loadWebMapIntoMapView(mPortalItemId);
+          return null;
+        }
+      });
     } else {
       // show the default map
       String defaultBaseMapURL = getString(R.string.default_basemap_url);
@@ -327,6 +336,28 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
     super.onSaveInstanceState(outState);
 
     outState.putBoolean(KEY_IS_LOCATION_TRACKING, mIsLocationTracking);
+    outState.putString(KEY_PORTAL_ITEM_ID, mPortalItemId);
+  }
+
+  /**
+   * Loads a WebMap and creates a MapView from it which is set into the fragment's layout.
+   * 
+   * @param portalItemId The portal item id that represents the WebMap.
+   * @throws Exception if WebMap loading failed.
+   */
+  private void loadWebMapIntoMapView(String portalItemId) throws Exception {
+    final WebMap webmap = WebMap.newInstance(portalItemId, AccountManager.getInstance().getPortal());
+    if (webmap != null) {
+      getActivity().runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+          MapView mapView = new MapView(getActivity(), webmap, null, null);
+          setMapView(mapView);
+        }
+      });
+    } else {
+      throw new Exception("Faied to load web map.");
+    }
   }
 
   /**
@@ -336,23 +367,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
    * @param mapView
    */
   private void setMapView(MapView mapView) {
-    // Tidy up old MapView (if any)
-    if (mapView == mMapView) {
-      mMapViewState = null;
-    } else {
-      mMapViewState = mMapView.retainState();
-
-      // Remove layers so they can be added to the new MapView
-      mMapView.removeLayer(mLocationLayer);
-      mMapView.removeLayer(mRouteLayer);
-
-      // Need this to be sure that old MapView's resources are freed up and
-      // location tracking is disabled
-      mMapView.getLocationDisplayManager().stop();
-      mMapView.recycle();
-    }
-
-    // Setup new MapView
     mMapView = mapView;
     mMapView.setEsriLogoVisible(true);
     mMapView.enableWrapAround(true);

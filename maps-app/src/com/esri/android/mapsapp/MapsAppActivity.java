@@ -182,8 +182,8 @@ public class MapsAppActivity extends Activity {
   /**
    * Opens the map represented by the specified portal item or if null, opens a default map.
    */
-  public void showMap(PortalItemParcelable portalItem) {
-    MapFragment mapFragment = MapFragment.newInstance(portalItem);
+  public void showMap(String portalItemId) {
+    MapFragment mapFragment = MapFragment.newInstance(portalItemId);
     FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
     transaction.replace(R.id.maps_app_activity_content_frame, mapFragment, MapFragment.TAG);
