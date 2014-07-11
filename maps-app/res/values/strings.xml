@@ -15,6 +15,9 @@
     <string name="cancel">Cancel</string>
     <string name="verifying_portal">Verifying portal</string>
     <string name="portal_url_hint">e.g., http://www.arcgis.com</string>
+    <string name="failed_sign_in">Failed to sign in.</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="sign_in">Sign In</string>
     
     <!-- content browser -->
     <string name="fetching_maps">Fetching maps</string>

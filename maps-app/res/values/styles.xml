@@ -34,6 +34,11 @@
     <style name="drawer_listView_style" parent="@style/listView_style">
         <item name="android:divider">@drawable/drawer_horizontal_divider</item>
     </style>
+    
+    <style name="drawer_item_text">
+    <item name="android:textSize">17sp</item>
+    <item name="android:textColor">@color/drawer_item_text_color_selector</item>
+  </style>
 
     <!-- Basemap grid -->
     <style name="basemap_gridview">

@@ -53,13 +53,15 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnKeyListener;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.esri.android.map.GraphicsLayer;
@@ -133,6 +135,8 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
    */
   private ListView mDrawerList;
 
+  private final List<DrawerItem> mDrawerItems = new ArrayList<DrawerItem>();
+
   /**
    * Helper component that ties the action bar to the navigation drawer.
    */
@@ -196,9 +200,6 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
     mContentFrame = (FrameLayout) findViewById(R.id.maps_app_activity_content_frame);
     mDrawerList = (ListView) findViewById(R.id.maps_app_activity_left_drawer);
 
-    // Set the adapter for the list view
-    mDrawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
-        new String[] { "Sign In" }));
     // Set the list's click listener
     mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
@@ -242,6 +243,8 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
     });
 
     mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+    updateDrawer();
   }
 
   private void setView() {
@@ -287,6 +290,53 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
     startActivity(intent);
 
     mDrawerLayout.closeDrawers();
+  }
+
+  /**
+   * Resets the app to "signed out" state.
+   */
+  private void signOut() {
+    AccountManager.getInstance().setPortal(null);
+
+    setView();
+
+    updateDrawer();
+    mDrawerLayout.closeDrawers();
+  }
+
+  /**
+   * Updates the navigation drawer items.
+   */
+  private void updateDrawer() {
+    mDrawerItems.clear();
+
+    DrawerItem item = null;
+    if (AccountManager.getInstance().isSignedIn()) {
+      item = new DrawerItem(getString(R.string.sign_out), new DrawerItem.OnClickListener() {
+
+        @Override
+        public void onClick() {
+          signOut();
+        }
+      });
+    } else {
+      item = new DrawerItem(getString(R.string.sign_in), new DrawerItem.OnClickListener() {
+
+        @Override
+        public void onClick() {
+          showSignInActivity();
+        }
+      });
+    }
+    mDrawerItems.add(item);
+
+    BaseAdapter adapter = (BaseAdapter) mDrawerList.getAdapter();
+    if(adapter == null){
+      adapter = new DrawerItemListAdapter();
+      mDrawerList.setAdapter(adapter);
+    } else {
+      adapter.notifyDataSetChanged();
+    }
   }
 
   /**
@@ -597,6 +647,7 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
     super.onResume();
 
     setView();
+    updateDrawer();
 
     // Start the MapView and LocationDisplayManager running again
     if (mMapView != null) {
@@ -721,7 +772,42 @@ public class MapsAppActivity extends Activity implements BasemapsDialogListener,
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-      showSignInActivity();
+      mDrawerItems.get(position).onClicked();
+    }
+  }
+
+  /**
+   * Populates the navigation drawer list with items.
+   */
+  private class DrawerItemListAdapter extends BaseAdapter {
+
+    @Override
+    public int getCount() {
+      return mDrawerItems.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+      return mDrawerItems.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+      return position;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+      View view = convertView;
+      if (view == null) {
+        view = getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
+      }
+
+      DrawerItem drawerItem = (DrawerItem) getItem(position);
+      TextView textView = (TextView) view;
+      textView.setText(drawerItem.getTitle());
+
+      return view;
     }
   }
 
