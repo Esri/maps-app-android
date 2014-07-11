@@ -170,12 +170,10 @@ public class MapsAppActivity extends Activity {
    * Opens the content browser that shows the user's maps.
    */
   private void showContentBrowser() {
-    if (mBrowseFragment == null) {
-      mBrowseFragment = new ContentBrowserFragment();
-    }
+    ContentBrowserFragment browseFragment = new ContentBrowserFragment();
 
     FragmentTransaction transaction = getFragmentManager().beginTransaction();
-    transaction.add(R.id.maps_app_activity_content_frame, mBrowseFragment, ContentBrowserFragment.TAG);
+    transaction.add(R.id.maps_app_activity_content_frame, browseFragment, ContentBrowserFragment.TAG);
     transaction.commit();
 
     invalidateOptionsMenu(); // reload the options menu
@@ -186,9 +184,11 @@ public class MapsAppActivity extends Activity {
    */
   public void showMap(PortalItemParcelable portalItem) {
     MapFragment mapFragment = MapFragment.newInstance(portalItem);
-
     FragmentTransaction transaction = getFragmentManager().beginTransaction();
-    transaction.add(R.id.maps_app_activity_content_frame, mapFragment, MapFragment.TAG);
+
+    transaction.replace(R.id.maps_app_activity_content_frame, mapFragment, MapFragment.TAG);
+    // transaction.addToBackStack(null);
+
     transaction.commit();
 
     invalidateOptionsMenu(); // reload the options menu
