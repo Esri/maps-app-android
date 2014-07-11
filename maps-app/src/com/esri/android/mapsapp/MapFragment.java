@@ -188,9 +188,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
     } else {
       // show the default map
       String defaultBaseMapURL = getString(R.string.default_basemap_url);
-      mMapView = new MapView(getActivity(), defaultBaseMapURL, "", "");
+      MapView mapView = new MapView(getActivity(), defaultBaseMapURL, "", "");
 
-      setMapView(mMapView);
+      setMapView(mapView);
     }
     return mMapContainer;
   }
