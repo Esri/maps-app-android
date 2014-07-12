@@ -29,6 +29,8 @@ import java.util.List;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
@@ -184,12 +186,22 @@ public class MapsAppActivity extends Activity {
    * Opens the map represented by the specified portal item or if null, opens a default map.
    */
   public void showMap(String portalItemId, String basemapPortalItemId) {
-    MapFragment mapFragment = MapFragment.newInstance(portalItemId, basemapPortalItemId);
-    FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
+    // remove existing MapFragment explicitly, simply replacing it can cause the app to freeze when switching basemaps
+    FragmentTransaction transaction = null;
+    FragmentManager fragmentManager = getFragmentManager();
+    Fragment currentMapFragment = fragmentManager.findFragmentByTag(MapFragment.TAG);
+    if (currentMapFragment != null) {
+      transaction = fragmentManager.beginTransaction();
+      transaction.remove(currentMapFragment);
+      transaction.commit();
+    }
+
+    MapFragment mapFragment = MapFragment.newInstance(portalItemId, basemapPortalItemId);
+
+    transaction = fragmentManager.beginTransaction();
     transaction.replace(R.id.maps_app_activity_content_frame, mapFragment, MapFragment.TAG);
     // transaction.addToBackStack(null);
-
     transaction.commit();
 
     invalidateOptionsMenu(); // reload the options menu
