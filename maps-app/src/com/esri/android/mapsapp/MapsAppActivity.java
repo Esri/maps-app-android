@@ -211,7 +211,7 @@ public class MapsAppActivity extends Activity {
 
     transaction = fragmentManager.beginTransaction();
     transaction.replace(R.id.maps_app_activity_content_frame, mapFragment, MapFragment.TAG);
-    // transaction.addToBackStack(null);
+    transaction.addToBackStack(null);
     transaction.commit();
 
     invalidateOptionsMenu(); // reload the options menu

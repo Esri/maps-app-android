@@ -25,7 +25,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -58,8 +57,12 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     mMapGrid = (GridView) inflater.inflate(R.layout.content_browser_fragment_layout, null);
 
-    // fetch the user's maps
-    new FetchMapsTask().execute();
+    if (mMaps == null) {
+      // fetch the user's maps
+      new FetchMapsTask().execute();
+    } else {
+      refreshView();
+    }
 
     return mMapGrid;
   }
@@ -72,6 +75,16 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
         ViewHolder viewHolder = (ViewHolder) view.getTag();
         ((MapsAppActivity) getActivity()).showMap(viewHolder.portalItem.getItemId(), null);
         break;
+    }
+  }
+
+  private void refreshView() {
+    BaseAdapter mapGridAdapter = (BaseAdapter) mMapGrid.getAdapter();
+    if (mapGridAdapter == null) {
+      mapGridAdapter = new MapGridAdapter();
+      mMapGrid.setAdapter(mapGridAdapter);
+    } else {
+      mapGridAdapter.notifyDataSetChanged();
     }
   }
 
@@ -113,13 +126,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
       super.onPostExecute(items);
 
       mMaps = items;
-      BaseAdapter mapGridAdapter = (BaseAdapter) mMapGrid.getAdapter();
-      if (mapGridAdapter == null) {
-        mapGridAdapter = new MapGridAdapter();
-        mMapGrid.setAdapter(mapGridAdapter);
-      } else {
-        mapGridAdapter.notifyDataSetChanged();
-      }
+      refreshView();
 
       mProgressDialog.dismiss();
     }
