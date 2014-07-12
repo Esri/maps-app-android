@@ -246,7 +246,10 @@ public class MapsAppActivity extends Activity {
     if (AccountManager.getInstance().isSignedIn()) {
 
       // Sign Out
-      item = new DrawerItem(getString(R.string.sign_out), new DrawerItem.OnClickListener() {
+      TextView view = (TextView) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
+      view.setText(getString(R.string.sign_out));
+
+      item = new DrawerItem(view, new DrawerItem.OnClickListener() {
 
         @Override
         public void onClick() {
@@ -256,7 +259,10 @@ public class MapsAppActivity extends Activity {
       mDrawerItems.add(item);
 
       // My Maps
-      item = new DrawerItem(getString(R.string.my_maps), new DrawerItem.OnClickListener() {
+      view = (TextView) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
+      view.setText(getString(R.string.my_maps));
+
+      item = new DrawerItem(view, new DrawerItem.OnClickListener() {
 
         @Override
         public void onClick() {
@@ -265,7 +271,10 @@ public class MapsAppActivity extends Activity {
       });
       mDrawerItems.add(item);
     } else {
-      item = new DrawerItem(getString(R.string.sign_in), new DrawerItem.OnClickListener() {
+      TextView view = (TextView) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
+      view.setText(getString(R.string.sign_in));
+
+      item = new DrawerItem(view, new DrawerItem.OnClickListener() {
 
         @Override
         public void onClick() {
@@ -317,16 +326,8 @@ public class MapsAppActivity extends Activity {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-      View view = convertView;
-      if (view == null) {
-        view = getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
-      }
-
       DrawerItem drawerItem = (DrawerItem) getItem(position);
-      TextView textView = (TextView) view;
-      textView.setText(drawerItem.getTitle());
-
-      return view;
+      return drawerItem.getView();
     }
   }
 }

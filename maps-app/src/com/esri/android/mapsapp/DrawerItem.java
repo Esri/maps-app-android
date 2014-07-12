@@ -16,6 +16,8 @@
 
 package com.esri.android.mapsapp;
 
+import android.view.View;
+
 /**
  * Represents an item in the navigation drawer list.
  */
@@ -24,12 +26,12 @@ public class DrawerItem {
     public void onClick();
   }
 
-  private final String mTitle;
-
   private final OnClickListener mListener;
 
-  public DrawerItem(String title, OnClickListener listener) {
-    mTitle = title;
+  private final View mView;
+
+  public DrawerItem(View view, OnClickListener listener) {
+    mView = view;
     mListener = listener;
   }
 
@@ -42,7 +44,7 @@ public class DrawerItem {
     }
   }
 
-  public String getTitle() {
-    return mTitle;
+  public View getView() {
+    return mView;
   }
 }
