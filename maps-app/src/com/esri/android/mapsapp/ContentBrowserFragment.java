@@ -25,6 +25,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -69,7 +70,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
       case R.id.map_item_linearlayout:
         // a map item has been clicked - open it
         ViewHolder viewHolder = (ViewHolder) view.getTag();
-        ((MapsAppActivity) getActivity()).showMap(viewHolder.portalItem.getItemId());
+        ((MapsAppActivity) getActivity()).showMap(viewHolder.portalItem.getItemId(), null);
         break;
     }
   }
@@ -163,7 +164,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
       PortalItem portalItem = mMaps.get(position);
 
       viewHolder.title.setText(portalItem.getTitle());
-      viewHolder.thumbnailImageView.setImageBitmap(null);
+      viewHolder.thumbnailImageView.setImageResource(R.drawable.ic_map_thumbnail); // use default thumbnail temporarily
       viewHolder.portalItem = portalItem;
       viewHolder.fetchTumbnail();
 
@@ -192,7 +193,6 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
         thumbnailFetchTask.cancel(true);
       }
 
-      thumbnailImageView.setImageBitmap(null);
       thumbnailFetchTask = TaskExecutor.getInstance().getThreadPool().submit(new FetchPortalItemThumbnailTask(this));
     }
   }
