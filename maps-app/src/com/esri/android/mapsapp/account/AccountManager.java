@@ -17,6 +17,7 @@
 package com.esri.android.mapsapp.account;
 
 import com.esri.core.portal.Portal;
+import com.esri.core.portal.PortalUser;
 
 
 /**
@@ -31,6 +32,8 @@ public class AccountManager {
   private Portal mPortal;
 
   private Portal mAGOLPortal;
+
+  private PortalUser mPortalUser;
 
   private AccountManager() {
   }
@@ -53,7 +56,15 @@ public class AccountManager {
    * Sets the portal the app is currently signed in to.
    */
   public void setPortal(Portal portal) {
+    mPortalUser = null;
+    
     mPortal = portal;
+    
+    try {
+      mPortalUser = mPortal != null ? mPortal.fetchUser() : null;
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -70,5 +81,9 @@ public class AccountManager {
 
   public boolean isSignedIn() {
     return mPortal != null;
+  }
+
+  public PortalUser getPortalUser() {
+    return mPortalUser;
   }
 }
