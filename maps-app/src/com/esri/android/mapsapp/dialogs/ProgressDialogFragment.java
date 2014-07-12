@@ -26,7 +26,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.os.Bundle;
 
-
 /**
  * Implements a dialog that shows a progress indicator and a message. The dialog host (Activity or Fragment) needs to
  * implement OnCancelListener if it wants to be notified when the progress dialog is canceled.
@@ -68,19 +67,19 @@ public class ProgressDialogFragment extends DialogFragment {
 
     return progressDlg;
   }
-  
+
   @Override
   public void onAttach(Activity activity) {
     super.onAttach(activity);
-    
+
     // check if the host activity or fragment implements OnCancelListener
     //
     Fragment targetFragment = getTargetFragment();
-    if(targetFragment instanceof OnCancelListener){
-      mOnCancelListener = (OnCancelListener)targetFragment;
-    } else if (activity instanceof OnCancelListener){
-      mOnCancelListener = (OnCancelListener)activity;
-    }      
+    if (targetFragment instanceof OnCancelListener) {
+      mOnCancelListener = (OnCancelListener) targetFragment;
+    } else if (activity instanceof OnCancelListener) {
+      mOnCancelListener = (OnCancelListener) activity;
+    }
   }
 
   @Override
@@ -94,6 +93,7 @@ public class ProgressDialogFragment extends DialogFragment {
 
   /**
    * Helper method to show a progress dialog with a message.
+   * 
    * @param activity
    * @param message
    * @param tag
@@ -123,13 +123,14 @@ public class ProgressDialogFragment extends DialogFragment {
 
   /**
    * Helper method to hide a progress dialog.
+   * 
    * @param activity
    * @param tag
    */
   public static void hideDialog(Activity activity, String tag) {
     FragmentManager fM = activity.getFragmentManager();
-    DialogFragment dlg = (DialogFragment)fM.findFragmentByTag(tag);
-    if(dlg != null){
+    DialogFragment dlg = (DialogFragment) fM.findFragmentByTag(tag);
+    if (dlg != null) {
       dlg.dismiss();
     }
   }

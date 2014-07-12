@@ -95,7 +95,7 @@ import com.esri.core.tasks.na.StopGraphic;
 /**
  * Implements the view that shows the map.
  */
-public class MapFragment extends Fragment implements BasemapsDialogListener, RoutingDialogListener {
+public class MapFragment extends Fragment implements BasemapsDialogListener, RoutingDialogListener, OnCancelListener {
   public static final String TAG = MapFragment.class.getSimpleName();
 
   private static final String KEY_PORTAL_ITEM_ID = "KEY_PORTAL_ITEM_ID";
@@ -103,6 +103,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
   private static final String KEY_BASEMAP_ITEM_ID = "KEY_BASEMAP_ITEM_ID";
 
   private static final String KEY_IS_LOCATION_TRACKING = "IsLocationTracking";
+
+  private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
 
   // The circle area specified by search_radius and input lat/lon serves
   // searching purpose.
@@ -147,6 +149,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
   private EditText mSearchEditText;
 
   private MotionEvent mLongPressEvent;
+
+  @SuppressWarnings("rawtypes")
+  // - using this only to cancel pending tasks in a generic way
+  private AsyncTask mPendingTask;
 
   public static MapFragment newInstance(String portalItemId, String basemapPortalItemId) {
     MapFragment mapFragment = new MapFragment();
@@ -410,12 +416,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
         Log.i(TAG, "MapView.setOnStatusChangedListener() status=" + status.toString());
         if (source == mMapView && status == STATUS.INITIALIZED) {
           if (mMapViewState == null) {
-            // Initial loading of default basemap is complete - dismiss the
-            // progress dialog, having first removed the
-            // onDismiss listener
-            // mProgressDialog.setOnDismissListener(null);
-            // mProgressDialog.dismiss();
-
             // Starting location tracking will cause zoom to My Location
             startLocationTracking();
           } else {
@@ -456,7 +456,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
           // magnifier.
           // Perform reverse-geocoding of the point that was pressed
           Point mapPoint = mMapView.toMapPoint(to.getX(), to.getY());
-          new ReverseGeocodingAsyncTask().execute(mapPoint);
+          ReverseGeocodingAsyncTask reverseGeocodeTask = new ReverseGeocodingAsyncTask();
+          reverseGeocodeTask.execute(mapPoint);
+          mPendingTask = reverseGeocodeTask;
+
           mLongPressEvent = null;
           // Remove any previous graphics
           resetGraphicsLayers();
@@ -553,6 +556,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
    * @param view
    */
   public void onSearchButtonClicked(View view) {
+
     // Hide virtual keyboard
     InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
     inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
@@ -589,7 +593,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
     findParams.setOutSR(mMapView.getSpatialReference());
 
     // Execute async task to find the address
-    new LocatorAsyncTask().execute(findParams);
+    LocatorAsyncTask locatorTask = new LocatorAsyncTask();
+    locatorTask.execute(findParams);
+    mPendingTask = locatorTask;
+
     mLocationLayerPointString = address;
   }
 
@@ -635,7 +642,17 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
     routeParams.add(routeEndParams);
 
     // Execute async task to do the routing
-    new RouteAsyncTask().execute(routeParams);
+    RouteAsyncTask routeTask = new RouteAsyncTask();
+    routeTask.execute(routeParams);
+    mPendingTask = routeTask;
+  }
+
+  @Override
+  public void onCancel(DialogInterface dialog) {
+    // a pending task needs to be canceled
+    if (mPendingTask != null) {
+      mPendingTask.cancel(true);
+    }
   }
 
   /*
@@ -655,6 +672,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
     @Override
     protected void onPreExecute() {
       mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.address_search));
+      // set the target fragment to receive cancel notification
+      mProgressDialog.setTargetFragment(MapFragment.this, REQUEST_CODE_PROGRESS_DIALOG);
       mProgressDialog.show(getActivity().getFragmentManager(), TAG_LOCATOR_PROGRESS_DIALOG);
     }
 
@@ -723,11 +742,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
 
   /**
    * This class provides an AsyncTask that performs a routing request on a background thread and displays the resultant
-   * route on the map on the UI thread. The class implements OnCancelListener to support cancellation of a pending
-   * routing task.
+   * route on the map on the UI thread.
    */
-  private class RouteAsyncTask extends AsyncTask<List<LocatorFindParameters>, Void, RouteResult> implements
-      OnCancelListener {
+  private class RouteAsyncTask extends AsyncTask<List<LocatorFindParameters>, Void, RouteResult> {
     private static final String TAG_ROUTE_SEARCH_PROGRESS_DIALOG = "TAG_ROUTE_SEARCH_PROGRESS_DIALOG";
 
     private Exception mException;
@@ -740,6 +757,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
     @Override
     protected void onPreExecute() {
       mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.route_search));
+      // set the target fragment to receive cancel notification
+      mProgressDialog.setTargetFragment(MapFragment.this, REQUEST_CODE_PROGRESS_DIALOG);
       mProgressDialog.show(getActivity().getFragmentManager(), TAG_ROUTE_SEARCH_PROGRESS_DIALOG);
     }
 
@@ -859,12 +878,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
       mRoutingDirections = route.getRoutingDirections();
       mActionItemDirections.setVisible(true);
     }
-
-    @Override
-    public void onCancel(DialogInterface dialog) {
-      // the progress dialog has been canceled - cancel the pending routing task
-      this.cancel(true);
-    }
   }
 
   /**
@@ -883,6 +896,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
     @Override
     protected void onPreExecute() {
       mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.reverse_geocoding));
+      // set the target fragment to receive cancel notification
+      mProgressDialog.setTargetFragment(MapFragment.this, REQUEST_CODE_PROGRESS_DIALOG);
       mProgressDialog.show(getActivity().getFragmentManager(), TAG_REVERSE_GEOCODING_PROGRESS_DIALOG);
     }
 

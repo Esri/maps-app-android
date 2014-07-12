@@ -27,9 +27,8 @@ package com.esri.android.mapsapp.basemaps;
 import java.util.ArrayList;
 
 import android.app.DialogFragment;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnDismissListener;
+import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -44,15 +43,18 @@ import android.widget.Toast;
 import com.esri.android.mapsapp.R;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.basemaps.BasemapsAdapter.BasemapsAdapterClickListener;
+import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.core.portal.Portal;
 import com.esri.core.portal.PortalItem;
 import com.esri.core.portal.PortalQueryParams;
 import com.esri.core.portal.PortalQueryParams.PortalQuerySortOrder;
 import com.esri.core.portal.PortalQueryResultSet;
 
-public class BasemapsDialogFragment extends DialogFragment implements BasemapsAdapterClickListener {
+public class BasemapsDialogFragment extends DialogFragment implements BasemapsAdapterClickListener, OnCancelListener {
 
   private static final String TAG = "BasemapsDialogFragment";
+
+  private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
 
   /**
    * A callback interface that all activities containing this fragment must implement, to receive a new basemap from
@@ -67,13 +69,13 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
     public void onBasemapChanged(String itemId);
   }
 
-  BasemapsDialogListener mBasemapsDialogListener;
+  private BasemapsDialogListener mBasemapsDialogListener;
 
-  BasemapsAdapter mBasemapsAdapter;
+  private BasemapsAdapter mBasemapsAdapter;
 
-  ArrayList<BasemapItem> mBasemapItemList;
+  private ArrayList<BasemapItem> mBasemapItemList;
 
-  ProgressDialog mProgressDialog;
+  private BasemapSearchAsyncTask mPendingBasemapSearch;
 
   // Mandatory empty constructor for fragment manager to recreate fragment after it's destroyed
   public BasemapsDialogFragment() {
@@ -92,15 +94,6 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setStyle(DialogFragment.STYLE_NORMAL, 0);
-
-    // Create and initialise the progress dialog
-    mProgressDialog = new ProgressDialog(getActivity()) {
-      @Override
-      public void onBackPressed() {
-        // Back key pressed - just dismiss the dialog
-        mProgressDialog.dismiss();
-      }
-    };
   }
 
   @Override
@@ -122,7 +115,12 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
     // If no basemaps yet, execute AsyncTask to search for available basemaps and populate the grid with them.
     // Note we do this here rather than in onCreateView() because otherwise the progress dialog doesn't show
     if (mBasemapItemList.size() == 0) {
-      new BasemapSearchAsyncTask().execute();
+      if (mPendingBasemapSearch != null) {
+        mPendingBasemapSearch.cancel(true);
+      }
+
+      mPendingBasemapSearch = new BasemapSearchAsyncTask();
+      mPendingBasemapSearch.execute();
     }
 
   }
@@ -135,27 +133,34 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
     mBasemapsDialogListener.onBasemapChanged(itemId);
   }
 
+  @Override
+  public void onCancel(DialogInterface dialog) {
+    // the progress dialog has been canceled - cancel pending basemap search task
+    if (mPendingBasemapSearch != null) {
+      mPendingBasemapSearch.cancel(true);
+    }
+  }
+
   /**
    * This class provides an AsyncTask that fetches info about available basemaps on a background thread and displays a
    * grid containing these on the UI thread.
    */
   private class BasemapSearchAsyncTask extends AsyncTask<Void, Void, Void> {
+    private static final String TAG_BASEMAP_SEARCH_PROGRESS_DIALOG = "TAG_BASEMAP_SEARCH_PROGRESS_DIALOG";
+
     private Exception mException;
+
+    private ProgressDialogFragment mProgressDialog;
 
     public BasemapSearchAsyncTask() {
     }
 
     @Override
     protected void onPreExecute() {
-      // Display progress dialog on UI thread
-      mProgressDialog.setMessage(getString(R.string.fetching_basemaps));
-      mProgressDialog.setOnDismissListener(new OnDismissListener() {
-        @Override
-        public void onDismiss(DialogInterface arg0) {
-          BasemapSearchAsyncTask.this.cancel(true);
-        }
-      });
-      mProgressDialog.show();
+      mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.fetching_basemaps));
+      // set the target fragment to receive cancel notification
+      mProgressDialog.setTargetFragment(BasemapsDialogFragment.this, REQUEST_CODE_PROGRESS_DIALOG);
+      mProgressDialog.show(getActivity().getFragmentManager(), TAG_BASEMAP_SEARCH_PROGRESS_DIALOG);
     }
 
     @Override
