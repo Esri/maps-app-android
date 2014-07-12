@@ -42,20 +42,17 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.esri.android.mapsapp.R;
+import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.basemaps.BasemapsAdapter.BasemapsAdapterClickListener;
-import com.esri.core.io.UserCredentials;
 import com.esri.core.portal.Portal;
 import com.esri.core.portal.PortalItem;
 import com.esri.core.portal.PortalQueryParams;
 import com.esri.core.portal.PortalQueryParams.PortalQuerySortOrder;
 import com.esri.core.portal.PortalQueryResultSet;
-import com.esri.core.portal.WebMap;
 
 public class BasemapsDialogFragment extends DialogFragment implements BasemapsAdapterClickListener {
 
   private static final String TAG = "BasemapsDialogFragment";
-
-  Portal mPortal;
 
   /**
    * A callback interface that all activities containing this fragment must implement, to receive a new basemap from
@@ -63,11 +60,11 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
    */
   public interface BasemapsDialogListener {
     /**
-     * Callback for when a new basemap is selected.
-     *
-     * @param webMap WebMap object containing the new basemap.
+     * Called when a basemap is selected.
+     * 
+     * @param itemId portal item id of the selected basemap
      */
-    public void onBasemapChanged(WebMap webMap);
+    public void onBasemapChanged(String itemId);
   }
 
   BasemapsDialogListener mBasemapsDialogListener;
@@ -131,9 +128,11 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
   }
 
   @Override
-  public void onBasemapItemClicked(int listPosition) {
-    // Basemap selected - execute AsyncTaks to fetch it
-    new BasemapFetchAsyncTask().execute(Integer.valueOf(listPosition));
+  public void onBasemapItemClicked(int position) {
+    dismiss();
+
+    String itemId = mBasemapItemList.get(position).item.getItemId();
+    mBasemapsDialogListener.onBasemapChanged(itemId);
   }
 
   /**
@@ -198,10 +197,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
      * @throws Exception
      */
     private void fetchBasemapItems() throws Exception {
-      // Create a Portal object
-      String portalUrl = getString(R.string.portal_url);
-      UserCredentials credentials = null; // anonymous login
-      mPortal = new Portal(portalUrl, credentials);
+      Portal portal = AccountManager.getInstance().getAGOLPortal();
 
       // Create a PortalQueryParams to query for items in basemap group
       PortalQueryParams queryParams = new PortalQueryParams();
@@ -210,7 +206,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
       queryParams.setQuery(createQueryString());
 
       // Find items that match the query
-      PortalQueryResultSet<PortalItem> queryResultSet = mPortal.findItems(queryParams);
+      PortalQueryResultSet<PortalItem> queryResultSet = portal.findItems(queryParams);
       if (isCancelled()) {
         return;
       }
@@ -251,62 +247,6 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
         }
       }
       return str.toString();
-    }
-
-  }
-
-  /**
-   * This class provides an AsyncTask that fetches the selected basemap on a background thread, creates a WebMap from it
-   * and passes it to MapsAppActivity to display it.
-   */
-  private class BasemapFetchAsyncTask extends AsyncTask<Integer, Void, WebMap> {
-    private Exception mException;
-
-    public BasemapFetchAsyncTask() {
-    }
-
-    @Override
-    protected void onPreExecute() {
-      // Display progress dialog on UI thread
-      mProgressDialog.setMessage(getString(R.string.fetching_selected_basemap));
-      mProgressDialog.setOnDismissListener(new OnDismissListener() {
-        @Override
-        public void onDismiss(DialogInterface arg0) {
-          BasemapFetchAsyncTask.this.cancel(true);
-        }
-      });
-      mProgressDialog.show();
-    }
-
-    @Override
-    protected WebMap doInBackground(Integer... params) {
-      // Fetch basemap data on background thread
-      WebMap baseWebMap = null;
-      mException = null;
-      try {
-        int position = params[0].intValue();
-        String basemapID = mBasemapItemList.get(position).item.getItemId();
-
-        // Create a new WebMap from the selected basemap
-        baseWebMap = WebMap.newInstance(basemapID, mPortal);
-      } catch (Exception e) {
-        mException = e;
-      }
-      return baseWebMap;
-    }
-
-    @Override
-    protected void onPostExecute(WebMap baseWebMap) {
-      // Display results on UI thread
-      mProgressDialog.dismiss();
-      if (mException != null) {
-        mException.printStackTrace();
-        Toast.makeText(getActivity(), getString(R.string.basemapSearchFailed), Toast.LENGTH_LONG).show();
-      } else {
-        // Success - pass WebMap to MapsAppActivity to display
-        mBasemapsDialogListener.onBasemapChanged(baseWebMap);
-      }
-      dismiss();
     }
   }
 }
