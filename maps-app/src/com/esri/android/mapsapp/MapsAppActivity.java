@@ -245,6 +245,17 @@ public class MapsAppActivity extends Activity {
     DrawerItem item = null;
     if (AccountManager.getInstance().isSignedIn()) {
 
+      // user info
+      View userInfoView = getLayoutInflater().inflate(R.layout.drawer_item_user_layout, null);
+      TextView textView = (TextView) userInfoView.findViewById(R.id.drawer_item_fullname_textview);
+      textView.setText(AccountManager.getInstance().getPortalUser().getFullName());
+
+      textView = (TextView) userInfoView.findViewById(R.id.drawer_item_username_textview);
+      textView.setText(AccountManager.getInstance().getPortalUser().getUsername());
+
+      item = new DrawerItem(userInfoView, null);
+      mDrawerItems.add(item);
+
       // Sign Out
       TextView view = (TextView) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
       view.setText(getString(R.string.sign_out));
