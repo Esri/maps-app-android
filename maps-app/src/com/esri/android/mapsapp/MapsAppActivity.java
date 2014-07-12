@@ -84,13 +84,14 @@ public class MapsAppActivity extends Activity {
 
     setContentView(R.layout.maps_app_activity);
     setupDrawer();
+
+    setView();
   }
 
   @Override
   protected void onResume() {
     super.onResume();
 
-    setView();
     updateDrawer();
   }
 
