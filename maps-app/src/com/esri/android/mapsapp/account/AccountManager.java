@@ -24,9 +24,13 @@ import com.esri.core.portal.Portal;
  */
 public class AccountManager {
 
+  private static final String AGOL_PORTAL_URL = "http://www.arcgis.com";
+
   private static AccountManager sAccountManager;
 
   private Portal mPortal;
+
+  private Portal mAGOLPortal;
 
   private AccountManager() {
   }
@@ -50,6 +54,18 @@ public class AccountManager {
    */
   public void setPortal(Portal portal) {
     mPortal = portal;
+  }
+
+  /**
+   * Gets the ArcGIS Online portal instance (http://www.arcgis.com).
+   * 
+   * @return the ArcGIS Online portal instance
+   */
+  public Portal getAGOLPortal() {
+    if (mAGOLPortal == null) {
+      mAGOLPortal = new Portal(AGOL_PORTAL_URL, null);
+    }
+    return mAGOLPortal;
   }
 
   public boolean isSignedIn() {
