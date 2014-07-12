@@ -23,7 +23,6 @@
     <string name="fetching_maps">Fetching maps</string>
 
     <!-- webmap urls -->
-    <string name="portal_url">http://www.arcgis.com</string>
     <string name="default_basemap_url">http://www.arcgis.com/home/item.html?id=d5e02a0c1f2b4ec399823fdd3c2fdebd</string>
 
     <!-- geocode service -->
