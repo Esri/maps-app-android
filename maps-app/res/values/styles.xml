@@ -39,6 +39,16 @@
     <item name="android:textSize">17sp</item>
     <item name="android:textColor">@color/drawer_item_text_color_selector</item>
   </style>
+  
+    <style name="drawer_item_fullname_text">
+    <item name="android:textSize">17sp</item>
+    <item name="android:textColor">@color/esri_dark_gray</item>
+  </style>
+
+  <style name="drawer_item_username_text">
+    <item name="android:textSize">15sp</item>
+    <item name="android:textColor">@color/esri_dark_gray</item>
+  </style>
 
     <!-- Basemap grid -->
     <style name="basemap_gridview">
