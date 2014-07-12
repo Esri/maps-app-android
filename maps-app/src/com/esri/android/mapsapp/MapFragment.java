@@ -71,6 +71,8 @@ import com.esri.core.geometry.Polyline;
 import com.esri.core.geometry.SpatialReference;
 import com.esri.core.geometry.Unit;
 import com.esri.core.map.Graphic;
+import com.esri.core.portal.BaseMap;
+import com.esri.core.portal.Portal;
 import com.esri.core.portal.WebMap;
 import com.esri.core.symbol.PictureMarkerSymbol;
 import com.esri.core.symbol.SimpleFillSymbol;
@@ -98,6 +100,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
 
   private static final String KEY_PORTAL_ITEM_ID = "KEY_PORTAL_ITEM_ID";
 
+  private static final String KEY_BASEMAP_ITEM_ID = "KEY_BASEMAP_ITEM_ID";
+
   private static final String KEY_IS_LOCATION_TRACKING = "IsLocationTracking";
 
   // The circle area specified by search_radius and input lat/lon serves
@@ -107,6 +111,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
   private final static double SEARCH_RADIUS = 10;
 
   private String mPortalItemId;
+
+  private String mBasemapPortalItemId;
 
   private FrameLayout mMapContainer;
 
@@ -145,11 +151,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
 
   private MotionEvent mLongPressEvent;
 
-  public static MapFragment newInstance(String portalItemId) {
+  public static MapFragment newInstance(String portalItemId, String basemapPortalItemId) {
     MapFragment mapFragment = new MapFragment();
 
     Bundle args = new Bundle();
     args.putString(KEY_PORTAL_ITEM_ID, portalItemId);
+    args.putString(KEY_BASEMAP_ITEM_ID, basemapPortalItemId);
 
     mapFragment.setArguments(args);
     return mapFragment;
@@ -169,6 +176,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
     if (args != null) {
       mIsLocationTracking = args.getBoolean(KEY_IS_LOCATION_TRACKING);
       mPortalItemId = args.getString(KEY_PORTAL_ITEM_ID);
+      mBasemapPortalItemId = args.getString(KEY_BASEMAP_ITEM_ID);
     }
   }
 
@@ -177,20 +185,19 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
     mMapContainer = (FrameLayout) inflater.inflate(R.layout.map_fragment_layout, null);
 
     if (mPortalItemId != null) {
-      // load the WebMap asynchronously
-      TaskExecutor.getInstance().getThreadPool().submit(new Callable<Void>() {
-        @Override
-        public Void call() throws Exception {
-          loadWebMapIntoMapView(mPortalItemId);
-          return null;
-        }
-      });
+      // load the WebMap
+      loadWebMapIntoMapView(mPortalItemId, mBasemapPortalItemId, AccountManager.getInstance().getPortal());
     } else {
-      // show the default map
-      String defaultBaseMapURL = getString(R.string.default_basemap_url);
-      MapView mapView = new MapView(getActivity(), defaultBaseMapURL, "", "");
+      if (mBasemapPortalItemId != null) {
+        // show a map with the basemap represented by mBasemapPortalItemId
+        loadWebMapIntoMapView(mBasemapPortalItemId, null, AccountManager.getInstance().getAGOLPortal());
+      } else {
+        // show the default map
+        String defaultBaseMapURL = getString(R.string.default_basemap_url);
+        MapView mapView = new MapView(getActivity(), defaultBaseMapURL, "", "");
 
-      setMapView(mapView);
+        setMapView(mapView);
+      }
     }
     return mMapContainer;
   }
@@ -308,11 +315,13 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
     super.onPause();
 
     // Pause the MapView and stop the LocationDisplayManager to save battery
-    if (mIsLocationTracking) {
-      mMapView.getLocationDisplayManager().stop();
+    if (mMapView != null) {
+      if (mIsLocationTracking) {
+        mMapView.getLocationDisplayManager().stop();
+      }
+      mMapViewState = mMapView.retainState();
+      mMapView.pause();
     }
-    mMapViewState = mMapView.retainState();
-    mMapView.pause();
   }
 
   @Override
@@ -337,27 +346,47 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
 
     outState.putBoolean(KEY_IS_LOCATION_TRACKING, mIsLocationTracking);
     outState.putString(KEY_PORTAL_ITEM_ID, mPortalItemId);
+    outState.putString(KEY_BASEMAP_ITEM_ID, mBasemapPortalItemId);
   }
 
   /**
    * Loads a WebMap and creates a MapView from it which is set into the fragment's layout.
    * 
-   * @param portalItemId The portal item id that represents the WebMap.
+   * @param portalItemId The portal item id that represents the web map.
+   * @param basemapPortalItemId The portal item id that represents the basemap.
    * @throws Exception if WebMap loading failed.
    */
-  private void loadWebMapIntoMapView(String portalItemId) throws Exception {
-    final WebMap webmap = WebMap.newInstance(portalItemId, AccountManager.getInstance().getPortal());
-    if (webmap != null) {
-      getActivity().runOnUiThread(new Runnable() {
-        @Override
-        public void run() {
-          MapView mapView = new MapView(getActivity(), webmap, null, null);
-          setMapView(mapView);
+  private void loadWebMapIntoMapView(final String portalItemId, final String basemapPortalItemId, final Portal portal) {
+
+    TaskExecutor.getInstance().getThreadPool().submit(new Callable<Void>() {
+
+      @Override
+      public Void call() throws Exception {
+
+        // load a WebMap instance from the portal item
+        final WebMap webmap = WebMap.newInstance(portalItemId, portal);
+
+        // load the WebMap that represents the basemap if one was specified
+        WebMap basemapWebMap = null;
+        if (basemapPortalItemId != null && !basemapPortalItemId.isEmpty()) {
+          basemapWebMap = WebMap.newInstance(basemapPortalItemId, portal);
         }
-      });
-    } else {
-      throw new Exception("Faied to load web map.");
-    }
+        final BaseMap basemap = basemapWebMap != null ? basemapWebMap.getBaseMap() : null;
+
+        if (webmap != null) {
+          getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+              MapView mapView = new MapView(getActivity(), webmap, basemap, null, null);
+              setMapView(mapView);
+            }
+          });
+        } else {
+          throw new Exception("Failed to load web map.");
+        }
+        return null;
+      }
+    });
   }
 
   /**
@@ -517,9 +546,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
   }
 
   @Override
-  public void onBasemapChanged(WebMap webMap) {
-    MapView mapView = new MapView(getActivity(), webMap, null, null);
-    setMapView(mapView);
+  public void onBasemapChanged(String basemapPortalItemId) {
+    ((MapsAppActivity) getActivity()).showMap(mPortalItemId, basemapPortalItemId);
   }
 
   /**

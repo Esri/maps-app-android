@@ -162,7 +162,8 @@ public class MapsAppActivity extends Activity {
       // we are signed in to a portal - show the content browser to choose a map
       showContentBrowser();
     } else {
-      showMap(null);
+      // show the default map
+      showMap(null, null);
     }
   }
 
@@ -182,8 +183,8 @@ public class MapsAppActivity extends Activity {
   /**
    * Opens the map represented by the specified portal item or if null, opens a default map.
    */
-  public void showMap(String portalItemId) {
-    MapFragment mapFragment = MapFragment.newInstance(portalItemId);
+  public void showMap(String portalItemId, String basemapPortalItemId) {
+    MapFragment mapFragment = MapFragment.newInstance(portalItemId, basemapPortalItemId);
     FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
     transaction.replace(R.id.maps_app_activity_content_frame, mapFragment, MapFragment.TAG);
