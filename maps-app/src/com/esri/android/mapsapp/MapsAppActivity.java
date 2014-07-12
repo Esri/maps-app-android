@@ -173,13 +173,22 @@ public class MapsAppActivity extends Activity {
    * Opens the content browser that shows the user's maps.
    */
   private void showContentBrowser() {
-    ContentBrowserFragment browseFragment = new ContentBrowserFragment();
+    FragmentManager fragmentManager = getFragmentManager();
+    Fragment browseFragment = fragmentManager.findFragmentByTag(ContentBrowserFragment.TAG);
+    if (browseFragment == null) {
+      browseFragment = new ContentBrowserFragment();
+    }
 
-    FragmentTransaction transaction = getFragmentManager().beginTransaction();
-    transaction.add(R.id.maps_app_activity_content_frame, browseFragment, ContentBrowserFragment.TAG);
-    transaction.commit();
+    if (!browseFragment.isVisible()) {
+      FragmentTransaction transaction = fragmentManager.beginTransaction();
+      transaction.add(R.id.maps_app_activity_content_frame, browseFragment, ContentBrowserFragment.TAG);
+      transaction.addToBackStack(null);
+      transaction.commit();
 
-    invalidateOptionsMenu(); // reload the options menu
+      invalidateOptionsMenu(); // reload the options menu
+    }
+
+    mDrawerLayout.closeDrawers();
   }
 
   /**
@@ -234,6 +243,8 @@ public class MapsAppActivity extends Activity {
 
     DrawerItem item = null;
     if (AccountManager.getInstance().isSignedIn()) {
+
+      // Sign Out
       item = new DrawerItem(getString(R.string.sign_out), new DrawerItem.OnClickListener() {
 
         @Override
@@ -241,6 +252,17 @@ public class MapsAppActivity extends Activity {
           signOut();
         }
       });
+      mDrawerItems.add(item);
+
+      // My Maps
+      item = new DrawerItem(getString(R.string.my_maps), new DrawerItem.OnClickListener() {
+
+        @Override
+        public void onClick() {
+          showContentBrowser();
+        }
+      });
+      mDrawerItems.add(item);
     } else {
       item = new DrawerItem(getString(R.string.sign_in), new DrawerItem.OnClickListener() {
 
@@ -249,8 +271,8 @@ public class MapsAppActivity extends Activity {
           showSignInActivity();
         }
       });
+      mDrawerItems.add(item);
     }
-    mDrawerItems.add(item);
 
     BaseAdapter adapter = (BaseAdapter) mDrawerList.getAdapter();
     if (adapter == null) {
