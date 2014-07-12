@@ -17,6 +17,7 @@
 package com.esri.android.mapsapp.account;
 
 import com.esri.core.portal.Portal;
+import com.esri.core.portal.PortalInfo;
 import com.esri.core.portal.PortalUser;
 
 
@@ -34,6 +35,8 @@ public class AccountManager {
   private Portal mAGOLPortal;
 
   private PortalUser mPortalUser;
+
+  private PortalInfo mPortalInfo;
 
   private AccountManager() {
   }
@@ -57,11 +60,13 @@ public class AccountManager {
    */
   public void setPortal(Portal portal) {
     mPortalUser = null;
+    mPortalInfo = null;
     
     mPortal = portal;
     
     try {
       mPortalUser = mPortal != null ? mPortal.fetchUser() : null;
+      mPortalInfo = mPortal != null ? mPortal.fetchPortalInfo() : null;
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -85,5 +90,9 @@ public class AccountManager {
 
   public PortalUser getPortalUser() {
     return mPortalUser;
+  }
+
+  public PortalInfo getPortalInfo() {
+    return mPortalInfo;
   }
 }
