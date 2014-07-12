@@ -22,10 +22,9 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 import android.app.Fragment;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnDismissListener;
+import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -57,6 +56,7 @@ import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogListener;
+import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.android.mapsapp.location.DirectionsDialogFragment;
 import com.esri.android.mapsapp.location.DirectionsDialogFragment.DirectionsDialogListener;
 import com.esri.android.mapsapp.location.RoutingDialogFragment;
@@ -143,9 +143,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
   private final SpatialReference mWm = SpatialReference.create(102100);
 
   private final SpatialReference mEgs = SpatialReference.create(4326);
-
-  // Other UI components
-  private static ProgressDialog mProgressDialog;
 
   private EditText mSearchEditText;
 
@@ -646,16 +643,19 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
    * result on the map on the UI thread.
    */
   private class LocatorAsyncTask extends AsyncTask<LocatorFindParameters, Void, List<LocatorGeocodeResult>> {
+    private static final String TAG_LOCATOR_PROGRESS_DIALOG = "TAG_LOCATOR_PROGRESS_DIALOG";
+
     private Exception mException;
+
+    private ProgressDialogFragment mProgressDialog;
 
     public LocatorAsyncTask() {
     }
 
     @Override
     protected void onPreExecute() {
-      // Display progress dialog on UI thread
-      mProgressDialog.setMessage(getString(R.string.address_search));
-      mProgressDialog.show();
+      mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.address_search));
+      mProgressDialog.show(getActivity().getFragmentManager(), TAG_LOCATOR_PROGRESS_DIALOG);
     }
 
     @Override
@@ -723,25 +723,24 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
 
   /**
    * This class provides an AsyncTask that performs a routing request on a background thread and displays the resultant
-   * route on the map on the UI thread.
+   * route on the map on the UI thread. The class implements OnCancelListener to support cancellation of a pending
+   * routing task.
    */
-  private class RouteAsyncTask extends AsyncTask<List<LocatorFindParameters>, Void, RouteResult> {
+  private class RouteAsyncTask extends AsyncTask<List<LocatorFindParameters>, Void, RouteResult> implements
+      OnCancelListener {
+    private static final String TAG_ROUTE_SEARCH_PROGRESS_DIALOG = "TAG_ROUTE_SEARCH_PROGRESS_DIALOG";
+
     private Exception mException;
+
+    private ProgressDialogFragment mProgressDialog;
 
     public RouteAsyncTask() {
     }
 
     @Override
     protected void onPreExecute() {
-      // Display progress dialog on UI thread
-      mProgressDialog.setMessage(getString(R.string.route_search));
-      mProgressDialog.setOnDismissListener(new OnDismissListener() {
-        @Override
-        public void onDismiss(DialogInterface arg0) {
-          RouteAsyncTask.this.cancel(true);
-        }
-      });
-      mProgressDialog.show();
+      mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.route_search));
+      mProgressDialog.show(getActivity().getFragmentManager(), TAG_ROUTE_SEARCH_PROGRESS_DIALOG);
     }
 
     @Override
@@ -861,6 +860,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
       mActionItemDirections.setVisible(true);
     }
 
+    @Override
+    public void onCancel(DialogInterface dialog) {
+      // the progress dialog has been canceled - cancel the pending routing task
+      this.cancel(true);
+    }
   }
 
   /**
@@ -868,15 +872,18 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
    * resultant point on the map on the UI thread.
    */
   public class ReverseGeocodingAsyncTask extends AsyncTask<Point, Void, LocatorReverseGeocodeResult> {
+    private static final String TAG_REVERSE_GEOCODING_PROGRESS_DIALOG = "TAG_REVERSE_GEOCODING_PROGRESS_DIALOG";
+
     private Exception mException;
+
+    private ProgressDialogFragment mProgressDialog;
 
     private Point mPoint;
 
     @Override
     protected void onPreExecute() {
-      // Display progress dialog on UI thread
-      mProgressDialog.setMessage(getString(R.string.reverse_geocoding));
-      mProgressDialog.show();
+      mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.reverse_geocoding));
+      mProgressDialog.show(getActivity().getFragmentManager(), TAG_REVERSE_GEOCODING_PROGRESS_DIALOG);
     }
 
     @Override
