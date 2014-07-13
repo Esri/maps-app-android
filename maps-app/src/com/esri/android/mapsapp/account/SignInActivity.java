@@ -31,6 +31,7 @@ import com.esri.android.mapsapp.R;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.android.mapsapp.util.StringUtils;
 import com.esri.android.oauth.OAuthView;
+import com.esri.android.runtime.ArcGISRuntime;
 import com.esri.core.io.EsriSecurityException;
 import com.esri.core.io.UserCredentials;
 import com.esri.core.map.CallbackListener;
@@ -43,6 +44,8 @@ import com.esri.core.portal.PortalInfo;
 public class SignInActivity extends Activity implements OnClickListener, TextWatcher {
 
   public static final String TAG = SignInActivity.class.getSimpleName();
+  
+  private static final String MSG_OBTAIN_CLIENT_ID = "You have to provide a client id in order to do OAuth sign in. You can obtain a client id by registering the application on https://developers.arcgis.com.";;;
 
   private static final String HTTPS = "https://";
 
@@ -59,12 +62,12 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    
+
     setContentView(R.layout.sign_in_activity_portal_url_layout);
 
     mPortalUrlEditText = (EditText) findViewById(R.id.sign_in_activity_portal_url_edittext);
     mPortalUrlEditText.addTextChangedListener(this);
-    
+
     mContinueButton = findViewById(R.id.sign_in_activity_continue_button);
     mContinueButton.setOnClickListener(this);
     mContinueButton.setEnabled(false);
@@ -104,31 +107,42 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
     String url = s.toString().trim();
     mContinueButton.setEnabled(StringUtils.isNotEmpty(url));
   }
-  
-  private void signInWithForm() {
-    // TODO Auto-generated method stub
 
+  /**
+   * Signs into the portal using the generateToken REST endpoint.
+   */
+  private void signInWithGenerateToken() {
+    Toast.makeText(this, "GenerateToken-based sign in not implemented yet", Toast.LENGTH_SHORT).show();
   }
 
+  /**
+   * Signs into the portal using OAuth2.
+   */
   private void signInWithOAuth() {
 
     if (mPortalUrl.startsWith(HTTP)) {
       mPortalUrl = mPortalUrl.replace(HTTP, HTTPS);
     }
 
+    String clientId = getString(R.string.client_id);
+    if (StringUtils.isEmpty(clientId)) {
+      Toast.makeText(this, MSG_OBTAIN_CLIENT_ID, Toast.LENGTH_SHORT).show();
+      return;
+    }
+
     // create an OAuthView and show it
-    OAuthView oAuthView = new OAuthView(this, mPortalUrl,
-        getString(R.string.app_oauth_id),
-        OAUTH_EXPIRATION_NEVER, new CallbackListener<UserCredentials>() {
+    OAuthView oAuthView = new OAuthView(this, mPortalUrl, clientId, OAUTH_EXPIRATION_NEVER,
+        new CallbackListener<UserCredentials>() {
 
           @Override
           public void onCallback(final UserCredentials credentials) {
             if (credentials != null) {
               Portal portal = new Portal(mPortalUrl, credentials);
+              PortalInfo portalInfo = null;
 
               try {
                 // fetch the portal info and user details, they will be cached in the Portal instance
-                portal.fetchPortalInfo();
+                portalInfo = portal.fetchPortalInfo();
                 portal.fetchUser();
               } catch (Exception e) {
                 onError(e);
@@ -136,6 +150,11 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 
               // hold on to the initialized portal for later use
               AccountManager.getInstance().setPortal(portal);
+
+              // enable standard license level
+              if (portalInfo != null) {
+                ArcGISRuntime.License.setLicense(portalInfo.getLicenseInfo());
+              }
 
               // we are done signing in
               finish();
@@ -163,11 +182,9 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 
     private static final int TYPE_OAUTH = 0;
 
-    private static final int TYPE_FORM = 1;
+    private static final int TYPE_GENERATE_TOKEN = 1;
 
     private ProgressDialogFragment mProgressDialog;
-
-    private boolean mIsOAuth;
 
     @Override
     protected void onPreExecute() {
@@ -184,19 +201,19 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
         if (!mPortalUrl.startsWith(HTTP)) {
           mPortalUrl = new StringBuilder(HTTP).append(mPortalUrl).toString();
         }
-        
+
         Log.d(TAG, mPortalUrl);
 
         Portal portal = new Portal(mPortalUrl, null);
         PortalInfo portalInfo = portal.fetchPortalInfo();
 
         if (portalInfo != null) {
-          authType = portalInfo.isSupportsOAuth() ? TYPE_OAUTH : TYPE_FORM;
+          authType = portalInfo.isSupportsOAuth() ? TYPE_OAUTH : TYPE_GENERATE_TOKEN;
         }
-      } catch (EsriSecurityException ese){
+      } catch (EsriSecurityException ese) {
         // Enterprise Windows auth throws this exception - assume it's not OAuth.
         if (ese.getCode() == EsriSecurityException.AUTHENTICATION_FAILED) {
-          authType = TYPE_FORM;
+          authType = TYPE_GENERATE_TOKEN;
         }
       } catch (Exception e) {
         authType = TYPE_UNDEFINED;
@@ -215,8 +232,8 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
         case TYPE_OAUTH:
           signInWithOAuth();
           break;
-        case TYPE_FORM:
-          signInWithForm();
+        case TYPE_GENERATE_TOKEN:
+          signInWithGenerateToken();
           break;
         default:
           // auth type could not be determined - just abort sign in
