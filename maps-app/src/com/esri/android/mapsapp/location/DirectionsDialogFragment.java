@@ -222,7 +222,7 @@ public class DirectionsDialogFragment extends DialogFragment {
           id = R.drawable.ic_routing_left_left;
           break;
         case STOP:
-          id = R.drawable.marker;
+          id = R.drawable.pin_circle_blue;
           break;
         case HIGHWAY_EXIT:
         case DEPART:

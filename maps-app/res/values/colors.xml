@@ -10,6 +10,16 @@
     <color name="esri_dark_gray">#FF595959</color>
     <color name="esri_darker_gray">#FF333333</color>
     <color name="esri_darkest_gray">#FF1F1F1F</color>
+    <color name="divider_color">#FFCCCCCC</color>
+    <color name="highlight_color">#BF35AC46</color>
+    <color name="drawer_shadow_background">#7F323232</color>
+    <color name="drawer_header_background">#FFCCCCCC</color>
+    <color name="drawer_header_text_color">@color/esri_dark_gray</color>
+    <color name="drawer_item_background">@color/esri_white</color>
+    <color name="drawer_item_text_color">#FF000000</color>
+    <color name="drawer_item_subtitle_text_color">#FF666666</color>
+    <color name="drawer_current_user_background">@android:color/transparent</color>
+    <color name="drawer_current_user_text_color">@color/esri_dark_gray</color>
 
     <!-- Browse card colors -->
     <color name="portal_item_background">@color/esri_white</color>
@@ -35,5 +45,8 @@
     <!-- Map result -->
     <color name="map_results_ribbon_item_default">@android:color/white</color>
     <color name="map_results_ribbon_item_pressed">@color/android_holo_light_blue</color>
+
+    <!-- Text -->
+    <color name="disabled_text_color">#FF888888</color>
 
 </resources>

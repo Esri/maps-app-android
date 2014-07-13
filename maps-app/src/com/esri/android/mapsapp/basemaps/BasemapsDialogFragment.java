@@ -27,9 +27,8 @@ package com.esri.android.mapsapp.basemaps;
 import java.util.ArrayList;
 
 import android.app.DialogFragment;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnDismissListener;
+import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -42,20 +41,25 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.esri.android.mapsapp.R;
+import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.basemaps.BasemapsAdapter.BasemapsAdapterClickListener;
-import com.esri.core.io.UserCredentials;
+import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.core.portal.Portal;
+import com.esri.core.portal.PortalGroup;
+import com.esri.core.portal.PortalInfo;
 import com.esri.core.portal.PortalItem;
 import com.esri.core.portal.PortalQueryParams;
 import com.esri.core.portal.PortalQueryParams.PortalQuerySortOrder;
 import com.esri.core.portal.PortalQueryResultSet;
-import com.esri.core.portal.WebMap;
 
-public class BasemapsDialogFragment extends DialogFragment implements BasemapsAdapterClickListener {
+/**
+ * Implements the dialog that provides a collection of basemaps to the user.
+ */
+public class BasemapsDialogFragment extends DialogFragment implements BasemapsAdapterClickListener, OnCancelListener {
 
   private static final String TAG = "BasemapsDialogFragment";
 
-  Portal mPortal;
+  private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
 
   /**
    * A callback interface that all activities containing this fragment must implement, to receive a new basemap from
@@ -63,20 +67,20 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
    */
   public interface BasemapsDialogListener {
     /**
-     * Callback for when a new basemap is selected.
-     *
-     * @param webMap WebMap object containing the new basemap.
+     * Called when a basemap is selected.
+     * 
+     * @param itemId portal item id of the selected basemap
      */
-    public void onBasemapChanged(WebMap webMap);
+    public void onBasemapChanged(String itemId);
   }
 
-  BasemapsDialogListener mBasemapsDialogListener;
+  private BasemapsDialogListener mBasemapsDialogListener;
 
-  BasemapsAdapter mBasemapsAdapter;
+  private BasemapsAdapter mBasemapsAdapter;
 
-  ArrayList<BasemapItem> mBasemapItemList;
+  private ArrayList<BasemapItem> mBasemapItemList;
 
-  ProgressDialog mProgressDialog;
+  private BasemapSearchAsyncTask mPendingBasemapSearch;
 
   // Mandatory empty constructor for fragment manager to recreate fragment after it's destroyed
   public BasemapsDialogFragment() {
@@ -84,7 +88,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 
   /**
    * Sets listener for selection of new basemap.
-   *
+   * 
    * @param listener
    */
   public void setBasemapsDialogListener(BasemapsDialogListener listener) {
@@ -95,15 +99,6 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setStyle(DialogFragment.STYLE_NORMAL, 0);
-
-    // Create and initialise the progress dialog
-    mProgressDialog = new ProgressDialog(getActivity()) {
-      @Override
-      public void onBackPressed() {
-        // Back key pressed - just dismiss the dialog
-        mProgressDialog.dismiss();
-      }
-    };
   }
 
   @Override
@@ -125,15 +120,30 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
     // If no basemaps yet, execute AsyncTask to search for available basemaps and populate the grid with them.
     // Note we do this here rather than in onCreateView() because otherwise the progress dialog doesn't show
     if (mBasemapItemList.size() == 0) {
-      new BasemapSearchAsyncTask().execute();
+      if (mPendingBasemapSearch != null) {
+        mPendingBasemapSearch.cancel(true);
+      }
+
+      mPendingBasemapSearch = new BasemapSearchAsyncTask();
+      mPendingBasemapSearch.execute();
     }
 
   }
 
   @Override
-  public void onBasemapItemClicked(int listPosition) {
-    // Basemap selected - execute AsyncTaks to fetch it
-    new BasemapFetchAsyncTask().execute(Integer.valueOf(listPosition));
+  public void onBasemapItemClicked(int position) {
+    dismiss();
+
+    String itemId = mBasemapItemList.get(position).item.getItemId();
+    mBasemapsDialogListener.onBasemapChanged(itemId);
+  }
+
+  @Override
+  public void onCancel(DialogInterface dialog) {
+    // the progress dialog has been canceled - cancel pending basemap search task
+    if (mPendingBasemapSearch != null) {
+      mPendingBasemapSearch.cancel(true);
+    }
   }
 
   /**
@@ -141,22 +151,21 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
    * grid containing these on the UI thread.
    */
   private class BasemapSearchAsyncTask extends AsyncTask<Void, Void, Void> {
+    private static final String TAG_BASEMAP_SEARCH_PROGRESS_DIALOG = "TAG_BASEMAP_SEARCH_PROGRESS_DIALOG";
+
     private Exception mException;
+
+    private ProgressDialogFragment mProgressDialog;
 
     public BasemapSearchAsyncTask() {
     }
 
     @Override
     protected void onPreExecute() {
-      // Display progress dialog on UI thread
-      mProgressDialog.setMessage(getString(R.string.fetching_basemaps));
-      mProgressDialog.setOnDismissListener(new OnDismissListener() {
-        @Override
-        public void onDismiss(DialogInterface arg0) {
-          BasemapSearchAsyncTask.this.cancel(true);
-        }
-      });
-      mProgressDialog.show();
+      mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.fetching_basemaps));
+      // set the target fragment to receive cancel notification
+      mProgressDialog.setTargetFragment(BasemapsDialogFragment.this, REQUEST_CODE_PROGRESS_DIALOG);
+      mProgressDialog.show(getActivity().getFragmentManager(), TAG_BASEMAP_SEARCH_PROGRESS_DIALOG);
     }
 
     @Override
@@ -193,30 +202,54 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
     }
 
     /**
-     * Connects to portal and fetches info about basemaps.
-     *
+     * Fetches basemaps from the user's portal if signed in, otherwise from arcgis.com portal.
+     * 
      * @throws Exception
      */
     private void fetchBasemapItems() throws Exception {
-      // Create a Portal object
-      String portalUrl = getString(R.string.portal_url);
-      UserCredentials credentials = null; // anonymous login
-      mPortal = new Portal(portalUrl, credentials);
 
-      // Create a PortalQueryParams to query for items in basemap group
-      PortalQueryParams queryParams = new PortalQueryParams();
-      queryParams.setCanSearchPublic(true);
-      queryParams.setSortField("name").setSortOrder(PortalQuerySortOrder.ASCENDING);
-      queryParams.setQuery(createQueryString());
+      PortalQueryResultSet<PortalItem> basemapResult = null;
 
-      // Find items that match the query
-      PortalQueryResultSet<PortalItem> queryResultSet = mPortal.findItems(queryParams);
-      if (isCancelled()) {
+      if (AccountManager.getInstance().isSignedIn()) {
+        // we are signed in - fetch the basemaps of the user's portal
+        Portal portal = AccountManager.getInstance().getPortal();
+        PortalInfo portalInfo = AccountManager.getInstance().getPortalInfo();
+
+        PortalQueryParams queryParams = new PortalQueryParams();
+
+        // get the query string to fetch the portal group that defines the portal's basemaps
+        queryParams.setQuery(portalInfo.getBasemapGalleryGroupQuery());
+
+        PortalQueryResultSet<PortalGroup> basemapGroupResult = portal.findGroups(queryParams);
+        if (basemapGroupResult != null && basemapGroupResult.getResults() != null
+            && !basemapGroupResult.getResults().isEmpty()) {
+
+          PortalGroup group = basemapGroupResult.getResults().get(0);
+
+          PortalQueryParams basemapQueryParams = new PortalQueryParams();
+          basemapQueryParams.setQueryForItemsInGroup(group.getGroupId());
+
+          basemapResult = portal.findItems(basemapQueryParams);
+        }
+      } else {
+        // we are not signed in - fetch a selection of basemaps from arcgis.com
+        Portal portal = AccountManager.getInstance().getAGOLPortal();
+
+        // Create a PortalQueryParams to query for items in basemap group
+        PortalQueryParams queryParams = new PortalQueryParams();
+        queryParams.setSortField("name").setSortOrder(PortalQuerySortOrder.ASCENDING);
+        queryParams.setQuery(createDefaultQueryString());
+
+        // Find items that match the query
+        basemapResult = portal.findItems(queryParams);
+      }
+
+      if (isCancelled() || basemapResult == null || basemapResult.getResults() == null) {
         return;
       }
 
       // Loop through query results
-      for (PortalItem item : queryResultSet.getResults()) {
+      for (PortalItem item : basemapResult.getResults()) {
         // Fetch item thumbnail from server
         byte[] data = item.fetchThumbnail();
         if (isCancelled()) {
@@ -232,11 +265,11 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
     }
 
     /**
-     * Creates query string to fetch portal items for all our basemaps.
-     *
-     * @return Query string, e.g. "id:portalId1 OR id:portalId2".
+     * Creates a query string to fetch basemap portal items from arcgis.com.
      */
-    private String createQueryString() {
+    private String createDefaultQueryString() {
+      String query = null;
+
       String[] mBasemapIds = { "d5e02a0c1f2b4ec399823fdd3c2fdebd", // topographic
           "716b600dbbac433faa4bec9220c76b3a", // imagery with labels
           "2bc6e99fcb9640f0aa14aebcbcbaccd9", // DeLorme World Basemap
@@ -250,63 +283,9 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
           str.append(" OR ");
         }
       }
-      return str.toString();
-    }
+      query = str.toString();
 
-  }
-
-  /**
-   * This class provides an AsyncTask that fetches the selected basemap on a background thread, creates a WebMap from it
-   * and passes it to MapsAppActivity to display it.
-   */
-  private class BasemapFetchAsyncTask extends AsyncTask<Integer, Void, WebMap> {
-    private Exception mException;
-
-    public BasemapFetchAsyncTask() {
-    }
-
-    @Override
-    protected void onPreExecute() {
-      // Display progress dialog on UI thread
-      mProgressDialog.setMessage(getString(R.string.fetching_selected_basemap));
-      mProgressDialog.setOnDismissListener(new OnDismissListener() {
-        @Override
-        public void onDismiss(DialogInterface arg0) {
-          BasemapFetchAsyncTask.this.cancel(true);
-        }
-      });
-      mProgressDialog.show();
-    }
-
-    @Override
-    protected WebMap doInBackground(Integer... params) {
-      // Fetch basemap data on background thread
-      WebMap baseWebMap = null;
-      mException = null;
-      try {
-        int position = params[0].intValue();
-        String basemapID = mBasemapItemList.get(position).item.getItemId();
-
-        // Create a new WebMap from the selected basemap
-        baseWebMap = WebMap.newInstance(basemapID, mPortal);
-      } catch (Exception e) {
-        mException = e;
-      }
-      return baseWebMap;
-    }
-
-    @Override
-    protected void onPostExecute(WebMap baseWebMap) {
-      // Display results on UI thread
-      mProgressDialog.dismiss();
-      if (mException != null) {
-        mException.printStackTrace();
-        Toast.makeText(getActivity(), getString(R.string.basemapSearchFailed), Toast.LENGTH_LONG).show();
-      } else {
-        // Success - pass WebMap to MapsAppActivity to display
-        mBasemapsDialogListener.onBasemapChanged(baseWebMap);
-      }
-      dismiss();
+      return query;
     }
   }
 }

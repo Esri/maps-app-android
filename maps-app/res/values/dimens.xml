@@ -4,6 +4,38 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
+    <!-- list view -->
+    <dimen name="listview_selected_bar_width">5dp</dimen>
+    <dimen name="listview_divider_height">1dp</dimen>
+
+    <!-- horizontal divider -->
+    <dimen name="horizontal_divider_left">5dp</dimen>
+    <dimen name="horizontal_divider_right">5dp</dimen>
+    <dimen name="horizontal_divider_width">1dp</dimen>
+    <dimen name="horizontal_divider_height">1dp</dimen>
+    <dimen name="horizontal_divider_padding_top">2dp</dimen>
+    <dimen name="horizontal_divider_padding_bottom">2dp</dimen>
+    <dimen name="vertical_divider_width">1dp</dimen>
+    <dimen name="vertical_divider_top">2dp</dimen>
+    <dimen name="vertical_divider_bottom">3dp</dimen>
+
+    <!-- Drawer -->
+    <!-- <dimen name="drawer_width">340dp</dimen> -->
+    <dimen name="drawer_width">320dp</dimen>
+    <dimen name="drawer_horizontal_divider_left">48dp</dimen>
+    <dimen name="drawer_imageview_size">32dp</dimen>
+    <dimen name="drawer_listview_padding_right">5dp</dimen>
+    <dimen name="drawer_header_height">32dp</dimen>
+    <dimen name="drawer_header_text_size">15sp</dimen>
+
+    <!-- Content Browser: Portal Item -->
+    <dimen name="map_item_width">305dp</dimen>
+    <dimen name="map_item_height">126dp</dimen>
+    <dimen name="map_item_thumbnail_width">135dp</dimen>
+    <dimen name="map_item_thumbnail_height">85dp</dimen>
+    <dimen name="map_item_thumbnail_padding">10dp</dimen>
+    <dimen name="map_item_title_padding">10dp</dimen>
+
     <!-- Browse card -->
     <dimen name="portal_item_bottom">2dp</dimen>
     <dimen name="map_details_radius">2dp</dimen>
@@ -28,6 +60,5 @@
     <dimen name="basemap_grid_item_status_padding_bottom">2dp</dimen>
     <dimen name="route_overview_layout_margin">8dp</dimen>
     <dimen name="route_overview_text_size">17sp</dimen>
-    
 
 </resources>
