@@ -82,6 +82,12 @@ public class MapsAppActivity extends Activity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
+    /**
+     * Unlock basic license level by setting your client code here. The client code can be obtained on
+     * https://developers.arcgis.com
+     */
+    // ArcGISRuntime.setClientId("put your client code here");
+
     setContentView(R.layout.maps_app_activity);
     setupDrawer();
 
