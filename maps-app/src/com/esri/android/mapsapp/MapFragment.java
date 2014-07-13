@@ -714,7 +714,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
         // get return geometry from geocode result
         Point resultPoint = geocodeResult.getLocation();
         // create marker symbol to represent location
-        SimpleMarkerSymbol resultSymbol = new SimpleMarkerSymbol(Color.RED, 16, SimpleMarkerSymbol.STYLE.CROSS);
+        Drawable drawable = getActivity().getResources().getDrawable(R.drawable.pin_circle_red);
+        PictureMarkerSymbol resultSymbol = new PictureMarkerSymbol(getActivity(), drawable);
         // create graphic object for resulting location
         Graphic resultLocGraphic = new Graphic(resultPoint, resultSymbol);
         // add graphic to location layer
@@ -861,12 +862,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
 
       // Create point graphic to mark start of route
       Point startPoint = ((Polyline) routeGraphic.getGeometry()).getPoint(0);
-      Graphic startGraphic = createMarkerGraphic(startPoint);
+      Graphic startGraphic = createMarkerGraphic(startPoint, false);
 
       // Create point graphic to mark end of route
       int endPointIndex = ((Polyline) routeGraphic.getGeometry()).getPointCount() - 1;
       Point endPoint = ((Polyline) routeGraphic.getGeometry()).getPoint(endPointIndex);
-      Graphic endGraphic = createMarkerGraphic(endPoint);
+      Graphic endGraphic = createMarkerGraphic(endPoint, true);
 
       // Add these graphics to route layer
       mRouteLayer.addGraphics(new Graphic[] { routeGraphic, startGraphic, endGraphic });
@@ -877,6 +878,16 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
       // Save routing directions so user can display them later
       mRoutingDirections = route.getRoutingDirections();
       mActionItemDirections.setVisible(true);
+    }
+
+    Graphic createMarkerGraphic(Point point, boolean endPoint) {
+      Drawable marker = getResources().getDrawable(endPoint ? R.drawable.pin_circle_blue : R.drawable.pin_circle_red);
+      PictureMarkerSymbol destinationSymbol = new PictureMarkerSymbol(mMapView.getContext(), marker);
+      // NOTE: marker's bounds not set till marker is used to create
+      // destinationSymbol
+      float offsetY = convertPixelsToDp(getActivity(), marker.getBounds().bottom);
+      destinationSymbol.setOffsetY(offsetY);
+      return new Graphic(point, destinationSymbol);
     }
   }
 
@@ -943,7 +954,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
 
         // Draw marker on map.
         // create marker symbol to represent location
-        SimpleMarkerSymbol symbol = new SimpleMarkerSymbol(Color.RED, 16, SimpleMarkerSymbol.STYLE.CROSS);
+        Drawable drawable = getActivity().getResources().getDrawable(R.drawable.pin_circle_red);
+        PictureMarkerSymbol symbol = new PictureMarkerSymbol(getActivity(), drawable);
         mLocationLayer.addGraphic(new Graphic(mPoint, symbol));
 
         // Address string is saved for use in routing
@@ -965,16 +977,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
         mMapView.centerAt(mPoint, true);
       }
     }
-  }
-
-  Graphic createMarkerGraphic(Point point) {
-    Drawable marker = getResources().getDrawable(R.drawable.marker);
-    PictureMarkerSymbol destinationSymbol = new PictureMarkerSymbol(mMapView.getContext(), marker);
-    // NOTE: marker's bounds not set till marker is used to create
-    // destinationSymbol
-    float offsetY = convertPixelsToDp(getActivity(), marker.getBounds().bottom);
-    destinationSymbol.setOffsetY(offsetY);
-    return new Graphic(point, destinationSymbol);
   }
 
   /**
