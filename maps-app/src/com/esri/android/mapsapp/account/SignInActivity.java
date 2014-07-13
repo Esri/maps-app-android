@@ -70,7 +70,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 
     mContinueButton = findViewById(R.id.sign_in_activity_continue_button);
     mContinueButton.setOnClickListener(this);
-    mContinueButton.setEnabled(false);
+    mContinueButton.setEnabled(!mPortalUrlEditText.getText().toString().trim().isEmpty());
 
     View cancelButton = findViewById(R.id.sign_in_activity_cancel_button);
     cancelButton.setOnClickListener(this);
@@ -197,7 +197,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
     protected Integer doInBackground(Void... params) {
       int authType = TYPE_UNDEFINED;
       try {
-        mPortalUrl = mPortalUrlEditText.getText().toString();
+        mPortalUrl = mPortalUrlEditText.getText().toString().trim();
         if (!mPortalUrl.startsWith(HTTP)) {
           mPortalUrl = new StringBuilder(HTTP).append(mPortalUrl).toString();
         }
