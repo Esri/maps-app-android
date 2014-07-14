@@ -24,6 +24,7 @@
 
 package com.esri.android.mapsapp;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -47,6 +48,7 @@ import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.android.mapsapp.util.TaskExecutor;
 import com.esri.core.portal.Portal;
 import com.esri.core.portal.PortalItem;
+import com.esri.core.portal.PortalItemType;
 import com.esri.core.portal.PortalUser;
 import com.esri.core.portal.PortalUserContent;
 
@@ -59,20 +61,33 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 
   private GridView mMapGrid;
 
+  private View mNoMapsInfo;
+
+  private View mRefreshButton;
+
   private List<PortalItem> mMaps;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    mMapGrid = (GridView) inflater.inflate(R.layout.content_browser_fragment_layout, null);
+    View view = inflater.inflate(R.layout.content_browser_fragment_layout, null);
 
-    if (mMaps == null) {
+    mMapGrid = (GridView) view.findViewById(R.id.content_browser_fragment_gridview);
+    mMapGrid.setVisibility(View.GONE);
+
+    mNoMapsInfo = view.findViewById(R.id.content_browser_fragment_no_maps_layout);
+    mNoMapsInfo.setVisibility(View.GONE);
+
+    mRefreshButton = view.findViewById(R.id.content_browser_fragment_refresh_button);
+    mRefreshButton.setOnClickListener(this);
+
+    if (mMaps == null || mMaps.isEmpty()) {
       // fetch the user's maps
-      new FetchMapsTask().execute();
+      fetchMyMaps();
     } else {
       refreshView();
     }
 
-    return mMapGrid;
+    return view;
   }
 
   @Override
@@ -83,19 +98,44 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
         ViewHolder viewHolder = (ViewHolder) view.getTag();
         ((MapsAppActivity) getActivity()).showMap(viewHolder.portalItem.getItemId(), null);
         break;
+      case R.id.content_browser_fragment_refresh_button:
+        // re-fetch maps
+        fetchMyMaps();
+        break;
     }
   }
 
+  /**
+   * Fetches the user's maps from the portal.
+   */
+  private void fetchMyMaps() {
+    new FetchMapsTask().execute();
+  }
+
+  /**
+   * Refreshes the GridView that shows the maps.
+   */
   private void refreshView() {
-    BaseAdapter mapGridAdapter = (BaseAdapter) mMapGrid.getAdapter();
-    if (mapGridAdapter == null) {
-      mapGridAdapter = new MapGridAdapter();
-      mMapGrid.setAdapter(mapGridAdapter);
+    if (mMaps == null || mMaps.isEmpty()) {
+      mMapGrid.setVisibility(View.GONE);
+      mNoMapsInfo.setVisibility(View.VISIBLE);
     } else {
-      mapGridAdapter.notifyDataSetChanged();
+      mMapGrid.setVisibility(View.VISIBLE);
+      mNoMapsInfo.setVisibility(View.GONE);
+
+      BaseAdapter mapGridAdapter = (BaseAdapter) mMapGrid.getAdapter();
+      if (mapGridAdapter == null) {
+        mapGridAdapter = new MapGridAdapter();
+        mMapGrid.setAdapter(mapGridAdapter);
+      } else {
+        mapGridAdapter.notifyDataSetChanged();
+      }
     }
   }
 
+  /**
+   * Fetches the maps from the user's root folder asynchronously.
+   */
   private class FetchMapsTask extends AsyncTask<Void, Void, List<PortalItem>> {
 
     private static final String TAG_FETCH_MAPS_PROGRESS_DIALOG = "TAG_FETCH_MAPS_PROGRESS_DIALOG";
@@ -113,20 +153,28 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
     @Override
     protected List<PortalItem> doInBackground(Void... params) {
 
-      List<PortalItem> items = null;
+      final List<PortalItem> webMapItems = new ArrayList<PortalItem>();
       try {
         // fetch the user's maps from the portal
         Portal portal = AccountManager.getInstance().getPortal();
         if (portal != null) {
           PortalUser portalUser = portal.fetchUser();
           PortalUserContent content = portalUser != null ? portalUser.fetchContent() : null;
-          items = content != null ? content.getItems() : null;
+          List<PortalItem> rootItems = content != null ? content.getItems() : null;
+          if (rootItems != null) {
+            // only select items of type WEBMAP
+            for (PortalItem item : rootItems) {
+              if (item.getType() == PortalItemType.WEBMAP) {
+                webMapItems.add(item);
+              }
+            }
+          }
         }
       } catch (Exception e) {
         // fetching content failed
       }
 
-      return items;
+      return webMapItems;
     }
 
     @Override
