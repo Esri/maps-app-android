@@ -162,6 +162,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
           PortalUserContent content = portalUser != null ? portalUser.fetchContent() : null;
           List<PortalItem> rootItems = content != null ? content.getItems() : null;
           if (rootItems != null) {
+            // only select items of type WEBMAP
             for (PortalItem item : rootItems) {
               if (item.getType() == PortalItemType.WEBMAP) {
                 webMapItems.add(item);
