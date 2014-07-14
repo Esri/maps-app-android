@@ -22,6 +22,8 @@
     
     <!-- content browser -->
     <string name="fetching_maps">Fetching maps</string>
+    <string name="refresh">Refresh</string>
+    <string name="no_maps">No maps</string>
 
     <!-- webmap urls -->
     <string name="default_basemap_url">http://www.arcgis.com/home/item.html?id=d5e02a0c1f2b4ec399823fdd3c2fdebd</string>
