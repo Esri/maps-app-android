@@ -30,6 +30,8 @@ Click the **Fork** button in the [Maps App Android](https://github.com/Esri/maps
 
   ![Convert Project](https://raw.githubusercontent.com/Esri/maps-app-android/master/convert-to-arcgis-project.png)
 
+4. Right Click the project and select **Android Tools > Add Support Library**.  Accept packages to install and click install.
+
 #### Command line Git
 1. [Clone the Maps App Android](https://help.github.com/articles/fork-a-repo#step-2-clone-your-fork)
 2. ```cd``` into the ```maps-app-android``` folder
@@ -39,6 +41,7 @@ Click the **Fork** button in the [Maps App Android](https://github.com/Esri/maps
 * [JDK 6 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 * [ADT Bundle](http://developer.android.com/sdk/index.html) **or** [Eclipse 4.2 +](https://www.eclipse.org/downloads/) with [ADT Plugin](http://developer.android.com/tools/sdk/eclipse-adt.html)
 * [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/android/)
+* [Android Support Library](http://developer.android.com/tools/support-library/index.html)
 
 ## Resources
 * [ArcGIS Runtime SDK for Android Developers Site](https://developers.arcgis.com/android/)
