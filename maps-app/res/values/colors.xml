@@ -48,5 +48,8 @@
 
     <!-- Text -->
     <color name="disabled_text_color">#FF888888</color>
+    
+    <!-- callout -->
+    <color name="place_callout_frame_color">@color/esri_gray</color>
 
 </resources>

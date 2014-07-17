@@ -53,8 +53,11 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.esri.android.map.Callout;
+import com.esri.android.map.CalloutStyle;
 import com.esri.android.map.GraphicsLayer;
 import com.esri.android.map.LocationDisplayManager;
 import com.esri.android.map.LocationDisplayManager.AutoPanMode;
@@ -71,6 +74,7 @@ import com.esri.android.mapsapp.location.RoutingDialogFragment;
 import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogListener;
 import com.esri.android.mapsapp.tools.MeasuringTool;
 import com.esri.android.mapsapp.util.TaskExecutor;
+import com.esri.android.mapsapp.util.UiUtils;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.LinearUnit;
@@ -127,6 +131,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
   private FrameLayout mMapContainer;
 
   private MapView mMapView;
+
+  private CalloutStyle mCalloutStyle;
+
+  private int mMaxCalloutWidth;
+
+  private int mMaxCalloutHeight;
 
   private String mMapViewState;
 
@@ -189,6 +199,15 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
       mPortalItemId = args.getString(KEY_PORTAL_ITEM_ID);
       mBasemapPortalItemId = args.getString(KEY_BASEMAP_ITEM_ID);
     }
+
+    mCalloutStyle = new CalloutStyle();
+    mCalloutStyle
+        .setCornerCurve(getActivity().getResources().getDimensionPixelSize(R.dimen.place_callout_corner_curve));
+    mCalloutStyle.setFrameColor(getActivity().getResources().getColor(R.color.place_callout_frame_color));
+    mCalloutStyle.setAnchor(Callout.ANCHOR_POSITION_LOWER_MIDDLE);
+
+    mMaxCalloutWidth = getActivity().getResources().getDimensionPixelSize(R.dimen.place_callout_max_width);
+    mMaxCalloutHeight = getActivity().getResources().getDimensionPixelSize(R.dimen.place_callout_max_height);
   }
 
   @Override
@@ -481,6 +500,38 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
   }
 
   /**
+   * Shows a mini callout on the map.
+   * 
+   * @param location the location of the callout
+   * @param message the content of the callout
+   * @param yOffsetDips the y offset of the callout in dips
+   */
+  private void showCallout(Point location, String message, int yOffsetDips) {
+
+    View view = getActivity().getLayoutInflater().inflate(R.layout.simple_callout_layout, null);
+
+    TextView textView = (TextView) view.findViewById(R.id.simple_callout_textview);
+    textView.setText(message);
+
+    int yOffset = UiUtils.dipsToPixels(yOffsetDips);
+
+    Callout callout = mMapView.getCallout();
+    callout.setStyle(mCalloutStyle);
+    callout.setMaxWidth(mMaxCalloutWidth);
+    callout.setMaxHeight(mMaxCalloutHeight);
+    callout.setOffset(0, yOffset);
+    callout.animatedShow(location, view);
+  }
+
+  /**
+   * Hides the callout.
+   */
+  private void hideCallout() {
+    Callout callout = mMapView.getCallout();
+    callout.hide();
+  }
+
+  /**
    * Clears all graphics out of the location layer and the route layer.
    */
   void resetGraphicsLayers() {
@@ -490,6 +541,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
     mLocationLayerPointString = null;
     mRoutingDirections = null;
     mActionItemDirections.setVisible(false);
+
+    hideCallout();
   }
 
   /**
@@ -729,16 +782,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
         // add graphic to location layer
         mLocationLayer.addGraphic(resultLocGraphic);
 
-        // create text symbol for return address
+        // show a callout for return address
         String address = geocodeResult.getAddress();
-        TextSymbol resultAddress = new TextSymbol(20, address, Color.BLACK);
-        // create offset for text
-        resultAddress.setOffsetX(-4 * address.length());
-        resultAddress.setOffsetY(10);
-        // create a graphic object for address text
-        Graphic resultText = new Graphic(resultPoint, resultAddress);
-        // add address text graphic to location graphics layer
-        mLocationLayer.addGraphic(resultText);
+        showCallout(resultPoint, address, 10);
 
         mLocationLayerPoint = resultPoint;
 

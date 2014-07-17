@@ -61,4 +61,9 @@
     <dimen name="route_overview_layout_margin">8dp</dimen>
     <dimen name="route_overview_text_size">17sp</dimen>
 
+    <!-- Callout -->
+    <dimen name="place_callout_max_width">400dp</dimen>
+    <dimen name="place_callout_max_height">600dp</dimen>
+    <dimen name="place_callout_corner_curve">5dp</dimen>
+
 </resources>

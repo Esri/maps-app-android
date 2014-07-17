@@ -34,21 +34,30 @@
     <style name="drawer_listView_style" parent="@style/listView_style">
         <item name="android:divider">@drawable/drawer_horizontal_divider</item>
     </style>
-    
-    <style name="drawer_item_text">
-    <item name="android:textSize">17sp</item>
-    <item name="android:textColor">@color/drawer_item_text_color_selector</item>
-  </style>
-  
-    <style name="drawer_item_fullname_text">
-    <item name="android:textSize">17sp</item>
-    <item name="android:textColor">@color/esri_dark_gray</item>
-  </style>
 
-  <style name="drawer_item_username_text">
-    <item name="android:textSize">15sp</item>
-    <item name="android:textColor">@color/esri_dark_gray</item>
-  </style>
+    <style name="drawer_item_text">
+        <item name="android:textSize">17sp</item>
+        <item name="android:textColor">@color/drawer_item_text_color_selector</item>
+    </style>
+
+    <style name="drawer_item_fullname_text">
+        <item name="android:textSize">17sp</item>
+        <item name="android:textColor">@color/esri_dark_gray</item>
+    </style>
+
+    <style name="drawer_item_username_text">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/esri_dark_gray</item>
+    </style>
+
+    <!-- callout -->
+    <style name="place_callout_title_text">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/esri_gray</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:maxWidth">200dp</item>
+        <item name="android:ellipsize">end</item>
+    </style>
 
     <!-- Basemap grid -->
     <style name="basemap_gridview">
