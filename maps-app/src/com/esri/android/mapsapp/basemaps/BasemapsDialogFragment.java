@@ -272,7 +272,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 
       String[] mBasemapIds = { "d5e02a0c1f2b4ec399823fdd3c2fdebd", // topographic
           "716b600dbbac433faa4bec9220c76b3a", // imagery with labels
-          "2bc6e99fcb9640f0aa14aebcbcbaccd9", // DeLorme World Basemap
+          "b834a68d7a484c5fb473d4ba90d35e71", // open steet map
           "8bf7167d20924cbf8e25e7b11c7c502c" // streets
       };
 
