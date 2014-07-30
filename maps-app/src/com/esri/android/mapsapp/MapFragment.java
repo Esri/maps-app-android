@@ -1014,20 +1014,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener, Rou
 
         // Address string is saved for use in routing
         mLocationLayerPointString = address.toString();
-
-        // Show the results of the reverse geocoding in a toast.
-        // Toast.makeText(MapsAppActivity.this, mLocationLayerPointString,
-        // Toast.LENGTH_LONG).show();
-
-        // create text symbol for result address
-        TextSymbol textSymbol = new TextSymbol(20, address.toString(), Color.BLACK);
-        // create offset for text
-        textSymbol.setOffsetX(-3 * address.length());
-        textSymbol.setOffsetY(10);
-        // create a graphic object for address text
-        Graphic resultText = new Graphic(mPoint, textSymbol);
-        // add address text graphic to location graphics layer
-        mLocationLayer.addGraphic(resultText);
+        // show results in callout
+        showCallout(mPoint, mLocationLayerPointString, 10);
+        // center the map to result location
         mMapView.centerAt(mPoint, true);
       }
     }
