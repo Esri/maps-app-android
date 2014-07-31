@@ -33,5 +33,5 @@
         android:icon="@android:drawable/ic_menu_mylocation"
         android:showAsAction="ifRoom"
         android:title="@string/action_location"/>
-    
+
 </menu>

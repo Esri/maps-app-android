@@ -14,17 +14,17 @@
         android:padding="@dimen/map_item_thumbnail_padding"
         android:scaleType="fitCenter"
         tools:ignore="ContentDescription" />
-    
+
     <TextView
-      android:id="@+id/map_item_title_textView"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:gravity="top"
-      android:paddingTop="@dimen/map_item_title_padding"
-      android:paddingRight="@dimen/map_item_title_padding"
-      android:paddingBottom="@dimen/map_item_title_padding"
-      style="@style/map_item_title_text"
-      android:text="Title"
-      tools:ignore="HardcodedText" />
+        android:id="@+id/map_item_title_textView"
+        style="@style/map_item_title_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="top"
+        android:paddingBottom="@dimen/map_item_title_padding"
+        android:paddingRight="@dimen/map_item_title_padding"
+        android:paddingTop="@dimen/map_item_title_padding"
+        android:text="Title"
+        tools:ignore="HardcodedText" />
 
 </LinearLayout>

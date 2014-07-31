@@ -63,6 +63,7 @@ import com.esri.android.map.LocationDisplayManager;
 import com.esri.android.map.LocationDisplayManager.AutoPanMode;
 import com.esri.android.map.MapOnTouchListener;
 import com.esri.android.map.MapView;
+import com.esri.android.map.event.OnSingleTapListener;
 import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
@@ -217,6 +218,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				R.dimen.place_callout_max_width);
 		mMaxCalloutHeight = getActivity().getResources().getDimensionPixelSize(
 				R.dimen.place_callout_max_height);
+
 	}
 
 	@Override
@@ -285,6 +287,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+
 		case R.id.route:
 			// Show RoutingDialogFragment to get routing start and end points.
 			// This calls back to onGetRoute() to do the routing.
@@ -504,6 +507,20 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 		});
 
+		mMapView.setOnSingleTapListener(new OnSingleTapListener() {
+			@Override
+			public void onSingleTap(float x, float y) {
+
+				// When a single tap gesture is received, reset the map to its
+				// default rotation angle,
+				// where North is shown at the top of the device.
+				mMapView.setRotationAngle(0);
+
+				// Also reset the compass angle.
+				mCompass.setRotationAngle(0);
+			}
+
+		});
 		// Setup use of magnifier on a long press on the map
 		mMapView.setShowMagnifierOnLongPress(true);
 		mLongPressEvent = null;
@@ -630,10 +647,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		final LocationDisplayManager locDispMgr = mMapView
 				.getLocationDisplayManager();
 
+		System.out.println(locDispMgr.getLocation() + "lalalal");
 		locDispMgr.setAutoPanMode(AutoPanMode.OFF);
 		locDispMgr.setAllowNetworkLocation(true);
-
-
 
 		locDispMgr.setLocationListener(new LocationListener() {
 
@@ -660,8 +676,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 					double zoomWidth = Unit.convertUnits(SEARCH_RADIUS,
 							Unit.create(LinearUnit.Code.MILE_US), mapUnit);
 
-					Envelope zoomExtent = new Envelope(mLocation, zoomWidth/10,
-							zoomWidth/10);
+					Envelope zoomExtent = new Envelope(mLocation,
+							zoomWidth / 10, zoomWidth / 10);
 
 					mMapView.setExtent(zoomExtent);
 
