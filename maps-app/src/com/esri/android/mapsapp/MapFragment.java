@@ -471,8 +471,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		lp.setMargins(25, 55, 25, 0);
 		item.setLayoutParams(lp);
 
-		SearchView sv = (SearchView) item.findViewById(R.id.searchView1);
-		sv.setIconifiedByDefault(false);
+		final SearchView mSearchview = (SearchView) item.findViewById(R.id.searchView1);
+		mSearchview.setIconifiedByDefault(false);
 		ImageView iv = (ImageView) item.findViewById(R.id.imageView1);
 
 		// set MapView into the activity layout
@@ -488,11 +488,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 		});
 		
-		sv.setOnQueryTextListener(new OnQueryTextListener() {
+		mSearchview.setOnQueryTextListener(new OnQueryTextListener() {
 			
 			@Override
 			public boolean onQueryTextSubmit(String query) {
 				onSearchButtonClicked(query);
+				mSearchview.clearFocus();
 				return true;
 			}
 			
