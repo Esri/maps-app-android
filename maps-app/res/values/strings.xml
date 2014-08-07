@@ -70,5 +70,8 @@
     <string name="noResultsFound">No results found</string>
     <string name="route_time">Time</string>
     <string name="route_distance">Distance</string>
-
+    <string name="swap_addresses">Interchange the addresses</string>
+	<string name="useCurrlocation">Use My Location</string>
+	<string name="routing_title">Routing</string>
+	<string name="clearText">Clear Text</string>
 </resources>

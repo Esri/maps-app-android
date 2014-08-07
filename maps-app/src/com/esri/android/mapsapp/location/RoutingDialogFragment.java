@@ -28,87 +28,135 @@ import android.app.DialogFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.SearchView;
 
 import com.esri.android.mapsapp.R;
 
 public class RoutingDialogFragment extends DialogFragment {
-  public static final String ARG_END_POINT_DEFAULT = "EndPointDefault";
-  
-  String mEndPointDefault;
+	public static final String ARG_END_POINT_DEFAULT = "EndPointDefault";
+	public static final String MY_LOCATION = "My Location";
 
-  EditText mStartText;
+	String mEndPointDefault;
 
-  EditText mEndText;
+	SearchView mStartText;
 
-  RoutingDialogListener mRoutingDialogListener;
+	SearchView mEndText;
 
-  /**
-   * A callback interface that all activities containing this fragment must implement, to receive a routing request
-   * from this fragment.
-   */
-  public interface RoutingDialogListener {
-    /**
-     * Callback for when the Get Route button is pressed.
-     * 
-     * @param startPoint String entered by user to define start point.
-     * @param endPoint String entered by user to define end point.
-     * @return true if routing task executed, false if parameters rejected. If this method rejects the parameters it
-     *         must display an explanatory Toast to the user before returning.
-     */
-    public boolean onGetRoute(String startPoint, String endPoint);
-  }
+	RoutingDialogListener mRoutingDialogListener;
 
-  // Mandatory empty constructor for fragment manager to recreate fragment after it's destroyed.
-  public RoutingDialogFragment() {
-  }
+	ImageView mSwap;
 
-  /**
-   * Sets listener for click on Get Route button.
-   * 
-   * @param listener
-   */
-  public void setRoutingDialogListener(RoutingDialogListener listener) {
-    mRoutingDialogListener = listener;
-  }
+	ImageView mCurrLocation;
 
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setStyle(DialogFragment.STYLE_NORMAL, 0);
+	Button mButton;
 
-    if (getArguments().containsKey(ARG_END_POINT_DEFAULT)) {
-      mEndPointDefault = getArguments().getString(ARG_END_POINT_DEFAULT);
-    } else {
-      mEndPointDefault = null;
-    }
-  }
+	/**
+	 * A callback interface that all activities containing this fragment must
+	 * implement, to receive a routing request from this fragment.
+	 */
+	public interface RoutingDialogListener {
+		/**
+		 * Callback for when the Get Route button is pressed.
+		 * 
+		 * @param startPoint
+		 *            String entered by user to define start point.
+		 * @param endPoint
+		 *            String entered by user to define end point.
+		 * @return true if routing task executed, false if parameters rejected.
+		 *         If this method rejects the parameters it must display an
+		 *         explanatory Toast to the user before returning.
+		 */
+		public boolean onGetRoute(String startPoint, String endPoint);
+	}
 
-  @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    View view = inflater.inflate(R.layout.routing_layout, container, false);
-    getDialog().setTitle(R.string.title_routing_dialog);
-    mStartText = (EditText) view.findViewById(R.id.startPoint);
-    mEndText = (EditText) view.findViewById(R.id.endPoint);
-    if (mEndPointDefault != null) {
-      mEndText.setText(mEndPointDefault);
-    }
-    Button button = (Button) view.findViewById(R.id.getRouteButton);
-    button.setOnClickListener(new View.OnClickListener() {
+	// Mandatory empty constructor for fragment manager to recreate fragment
+	// after it's destroyed.
+	public RoutingDialogFragment() {
+	}
 
-      @Override
-      public void onClick(View v) {
-        String startPoint = mStartText.getText().toString();
-        String endPoint = mEndText.getText().toString();
-        if (mRoutingDialogListener.onGetRoute(startPoint, endPoint)) {
-          dismiss();
-        }
-      }
+	/**
+	 * Sets listener for click on Get Route button.
+	 * 
+	 * @param listener
+	 */
+	public void setRoutingDialogListener(RoutingDialogListener listener) {
+		mRoutingDialogListener = listener;
+	}
 
-    });
-    return view;
-  }
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setStyle(DialogFragment.STYLE_NORMAL, 0);
+
+		if (getArguments().containsKey(ARG_END_POINT_DEFAULT)) {
+			mEndPointDefault = getArguments().getString(ARG_END_POINT_DEFAULT);
+		} else {
+			mEndPointDefault = null;
+		}
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.routing_layout, container, false);
+		getDialog().setTitle(R.string.title_routing_dialog);
+		mStartText = (SearchView) view.findViewById(R.id.startPoint);
+		mEndText = (SearchView) view.findViewById(R.id.endPoint);
+
+		mStartText.setIconifiedByDefault(false);
+		mEndText.setIconifiedByDefault(false);
+
+		mStartText.setQuery(MY_LOCATION, false);
+		mStartText.clearFocus();
+		mEndText.requestFocus();
+		if (mEndPointDefault != null) {
+			mEndText.setQuery(mEndPointDefault, false);
+		}
+		mSwap = (ImageView) view.findViewById(R.id.iv_interchange);
+		mCurrLocation = (ImageView) view.findViewById(R.id.iv_myDialogLocation);
+
+		mButton = (Button) view.findViewById(R.id.getRouteButton);
+		mButton.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				String startPoint = mStartText.getQuery().toString();
+				String endPoint = mEndText.getQuery().toString();
+				if (mRoutingDialogListener.onGetRoute(startPoint, endPoint)) {
+					dismiss();
+				}
+			}
+
+		});
+		
+		mSwap.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				//Swap the places
+				String temp = mStartText.getQuery().toString();
+				mStartText.setQuery(mEndText.getQuery().toString(),false);
+				mEndText.setQuery(temp,false);
+				
+			}
+		});
+		
+		mCurrLocation.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				
+				if(mStartText.isFocused())
+					mStartText.setQuery(MY_LOCATION, false);
+				else if(mEndText.isFocused())
+					mEndText.setQuery(MY_LOCATION, false);
+			}
+		});
+		return view;
+	}
 
 }
