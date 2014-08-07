@@ -281,7 +281,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.route:
-			showRoutingDialogFragemnt();			
+			showRoutingDialogFragment();			
 			return true;
 
 		case R.id.basemaps:
@@ -483,7 +483,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			@Override
 			public void onClick(View v) {
-				showRoutingDialogFragemnt();
+				showRoutingDialogFragment();
 
 			}
 		});
@@ -576,7 +576,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	}
 
-	private void showRoutingDialogFragemnt() {
+	/*
+	 * 
+	 * Displays the Dialog Fragment which allows users to
+	 * route
+	 */
+	private void showRoutingDialogFragment() {
 		// Show RoutingDialogFragment to get routing start and end points.
 		// This calls back to onGetRoute() to do the routing.
 		RoutingDialogFragment routingFrag = new RoutingDialogFragment();
