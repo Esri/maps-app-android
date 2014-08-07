@@ -58,6 +58,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.SearchView;
+import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -265,7 +266,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
 				if (keyCode == KeyEvent.KEYCODE_ENTER) {
-					onSearchButtonClicked(mSearchEditText);
+					onSearchButtonClicked(mSearchEditText.getText().toString());
 					return true;
 				}
 				return false;
@@ -486,6 +487,21 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			}
 		});
+		
+		sv.setOnQueryTextListener(new OnQueryTextListener() {
+			
+			@Override
+			public boolean onQueryTextSubmit(String query) {
+				onSearchButtonClicked(query);
+				return true;
+			}
+			
+			@Override
+			public boolean onQueryTextChange(String newText) {
+				return false;
+			}
+		});
+		
 		// Setup listener for map initialized
 		mMapView.setOnStatusChangedListener(new OnStatusChangedListener() {
 
@@ -701,7 +717,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * 
 	 * @param view
 	 */
-	public void onSearchButtonClicked(View view) {
+	public void onSearchButtonClicked(String address) {
 
 		// Hide virtual keyboard
 		InputMethodManager inputManager = (InputMethodManager) getActivity()
@@ -712,8 +728,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Remove any previous graphics and routes
 		resetGraphicsLayers();
 
-		// Obtain address and execute locator task
-		String address = mSearchEditText.getText().toString();
+		//  execute locator task
 		executeLocatorTask(address);
 	}
 
