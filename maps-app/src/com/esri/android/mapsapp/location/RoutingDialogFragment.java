@@ -103,6 +103,7 @@ public class RoutingDialogFragment extends DialogFragment {
         String startPoint = mStartText.getText().toString();
         String endPoint = mEndText.getText().toString();
         if (mRoutingDialogListener.onGetRoute(startPoint, endPoint)) {
+        	
           dismiss();
         }
       }

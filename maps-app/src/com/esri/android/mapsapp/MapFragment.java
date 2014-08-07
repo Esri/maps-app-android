@@ -244,7 +244,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		return mMapContainer;
 	}
 
-	/*@Override
+	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
 
@@ -270,8 +270,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Save a reference to the Directions button
 		mActionItemDirections = menu.findItem(R.id.directions);
 	}
-*/
-	/*@Override
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.route:
@@ -300,8 +300,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		case R.id.location:
 			// Toggle location tracking on or off
 			if (mIsLocationTracking) {
-//				mMapView.getLocationDisplayManager().setAutoPanMode(
-//						AutoPanMode.COMPASS);
+				// mMapView.getLocationDisplayManager().setAutoPanMode(
+				// AutoPanMode.COMPASS);
 				mIsLocationTracking = false;
 			} else {
 				startLocationTracking();
@@ -363,18 +363,19 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			return super.onOptionsItemSelected(item);
 		}
 	}
-*/
+
 	@Override
 	public void onPause() {
 		super.onPause();
-		mCompass.stop();
 		
 		// Pause the MapView and stop the LocationDisplayManager to save battery
 		if (mMapView != null) {
 			if (mIsLocationTracking) {
 				mMapView.getLocationDisplayManager().stop();
+				mCompass.stop();
 			}
 			mMapViewState = mMapView.retainState();
+			
 			mMapView.pause();
 		}
 	}
@@ -382,10 +383,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	@Override
 	public void onResume() {
 		super.onResume();
-		mCompass.start();
-
+		
 		// Start the MapView and LocationDisplayManager running again
 		if (mMapView != null) {
+			mCompass.start();
 			mMapView.unpause();
 			if (mMapViewState != null) {
 				mMapView.restoreState(mMapViewState);
@@ -394,11 +395,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				mMapView.getLocationDisplayManager().start();
 			}
 		}
-	}
-	
-	public void onStop(){
-		super.onStop();
-		mCompass.stop();
 	}
 
 	@Override
@@ -480,7 +476,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Create the Compass custom view, and add it onto
 		// the MapView.
 		mCompass = new Compass(mapView.getContext(), null, mapView);
-		
+
 		mCompass.setAlpha(1f);
 		compassFrameParams = new FrameLayout.LayoutParams(
 				FrameLayout.LayoutParams.WRAP_CONTENT,
@@ -510,7 +506,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				// TODO Auto-generated method stub
 
 				mMapView.setRotationAngle(0);
-				
+
 				if (mIsLocationTracking) {
 					mMapView.getLocationDisplayManager().setAutoPanMode(
 							AutoPanMode.COMPASS);
@@ -689,6 +685,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	void startLocationTracking() {
 		LocationDisplayManager locDispMgr = mMapView
 				.getLocationDisplayManager();
+		mCompass.start();
 		locDispMgr.setAutoPanMode(AutoPanMode.LOCATION);
 		locDispMgr.setAllowNetworkLocation(true);
 		locDispMgr.setLocationListener(new LocationListener() {
@@ -1221,6 +1218,5 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		float dp = px / (metrics.densityDpi / 160f);
 		return dp;
 	}
-	
-	
+
 }
