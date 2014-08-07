@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import android.R.drawable;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -115,13 +114,9 @@ import com.esri.core.tasks.na.StopGraphic;
 public class MapFragment extends Fragment implements BasemapsDialogListener,
 		RoutingDialogListener, OnCancelListener {
 	public static final String TAG = MapFragment.class.getSimpleName();
-
 	private static final String KEY_PORTAL_ITEM_ID = "KEY_PORTAL_ITEM_ID";
-
 	private static final String KEY_BASEMAP_ITEM_ID = "KEY_BASEMAP_ITEM_ID";
-
 	private static final String KEY_IS_LOCATION_TRACKING = "IsLocationTracking";
-
 	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
 
 	// The circle area specified by search_radius and input lat/lon serves
@@ -130,57 +125,40 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	// first
 	// GPS fix is retrieved.
 	private final static double SEARCH_RADIUS = 10;
-
 	private String mPortalItemId;
-
 	private String mBasemapPortalItemId;
-
 	private FrameLayout mMapContainer;
-
 	private MapView mMapView;
-
 	private CalloutStyle mCalloutStyle;
-
 	private int mMaxCalloutWidth;
-
 	private int mMaxCalloutHeight;
-
 	private String mMapViewState;
 
 	// GPS location tracking
 	private boolean mIsLocationTracking;
-
 	private Point mLocation = null;
 
 	// Graphics layer to show geocode and reverse geocode results
 	private GraphicsLayer mLocationLayer;
 
 	private Point mLocationLayerPoint;
-
 	private String mLocationLayerPointString;
 
 	// Graphics layer to show routes
 	private GraphicsLayer mRouteLayer;
 
 	private List<RouteDirection> mRoutingDirections;
-
 	private MenuItem mActionItemDirections;
 
 	// Spatial references used for projecting points
 	private final SpatialReference mWm = SpatialReference.create(102100);
 
 	private final SpatialReference mEgs = SpatialReference.create(4326);
-
 	private EditText mSearchEditText;
-
 	private MotionEvent mLongPressEvent;
-
 	Compass mCompass;
-
 	LinearLayout rel, haha;
-
 	private Button gpsButton;
-
 	LayoutParams compassFrameParams, gpsFrameParams;
 
 	@SuppressWarnings("rawtypes")
@@ -266,7 +244,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		return mMapContainer;
 	}
 
-	@Override
+	/*@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
 
@@ -292,8 +270,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Save a reference to the Directions button
 		mActionItemDirections = menu.findItem(R.id.directions);
 	}
-
-	@Override
+*/
+	/*@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.route:
@@ -322,8 +300,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		case R.id.location:
 			// Toggle location tracking on or off
 			if (mIsLocationTracking) {
-				mMapView.getLocationDisplayManager().setAutoPanMode(
-						AutoPanMode.COMPASS);
+//				mMapView.getLocationDisplayManager().setAutoPanMode(
+//						AutoPanMode.COMPASS);
 				mIsLocationTracking = false;
 			} else {
 				startLocationTracking();
@@ -385,11 +363,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			return super.onOptionsItemSelected(item);
 		}
 	}
-
+*/
 	@Override
 	public void onPause() {
 		super.onPause();
-
+		mCompass.stop();
+		
 		// Pause the MapView and stop the LocationDisplayManager to save battery
 		if (mMapView != null) {
 			if (mIsLocationTracking) {
@@ -403,6 +382,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	@Override
 	public void onResume() {
 		super.onResume();
+		mCompass.start();
 
 		// Start the MapView and LocationDisplayManager running again
 		if (mMapView != null) {
@@ -414,6 +394,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				mMapView.getLocationDisplayManager().start();
 			}
 		}
+	}
+	
+	public void onStop(){
+		super.onStop();
+		mCompass.stop();
 	}
 
 	@Override
@@ -495,6 +480,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Create the Compass custom view, and add it onto
 		// the MapView.
 		mCompass = new Compass(mapView.getContext(), null, mapView);
+		
 		mCompass.setAlpha(1f);
 		compassFrameParams = new FrameLayout.LayoutParams(
 				FrameLayout.LayoutParams.WRAP_CONTENT,
@@ -523,13 +509,13 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 
+				mMapView.setRotationAngle(0);
+				
 				if (mIsLocationTracking) {
-					gpsButton.setBackgroundResource(R.drawable.gps_copy);
 					mMapView.getLocationDisplayManager().setAutoPanMode(
 							AutoPanMode.COMPASS);
 					mIsLocationTracking = false;
 				} else {
-					gpsButton.setBackgroundResource(R.drawable.gps);
 					startLocationTracking();
 				}
 
@@ -575,8 +561,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				// where North is shown at the top of the device.
 				mMapView.setRotationAngle(0);
 
-				// Also reset the compass angle.
-				mCompass.setRotationAngle(0);
 			}
 
 		});
@@ -1237,4 +1221,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		float dp = px / (metrics.densityDpi / 160f);
 		return dp;
 	}
+	
+	
 }
