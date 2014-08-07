@@ -171,7 +171,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private final SpatialReference mEgs = SpatialReference.create(4326);
 
-	private EditText mSearchEditText;
 
 	private MotionEvent mLongPressEvent;
 
@@ -257,21 +256,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Inflate the menu items for use in the action bar
 		inflater.inflate(R.menu.actions, menu);
 
-		// Get a reference to the EditText widget for the search option
-		View searchRef = menu.findItem(R.id.menu_search).getActionView();
-		mSearchEditText = (EditText) searchRef.findViewById(R.id.searchText);
-
-		// Set key listener to start search if Enter key pressed
-		mSearchEditText.setOnKeyListener(new OnKeyListener() {
-			@Override
-			public boolean onKey(View v, int keyCode, KeyEvent event) {
-				if (keyCode == KeyEvent.KEYCODE_ENTER) {
-					onSearchButtonClicked(mSearchEditText.getText().toString());
-					return true;
-				}
-				return false;
-			}
-		});
 
 		// Save a reference to the Directions button
 		mActionItemDirections = menu.findItem(R.id.directions);
@@ -280,10 +264,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.route:
-			showRoutingDialogFragment();			
-			return true;
-
 		case R.id.basemaps:
 			// Show BasemapsDialogFragment to offer a choice if basemaps.
 			// This calls back to onBasemapChanged() if one is selected.
@@ -567,7 +547,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 					mLongPressEvent = null;
 					// Remove any previous graphics
 					resetGraphicsLayers();
-					mSearchEditText.setText("");
 				}
 				return super.onDragPointerUp(from, to);
 			}
@@ -576,7 +555,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	}
 
-	/*
+	/**
 	 * 
 	 * Displays the Dialog Fragment which allows users to
 	 * route
@@ -795,7 +774,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		}
 		// Remove any previous graphics and routes
 		resetGraphicsLayers();
-		mSearchEditText.setText("");
 
 		// Do the routing
 		executeRoutingTask(startPoint, endPoint);
