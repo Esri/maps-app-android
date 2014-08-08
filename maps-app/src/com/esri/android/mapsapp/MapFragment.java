@@ -830,6 +830,62 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		}
 	}
 
+	
+	/**
+	 * Shows the search result in the layout after successful geocoding and 
+	 * reverse geocoding
+	 * 
+	 *
+	 */
+	
+	private void showSearchResultLayout(String address){
+		// Remove the layout
+		mMapContainer.removeView(mSearchBox);
+
+		mSearchResult = mInflater.inflate(R.layout.searchresult, null);
+		LinearLayout item = (LinearLayout) mSearchResult
+				.findViewById(R.id.linearSearchResultLayout);
+		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+				WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.CENTER
+						| Gravity.TOP);
+		lp.setMargins(0, 55, 0, 0);
+		item.setLayoutParams(lp);
+
+		TextView tv = (TextView) item.findViewById(R.id.textView1);
+		tv.setTypeface(null, Typeface.BOLD);
+		tv.setText(address);
+		// Adding the layout
+		mMapContainer.addView(item);
+
+		ImageView iv_cancel = (ImageView) item
+				.findViewById(R.id.imageView3);
+		iv_cancel.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// Remove the search result view
+				mMapContainer.removeView(mSearchResult);
+				// Add the search box view
+				showSearchBox();
+				// Remove all graphics from the map
+				resetGraphicsLayers();
+
+			}
+		});
+
+		ImageView iv_route = (ImageView) item
+				.findViewById(R.id.imageView2);
+		iv_route.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				
+				onGetRoute(getString(R.string.my_location), mLocationLayerPointString);
+			}
+		});
+
+	}
+	
 	/*
 	 * This class provides an AsyncTask that performs a geolocation request on a
 	 * background thread and displays the first result on the map on the UI
@@ -919,50 +975,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				// Zoom map to geocode result location
 				mMapView.zoomToResolution(geocodeResult.getLocation(), 2);
 
-				// Remove the layout
-				mMapContainer.removeView(mSearchBox);
-
-				mSearchResult = mInflater.inflate(R.layout.searchresult, null);
-				LinearLayout item = (LinearLayout) mSearchResult
-						.findViewById(R.id.linearSearchResultLayout);
-				FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-						WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.CENTER
-								| Gravity.TOP);
-				lp.setMargins(0, 55, 0, 0);
-				item.setLayoutParams(lp);
-
-				TextView tv = (TextView) item.findViewById(R.id.textView1);
-				tv.setTypeface(null, Typeface.BOLD);
-				tv.setText(address);
-				// Adding the layout
-				mMapContainer.addView(item);
-
-				ImageView iv_cancel = (ImageView) item
-						.findViewById(R.id.imageView3);
-				iv_cancel.setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						// Remove the search result view
-						mMapContainer.removeView(mSearchResult);
-						// Add the search box view
-						showSearchBox();
-						// Remove all graphics from the map
-						resetGraphicsLayers();
-
-					}
-				});
-
-				ImageView iv_route = (ImageView) item
-						.findViewById(R.id.imageView2);
-				iv_route.setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						
-						onGetRoute(getString(R.string.my_location), mLocationLayerPointString);
-					}
-				});
+				showSearchResultLayout(address);
 
 			}
 		}
@@ -1285,6 +1298,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				showCallout(mPoint, mLocationLayerPointString, 10);
 				// center the map to result location
 				mMapView.centerAt(mPoint, true);
+				
+				
+				showSearchResultLayout(address.toString());
 			}
 		}
 	}
