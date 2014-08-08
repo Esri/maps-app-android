@@ -297,17 +297,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			basemapsFrag.show(getFragmentManager(), null);
 			return true;
 
-		case R.id.location:
-			// Toggle location tracking on or off
-			if (mIsLocationTracking) {
-				// mMapView.getLocationDisplayManager().setAutoPanMode(
-				// AutoPanMode.COMPASS);
-				mIsLocationTracking = false;
-			} else {
-				startLocationTracking();
-			}
-			return true;
-
 		case R.id.directions:
 			// Launch a DirectionsListFragment to display list of directions
 			final DirectionsDialogFragment frag = new DirectionsDialogFragment();
@@ -367,7 +356,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	@Override
 	public void onPause() {
 		super.onPause();
-		
+
 		// Pause the MapView and stop the LocationDisplayManager to save battery
 		if (mMapView != null) {
 			if (mIsLocationTracking) {
@@ -375,7 +364,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				mCompass.stop();
 			}
 			mMapViewState = mMapView.retainState();
-			
+
 			mMapView.pause();
 		}
 	}
@@ -383,7 +372,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	@Override
 	public void onResume() {
 		super.onResume();
-		
+
 		// Start the MapView and LocationDisplayManager running again
 		if (mMapView != null) {
 			mCompass.start();
@@ -478,19 +467,20 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mCompass = new Compass(mapView.getContext(), null, mapView);
 
 		mCompass.setAlpha(1f);
+
 		compassFrameParams = new FrameLayout.LayoutParams(
 				FrameLayout.LayoutParams.WRAP_CONTENT,
 				FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.TOP
 						| Gravity.RIGHT);
-		compassFrameParams.topMargin = 15;
+		compassFrameParams.topMargin = 200;
 		compassFrameParams.rightMargin = 35;
-
 		mCompass.setLayoutParams(compassFrameParams);
 
 		// set MapView into the activity layout
 		gpsButton = new Button(getActivity());
 
-		gpsButton.setBackgroundResource(R.drawable.gps);
+		gpsButton
+				.setBackgroundResource(R.drawable.ic_device_access_location_black);
 		gpsFrameParams = new FrameLayout.LayoutParams(
 				FrameLayout.LayoutParams.WRAP_CONTENT,
 				FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM
@@ -508,10 +498,16 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				mMapView.setRotationAngle(0);
 
 				if (mIsLocationTracking) {
+					gpsButton
+							.setBackgroundResource(R.drawable.ic_device_access_location_blue);
 					mMapView.getLocationDisplayManager().setAutoPanMode(
 							AutoPanMode.COMPASS);
+					mCompass.setVisibility(View.VISIBLE);
 					mIsLocationTracking = false;
 				} else {
+					gpsButton
+							.setBackgroundResource(R.drawable.ic_device_access_location_black);
+					mCompass.setVisibility(View.GONE);
 					startLocationTracking();
 				}
 
@@ -532,6 +528,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			@Override
 			public void onStatusChanged(Object source, STATUS status) {
+
 				Log.i(TAG, "MapView.setOnStatusChangedListener() status="
 						+ status.toString());
 				if (source == mMapView && status == STATUS.INITIALIZED) {
@@ -556,6 +553,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				// default rotation angle,
 				// where North is shown at the top of the device.
 				mMapView.setRotationAngle(0);
+				mCompass.setVisibility(View.GONE);
 
 			}
 
@@ -568,6 +566,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Setup OnTouchListener to detect and act on long-press
 		mMapView.setOnTouchListener(new MapOnTouchListener(getActivity(),
 				mMapView) {
+
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
@@ -584,6 +583,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				// long-press
 				mLongPressEvent = point;
 				super.onLongPress(point);
+
 			}
 
 			@Override
@@ -688,6 +688,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mCompass.start();
 		locDispMgr.setAutoPanMode(AutoPanMode.LOCATION);
 		locDispMgr.setAllowNetworkLocation(true);
+
 		locDispMgr.setLocationListener(new LocationListener() {
 
 			boolean locationChanged = false;
@@ -707,7 +708,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 					double zoomWidth = Unit.convertUnits(SEARCH_RADIUS,
 							Unit.create(LinearUnit.Code.MILE_US), mapUnit);
 					Envelope zoomExtent = new Envelope(mLocation,
-							zoomWidth / 100, zoomWidth / 100);
+							zoomWidth / 10, zoomWidth / 10);
 					mMapView.setExtent(zoomExtent);
 				}
 			}

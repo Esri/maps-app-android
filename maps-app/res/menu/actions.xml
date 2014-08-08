@@ -28,10 +28,5 @@
         android:icon="@android:drawable/ic_menu_edit"
         android:showAsAction="ifRoom"
         android:title="@string/action_measure"/>
-    <item
-        android:id="@+id/location"
-        android:icon="@android:drawable/ic_menu_mylocation"
-        android:showAsAction="ifRoom"
-        android:title="@string/action_location"/>
-    
+      
 </menu>
