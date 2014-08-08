@@ -451,46 +451,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		
 		mInflater = (LayoutInflater) getActivity()
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		mSearchBox = mInflater.inflate(R.layout.searchview, null);
-		LinearLayout item = (LinearLayout) mSearchBox
-				.findViewById(R.id.linearLayout1);
-
-		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-				WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.CENTER | Gravity.TOP);
-		lp.setMargins(0, 55, 0, 0);
-		item.setLayoutParams(lp);
-
-		final SearchView mSearchview = (SearchView) item.findViewById(R.id.searchView1);
-		mSearchview.setIconifiedByDefault(false);
-		ImageView iv = (ImageView) item.findViewById(R.id.imageView1);
-
 		// set MapView into the activity layout
 		mMapContainer.addView(mMapView);
-		mMapContainer.addView(item);
-
-		iv.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				showRoutingDialogFragment();
-
-			}
-		});
 		
-		mSearchview.setOnQueryTextListener(new OnQueryTextListener() {
-			
-			@Override
-			public boolean onQueryTextSubmit(String query) {
-				onSearchButtonClicked(query);
-				mSearchview.clearFocus();
-				return true;
-			}
-			
-			@Override
-			public boolean onQueryTextChange(String newText) {
-				return false;
-			}
-		});
+		showSearchBox();
 		
 		// Setup listener for map initialized
 		mMapView.setOnStatusChangedListener(new OnStatusChangedListener() {
@@ -582,8 +546,56 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		routingFrag.setArguments(arguments);
 		routingFrag.show(getFragmentManager(), null);
 
+		
 	}
+	
+	/**
+	 * 
+	 * 
+	 */
 
+		private void showSearchBox(){
+			mSearchBox = mInflater.inflate(R.layout.searchview, null);
+			LinearLayout item = (LinearLayout) mSearchBox
+					.findViewById(R.id.linearLayout1);
+
+			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+					WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.CENTER | Gravity.TOP);
+			lp.setMargins(0, 55, 0, 0);
+			item.setLayoutParams(lp);
+
+			final SearchView mSearchview = (SearchView) item.findViewById(R.id.searchView1);
+			mSearchview.setIconifiedByDefault(false);
+			ImageView iv = (ImageView) item.findViewById(R.id.imageView1);
+
+			mMapContainer.addView(item);
+
+			iv.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					showRoutingDialogFragment();
+
+				}
+			});
+			
+			mSearchview.setOnQueryTextListener(new OnQueryTextListener() {
+				
+				@Override
+				public boolean onQueryTextSubmit(String query) {
+					onSearchButtonClicked(query);
+					mSearchview.clearFocus();
+					return true;
+				}
+				
+				@Override
+				public boolean onQueryTextChange(String newText) {
+					return false;
+				}
+			});
+
+		}
+	
 	/**
 	 * Shows a mini callout on the map.
 	 * 
@@ -926,6 +938,30 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				tv.setText(address);
 				//Adding the layout
 				mMapContainer.addView(item);
+				
+				ImageView iv_cancel = (ImageView)item.findViewById(R.id.imageView3);
+				iv_cancel.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						//Remove the search result view
+						mMapContainer.removeView(mSearchResult);
+						//Add the search box view
+						showSearchBox();
+						//Remove all graphics from the map
+						resetGraphicsLayers();
+
+					}
+				});
+				
+				ImageView iv_route = (ImageView)item.findViewById(R.id.imageView2);
+				iv_route.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						showRoutingDialogFragment();
+					}
+				});
 
 			}
 		}
