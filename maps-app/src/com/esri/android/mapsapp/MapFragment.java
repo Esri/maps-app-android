@@ -122,11 +122,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static final String KEY_IS_LOCATION_TRACKING = "IsLocationTracking";
 
 	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
-	
-	private static int WIDTH_SEARCH_BOX = 600;
-	
-	private static int HEIGHT_SEARCH_BOX = 100;
 
+	private static int WIDTH_SEARCH_BOX = 600;
+
+	private static int HEIGHT_SEARCH_BOX = 100;
 
 	// The circle area specified by search_radius and input lat/lon serves
 	// searching purpose.
@@ -175,17 +174,18 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private final SpatialReference mEgs = SpatialReference.create(4326);
 
-
 	private MotionEvent mLongPressEvent;
 
 	@SuppressWarnings("rawtypes")
 	// - using this only to cancel pending tasks in a generic way
 	private AsyncTask mPendingTask;
-	
+
 	private View mSearchBox;
 	private View mSearchResult;
-	
+
 	private LayoutInflater mInflater;
+
+	private String mStartLocation, mEndLocation;
 
 	public static MapFragment newInstance(String portalItemId,
 			String basemapPortalItemId) {
@@ -264,7 +264,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Inflate the menu items for use in the action bar
 		inflater.inflate(R.menu.actions, menu);
-
 
 		// Save a reference to the Directions button
 		mActionItemDirections = menu.findItem(R.id.directions);
@@ -448,14 +447,13 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mMapView.setEsriLogoVisible(true);
 		mMapView.enableWrapAround(true);
 
-		
-		mInflater = (LayoutInflater) getActivity()
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mInflater = (LayoutInflater) getActivity().getSystemService(
+				Context.LAYOUT_INFLATER_SERVICE);
 		// set MapView into the activity layout
 		mMapContainer.addView(mMapView);
-		
+
 		showSearchBox();
-		
+
 		// Setup listener for map initialized
 		mMapView.setOnStatusChangedListener(new OnStatusChangedListener() {
 
@@ -530,8 +528,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	/**
 	 * 
-	 * Displays the Dialog Fragment which allows users to
-	 * route
+	 * Displays the Dialog Fragment which allows users to route
 	 */
 	private void showRoutingDialogFragment() {
 		// Show RoutingDialogFragment to get routing start and end points.
@@ -546,56 +543,57 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		routingFrag.setArguments(arguments);
 		routingFrag.show(getFragmentManager(), null);
 
-		
 	}
-	
+
 	/**
 	 * 
 	 * 
 	 */
 
-		private void showSearchBox(){
-			mSearchBox = mInflater.inflate(R.layout.searchview, null);
-			LinearLayout item = (LinearLayout) mSearchBox
-					.findViewById(R.id.linearLayout1);
+	private void showSearchBox() {
+		mSearchBox = mInflater.inflate(R.layout.searchview, null);
+		LinearLayout item = (LinearLayout) mSearchBox
+				.findViewById(R.id.linearLayout1);
 
-			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-					WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.CENTER | Gravity.TOP);
-			lp.setMargins(0, 55, 0, 0);
-			item.setLayoutParams(lp);
+		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+				WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.CENTER
+						| Gravity.TOP);
+		lp.setMargins(0, 55, 0, 0);
+		item.setLayoutParams(lp);
 
-			final SearchView mSearchview = (SearchView) item.findViewById(R.id.searchView1);
-			mSearchview.setIconifiedByDefault(false);
-			ImageView iv = (ImageView) item.findViewById(R.id.imageView1);
+		final SearchView mSearchview = (SearchView) item
+				.findViewById(R.id.searchView1);
+		mSearchview.setIconifiedByDefault(false);
+		ImageView iv = (ImageView) item.findViewById(R.id.imageView1);
 
-			mMapContainer.addView(item);
+		mMapContainer.addView(item);
 
-			iv.setOnClickListener(new OnClickListener() {
+		iv.setOnClickListener(new OnClickListener() {
 
-				@Override
-				public void onClick(View v) {
-					showRoutingDialogFragment();
+			@Override
+			public void onClick(View v) {
+				showRoutingDialogFragment();
 
-				}
-			});
-			
-			mSearchview.setOnQueryTextListener(new OnQueryTextListener() {
-				
-				@Override
-				public boolean onQueryTextSubmit(String query) {
-					onSearchButtonClicked(query);
-					mSearchview.clearFocus();
-					return true;
-				}
-				
-				@Override
-				public boolean onQueryTextChange(String newText) {
-					return false;
-				}
-			});
+			}
+		});
 
-		}
-	
+		mSearchview.setOnQueryTextListener(new OnQueryTextListener() {
+
+			@Override
+			public boolean onQueryTextSubmit(String query) {
+				onSearchButtonClicked(query);
+				mSearchview.clearFocus();
+				return true;
+			}
+
+			@Override
+			public boolean onQueryTextChange(String newText) {
+				return false;
+			}
+		});
+
+	}
+
 	/**
 	 * Shows a mini callout on the map.
 	 * 
@@ -734,7 +732,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Remove any previous graphics and routes
 		resetGraphicsLayers();
 
-		//  execute locator task
+		// execute locator task
 		executeLocatorTask(address);
 	}
 
@@ -921,42 +919,45 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 				// Zoom map to geocode result location
 				mMapView.zoomToResolution(geocodeResult.getLocation(), 2);
-				
-				//Remove the layout 
+
+				// Remove the layout
 				mMapContainer.removeView(mSearchBox);
-				
+
 				mSearchResult = mInflater.inflate(R.layout.searchresult, null);
 				LinearLayout item = (LinearLayout) mSearchResult
 						.findViewById(R.id.linearSearchResultLayout);
 				FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-						WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.CENTER | Gravity.TOP);
+						WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.CENTER
+								| Gravity.TOP);
 				lp.setMargins(0, 55, 0, 0);
 				item.setLayoutParams(lp);
-				
-				TextView tv = (TextView)item.findViewById(R.id.textView1);
+
+				TextView tv = (TextView) item.findViewById(R.id.textView1);
 				tv.setTypeface(null, Typeface.BOLD);
 				tv.setText(address);
-				//Adding the layout
+				// Adding the layout
 				mMapContainer.addView(item);
-				
-				ImageView iv_cancel = (ImageView)item.findViewById(R.id.imageView3);
+
+				ImageView iv_cancel = (ImageView) item
+						.findViewById(R.id.imageView3);
 				iv_cancel.setOnClickListener(new OnClickListener() {
-					
+
 					@Override
 					public void onClick(View v) {
-						//Remove the search result view
+						// Remove the search result view
 						mMapContainer.removeView(mSearchResult);
-						//Add the search box view
+						// Add the search box view
 						showSearchBox();
-						//Remove all graphics from the map
+						// Remove all graphics from the map
 						resetGraphicsLayers();
 
 					}
 				});
-				
-				ImageView iv_route = (ImageView)item.findViewById(R.id.imageView2);
+
+				ImageView iv_route = (ImageView) item
+						.findViewById(R.id.imageView2);
 				iv_route.setOnClickListener(new OnClickListener() {
-					
+
 					@Override
 					public void onClick(View v) {
 						showRoutingDialogFragment();
@@ -1016,11 +1017,14 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				LocatorFindParameters startParam = params[0].get(0);
 				if (startParam.getText()
 						.equals(getString(R.string.my_location))) {
+					mStartLocation = getString(R.string.my_location);
 					startPoint = (Point) GeometryEngine.project(mLocation, mWm,
 							mEgs);
 				} else {
 					geocodeStartResult = locator.find(startParam);
 					startPoint = geocodeStartResult.get(0).getLocation();
+					mStartLocation = geocodeStartResult.get(0).getAddress();
+
 					if (isCancelled()) {
 						return null;
 					}
@@ -1028,8 +1032,16 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 				// Geocode the destination
 				LocatorFindParameters endParam = params[0].get(1);
-				geocodeEndResult = locator.find(endParam);
-				endPoint = geocodeEndResult.get(0).getLocation();
+				if (endParam.getText().equals(getString(R.string.my_location))) {
+					mEndLocation = getString(R.string.my_location);
+					endPoint = (Point) GeometryEngine.project(mLocation, mWm,
+							mEgs);
+				} else {
+					geocodeEndResult = locator.find(endParam);
+					endPoint = geocodeEndResult.get(0).getLocation();
+					mEndLocation = geocodeEndResult.get(0).getAddress();
+				}
+
 			} catch (Exception e) {
 				mException = e;
 				return null;
@@ -1122,6 +1134,48 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			// Save routing directions so user can display them later
 			mRoutingDirections = route.getRoutingDirections();
 			mActionItemDirections.setVisible(true);
+
+			mMapContainer.removeView(mSearchResult);
+			mMapContainer.removeView(mSearchBox);
+
+			mSearchResult = mInflater.inflate(R.layout.searchresult, null);
+
+			LinearLayout item = (LinearLayout) mSearchResult
+					.findViewById(R.id.linearSearchResultLayout);
+			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+					WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.CENTER
+							| Gravity.TOP);
+			lp.setMargins(0, 55, 0, 0);
+			item.setLayoutParams(lp);
+
+			TextView tv = (TextView) item.findViewById(R.id.textView1);
+			tv.setTypeface(null, Typeface.BOLD);
+			tv.setText("From: " + mStartLocation + " \nTo: " + mEndLocation);
+			// Adding the layout
+			mMapContainer.addView(item);
+
+			ImageView iv_car = (ImageView) item.findViewById(R.id.imageView1);
+			iv_car.setImageResource(R.drawable.ic_action_sedan2);
+
+			ImageView iv_cancel = (ImageView) item
+					.findViewById(R.id.imageView3);
+			iv_cancel.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					// Remove the search result view
+					mMapContainer.removeView(mSearchResult);
+					// Add the search box view
+					showSearchBox();
+					// Remove all graphics from the map
+					resetGraphicsLayers();
+
+				}
+			});
+
+			ImageView iv_route = (ImageView) item.findViewById(R.id.imageView2);
+			iv_route.setVisibility(View.GONE);
+
 		}
 
 		Graphic createMarkerGraphic(Point point, boolean endPoint) {
