@@ -122,7 +122,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
 
-	private static int WIDTH_SEARCH_BOX = 600;
+	private static int WIDTH_SEARCH_BOX = 700;
 
 	private static int HEIGHT_SEARCH_BOX = 100;
 
@@ -968,7 +968,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 					@Override
 					public void onClick(View v) {
-						showRoutingDialogFragment();
+						
+						onGetRoute("My Location", mLocationLayerPointString);
 					}
 				});
 
