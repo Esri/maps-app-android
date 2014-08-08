@@ -34,6 +34,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
@@ -123,6 +124,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
 	
 	private static int WIDTH_SEARCH_BOX = 600;
+	
+	private static int HEIGHT_SEARCH_BOX = 100;
+
 
 	// The circle area specified by search_radius and input lat/lon serves
 	// searching purpose.
@@ -177,6 +181,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	@SuppressWarnings("rawtypes")
 	// - using this only to cancel pending tasks in a generic way
 	private AsyncTask mPendingTask;
+	
+	private View mSearchBox;
+	private View mSearchResult;
+	
+	private LayoutInflater mInflater;
 
 	public static MapFragment newInstance(String portalItemId,
 			String basemapPortalItemId) {
@@ -439,15 +448,15 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mMapView.setEsriLogoVisible(true);
 		mMapView.enableWrapAround(true);
 
-		View view;
-		LayoutInflater inflater = (LayoutInflater) getActivity()
+		
+		mInflater = (LayoutInflater) getActivity()
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		view = inflater.inflate(R.layout.searchview, null);
-		LinearLayout item = (LinearLayout) view
+		mSearchBox = mInflater.inflate(R.layout.searchview, null);
+		LinearLayout item = (LinearLayout) mSearchBox
 				.findViewById(R.id.linearLayout1);
 
 		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-				WIDTH_SEARCH_BOX, LayoutParams.WRAP_CONTENT, Gravity.CENTER | Gravity.TOP);
+				WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.CENTER | Gravity.TOP);
 		lp.setMargins(0, 55, 0, 0);
 		item.setLayoutParams(lp);
 
@@ -900,6 +909,24 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 				// Zoom map to geocode result location
 				mMapView.zoomToResolution(geocodeResult.getLocation(), 2);
+				
+				//Remove the layout 
+				mMapContainer.removeView(mSearchBox);
+				
+				mSearchResult = mInflater.inflate(R.layout.searchresult, null);
+				LinearLayout item = (LinearLayout) mSearchResult
+						.findViewById(R.id.linearSearchResultLayout);
+				FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+						WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.CENTER | Gravity.TOP);
+				lp.setMargins(0, 55, 0, 0);
+				item.setLayoutParams(lp);
+				
+				TextView tv = (TextView)item.findViewById(R.id.textView1);
+				tv.setTypeface(null, Typeface.BOLD);
+				tv.setText(address);
+				//Adding the layout
+				mMapContainer.addView(item);
+
 			}
 		}
 
