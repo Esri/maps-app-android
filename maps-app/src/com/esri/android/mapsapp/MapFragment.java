@@ -41,7 +41,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.KeyEvent;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -49,10 +49,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -123,6 +121,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static final String KEY_IS_LOCATION_TRACKING = "IsLocationTracking";
 
 	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
+	
+	private static int WIDTH_SEARCH_BOX = 600;
 
 	// The circle area specified by search_radius and input lat/lon serves
 	// searching purpose.
@@ -447,8 +447,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				.findViewById(R.id.linearLayout1);
 
 		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-		lp.setMargins(25, 55, 25, 0);
+				WIDTH_SEARCH_BOX, LayoutParams.WRAP_CONTENT, Gravity.CENTER | Gravity.TOP);
+		lp.setMargins(0, 55, 0, 0);
 		item.setLayoutParams(lp);
 
 		final SearchView mSearchview = (SearchView) item.findViewById(R.id.searchView1);
