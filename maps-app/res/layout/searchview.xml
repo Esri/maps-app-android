@@ -20,9 +20,9 @@
         android:id="@+id/imageView1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_alignRight="@+id/searchView1"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
-        android:src="@drawable/ic_loc_directions" />
+        android:src="@drawable/ic_loc_directions" 
+        android:contentDescription="@string/icon_for_directions_and_routing"/>
 
 </LinearLayout>

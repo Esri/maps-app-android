@@ -13,14 +13,14 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
+        android:contentDescription="@string/icon_for_searchResult"
         android:src="@drawable/pin_circle_red" />
 
     <TextView
         android:id="@+id/textView1"
         android:layout_width="0dp"
         android:layout_height="60dp"
-        android:layout_weight="6"
-        android:text="TextView" />
+        android:layout_weight="6" />
 
     <ImageView
         android:id="@+id/imageView2"
@@ -28,7 +28,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_weight="1"
-        android:src="@drawable/ic_loc_directions" />
+        android:src="@drawable/ic_loc_directions" 
+        android:contentDescription="@string/icon_for_directions_and_routing"/>
 
     <ImageView
         android:id="@+id/imageView3"
@@ -37,6 +38,7 @@
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="5dp"
         android:layout_weight="1"
-        android:src="@drawable/ic_action_cancel" />
+        android:src="@drawable/ic_action_cancel"
+        android:contentDescription="@string/icon_cancel" />
 
 </LinearLayout>
