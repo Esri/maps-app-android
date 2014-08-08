@@ -427,7 +427,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// set MapView into the activity layout
 		mMapContainer.addView(mMapView);
 
-		showSearchBox();
+		showSearchBoxLayout();
 
 		// Setup listener for map initialized
 		mMapView.setOnStatusChangedListener(new OnStatusChangedListener() {
@@ -550,23 +550,20 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * 
 	 */
 
-	private void showSearchBox() {
+	private void showSearchBoxLayout() {
 		mSearchBox = mInflater.inflate(R.layout.searchview, null);
-		LinearLayout item = (LinearLayout) mSearchBox
-				.findViewById(R.id.linearLayout1);
-
 		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
 				WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.CENTER
 						| Gravity.TOP);
 		lp.setMargins(0, 55, 0, 0);
-		item.setLayoutParams(lp);
+		mSearchBox.setLayoutParams(lp);
 
-		final SearchView mSearchview = (SearchView) item
+		final SearchView mSearchview = (SearchView) mSearchBox
 				.findViewById(R.id.searchView1);
 		mSearchview.setIconifiedByDefault(false);
-		ImageView iv = (ImageView) item.findViewById(R.id.imageView1);
+		ImageView iv = (ImageView) mSearchBox.findViewById(R.id.imageView1);
 
-		mMapContainer.addView(item);
+		mMapContainer.addView(mSearchBox);
 
 		iv.setOnClickListener(new OnClickListener() {
 
@@ -834,7 +831,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	/**
 	 * Shows the search result in the layout after successful geocoding and 
 	 * reverse geocoding
-	 * 
 	 *
 	 */
 	
@@ -843,21 +839,19 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mMapContainer.removeView(mSearchBox);
 
 		mSearchResult = mInflater.inflate(R.layout.searchresult, null);
-		LinearLayout item = (LinearLayout) mSearchResult
-				.findViewById(R.id.linearSearchResultLayout);
 		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
 				WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.CENTER
 						| Gravity.TOP);
 		lp.setMargins(0, 55, 0, 0);
-		item.setLayoutParams(lp);
+		mSearchResult.setLayoutParams(lp);
 
-		TextView tv = (TextView) item.findViewById(R.id.textView1);
+		TextView tv = (TextView) mSearchResult.findViewById(R.id.textView1);
 		tv.setTypeface(null, Typeface.BOLD);
 		tv.setText(address);
 		// Adding the layout
-		mMapContainer.addView(item);
+		mMapContainer.addView(mSearchResult);
 
-		ImageView iv_cancel = (ImageView) item
+		ImageView iv_cancel = (ImageView) mSearchResult
 				.findViewById(R.id.imageView3);
 		iv_cancel.setOnClickListener(new OnClickListener() {
 
@@ -866,20 +860,19 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				// Remove the search result view
 				mMapContainer.removeView(mSearchResult);
 				// Add the search box view
-				showSearchBox();
+				showSearchBoxLayout();
 				// Remove all graphics from the map
 				resetGraphicsLayers();
 
 			}
 		});
 
-		ImageView iv_route = (ImageView) item
+		ImageView iv_route = (ImageView) mSearchResult
 				.findViewById(R.id.imageView2);
 		iv_route.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				
 				onGetRoute(getString(R.string.my_location), mLocationLayerPointString);
 			}
 		});
@@ -1147,22 +1140,28 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			// Save routing directions so user can display them later
 			mRoutingDirections = route.getRoutingDirections();
 
+			//Remove the views
 			mMapContainer.removeView(mSearchResult);
 			mMapContainer.removeView(mSearchBox);
 
+			//Inflate the layout from the xml
 			mSearchResult = mInflater.inflate(R.layout.searchresult, null);
 
 			LinearLayout item = (LinearLayout) mSearchResult
 					.findViewById(R.id.linearSearchResultLayout);
+			
+			//Set Layout params for the view
 			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-					WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.CENTER
+					WIDTH_SEARCH_BOX, (HEIGHT_SEARCH_BOX+30), Gravity.CENTER
 							| Gravity.TOP);
 			lp.setMargins(0, 55, 0, 0);
 			item.setLayoutParams(lp);
 
+			//Set the text to be displayed
 			TextView tv = (TextView) item.findViewById(R.id.textView1);
 			tv.setTypeface(null, Typeface.BOLD);
 			tv.setText("From: " + mStartLocation + " \nTo: " + mEndLocation);
+			
 			// Adding the layout
 			mMapContainer.addView(item);
 
@@ -1177,8 +1176,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				public void onClick(View v) {
 					// Remove the search result view
 					mMapContainer.removeView(mSearchResult);
-					// Add the search box view
-					showSearchBox();
+					// Add the default search box view
+					showSearchBoxLayout();
 					// Remove all graphics from the map
 					resetGraphicsLayers();
 
