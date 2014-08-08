@@ -166,8 +166,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private List<RouteDirection> mRoutingDirections;
 
-	private MenuItem mActionItemDirections;
-
 	// Spatial references used for projecting points
 	private final SpatialReference mWm = SpatialReference.create(102100);
 
@@ -264,8 +262,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Inflate the menu items for use in the action bar
 		inflater.inflate(R.menu.actions, menu);
 
-		// Save a reference to the Directions button
-		mActionItemDirections = menu.findItem(R.id.directions);
 	}
 
 	@Override
@@ -289,10 +285,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 			return true;
 
-		case R.id.directions:
-			// Launch a DirectionsListFragment to display list of directions
-			showDirectionsDialogFragment();
-			return true;
 
 		case R.id.action_measure:
 			// initialize some resources for the measure tool, optional.
@@ -506,7 +498,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 
 		});
-
+	
 	}
 
 	/**
@@ -648,7 +640,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mLocationLayerPoint = null;
 		mLocationLayerPointString = null;
 		mRoutingDirections = null;
-		mActionItemDirections.setVisible(false);
 
 		hideCallout();
 	}
@@ -969,7 +960,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 					@Override
 					public void onClick(View v) {
 						
-						onGetRoute("My Location", mLocationLayerPointString);
+						onGetRoute(getString(R.string.my_location), mLocationLayerPointString);
 					}
 				});
 
@@ -1142,7 +1133,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			// Save routing directions so user can display them later
 			mRoutingDirections = route.getRoutingDirections();
-			mActionItemDirections.setVisible(true);
 
 			mMapContainer.removeView(mSearchResult);
 			mMapContainer.removeView(mSearchBox);
