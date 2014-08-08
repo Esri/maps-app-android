@@ -292,23 +292,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		case R.id.directions:
 			// Launch a DirectionsListFragment to display list of directions
-			final DirectionsDialogFragment frag = new DirectionsDialogFragment();
-			frag.setRoutingDirections(mRoutingDirections,
-					new DirectionsDialogListener() {
-
-						@Override
-						public void onDirectionSelected(int position) {
-							// User has selected a particular direction -
-							// dismiss the dialog and
-							// zoom to the selected direction
-							frag.dismiss();
-							RouteDirection direction = mRoutingDirections
-									.get(position);
-							mMapView.setExtent(direction.getGeometry());
-						}
-
-					});
-			getFragmentManager().beginTransaction().add(frag, null).commit();
+			showDirectionsDialogFragment();
 			return true;
 
 		case R.id.action_measure:
@@ -544,7 +528,32 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		routingFrag.show(getFragmentManager(), null);
 
 	}
+	
+	/**
+	 * Displays the Directions Dialog Fragment
+	 */
 
+	private void showDirectionsDialogFragment(){
+		// Launch a DirectionsListFragment to display list of directions
+		final DirectionsDialogFragment frag = new DirectionsDialogFragment();
+		frag.setRoutingDirections(mRoutingDirections,
+				new DirectionsDialogListener() {
+
+					@Override
+					public void onDirectionSelected(int position) {
+						// User has selected a particular direction -
+						// dismiss the dialog and
+						// zoom to the selected direction
+						frag.dismiss();
+						RouteDirection direction = mRoutingDirections
+								.get(position);
+						mMapView.setExtent(direction.getGeometry());
+					}
+
+				});
+		getFragmentManager().beginTransaction().add(frag, null).commit();
+
+	}
 	/**
 	 * 
 	 * 
@@ -1173,8 +1182,15 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				}
 			});
 
-			ImageView iv_route = (ImageView) item.findViewById(R.id.imageView2);
-			iv_route.setVisibility(View.GONE);
+			ImageView iv_directions = (ImageView) item.findViewById(R.id.imageView2);
+			iv_directions.setImageResource(R.drawable.ic_routing_take_center_fork);
+			iv_directions.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					showDirectionsDialogFragment();				
+				}
+			});
 
 		}
 
