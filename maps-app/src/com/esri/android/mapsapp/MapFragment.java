@@ -122,9 +122,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
 
-	private static int WIDTH_SEARCH_BOX = 700;
+	private static int WIDTH_SEARCH_BOX = 1000;
 
-	private static int HEIGHT_SEARCH_BOX = 100;
+	private static int HEIGHT_SEARCH_BOX = 125;
 
 	// The circle area specified by search_radius and input lat/lon serves
 	// searching purpose.
@@ -553,7 +553,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private void showSearchBoxLayout() {
 		mSearchBox = mInflater.inflate(R.layout.searchview, null);
 		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-				WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.CENTER
+				WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.LEFT
 						| Gravity.TOP);
 		lp.setMargins(0, 55, 0, 0);
 		mSearchBox.setLayoutParams(lp);
