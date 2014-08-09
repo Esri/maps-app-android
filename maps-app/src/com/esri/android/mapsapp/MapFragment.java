@@ -552,11 +552,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private void showSearchBoxLayout() {
 		mSearchBox = mInflater.inflate(R.layout.searchview, null);
-		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+		FrameLayout.LayoutParams searchLayoutParams = new FrameLayout.LayoutParams(
 				WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.LEFT
 						| Gravity.TOP);
-		lp.setMargins(0, 55, 0, 0);
-		mSearchBox.setLayoutParams(lp);
+		searchLayoutParams.setMargins(0, 55, 0, 0);
+		mSearchBox.setLayoutParams(searchLayoutParams);
 
 		final SearchView mSearchview = (SearchView) mSearchBox
 				.findViewById(R.id.searchView1);
