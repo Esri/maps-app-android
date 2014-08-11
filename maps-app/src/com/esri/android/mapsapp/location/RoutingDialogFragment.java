@@ -30,8 +30,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SearchView;
 
 import com.esri.android.mapsapp.R;
@@ -55,8 +57,6 @@ public class RoutingDialogFragment extends DialogFragment {
 	RoutingDialogListener mRoutingDialogListener;
 
 	ImageView mSwap;
-
-	ImageView mCurrLocation;
 
 	Button mButton;
 
@@ -110,15 +110,30 @@ public class RoutingDialogFragment extends DialogFragment {
 			Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.routing_layout, container, false);
 		getDialog().setTitle(R.string.title_routing_dialog);
+		//Initialize searchviews
 		mStartText = (SearchView) view.findViewById(R.id.startPoint);
 		mEndText = (SearchView) view.findViewById(R.id.endPoint);
 
 		mStartText.setIconifiedByDefault(false);
 		mEndText.setIconifiedByDefault(false);
 		
+		//Set hint for searchviews
 		mStartText.setQueryHint(SEARCH_FROM);
 		mEndText.setQueryHint(SEARCH_TO);
 
+		
+		//Change default search icons for the search view
+		int startIconId = mStartText.getContext().getResources().
+                getIdentifier("android:id/search_mag_icon", null, null);
+		ImageView start_icon = (ImageView)mStartText.findViewById(startIconId);
+		start_icon.setImageResource(R.drawable.pin_circle_red);
+
+		int endIconId = mEndText.getContext().getResources().
+                getIdentifier("android:id/search_mag_icon", null, null);
+		ImageView end_icon = (ImageView)mEndText.findViewById(endIconId);
+		end_icon.setImageResource(R.drawable.pin_circle_blue);
+
+		
 		mStartText.setQuery(MY_LOCATION, false);
 		mStartText.clearFocus();
 		mEndText.requestFocus();
@@ -126,7 +141,6 @@ public class RoutingDialogFragment extends DialogFragment {
 			mEndText.setQuery(mEndPointDefault, false);
 		}
 		mSwap = (ImageView) view.findViewById(R.id.iv_interchange);
-		mCurrLocation = (ImageView) view.findViewById(R.id.iv_myDialogLocation);
 
 		mButton = (Button) view.findViewById(R.id.getRouteButton);
 		mButton.setOnClickListener(new View.OnClickListener() {
@@ -154,17 +168,6 @@ public class RoutingDialogFragment extends DialogFragment {
 			}
 		});
 		
-		mCurrLocation.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				
-				if(mStartText.isFocused())
-					mStartText.setQuery(MY_LOCATION, false);
-				else if(mEndText.isFocused())
-					mEndText.setQuery(MY_LOCATION, false);
-			}
-		});
 		return view;
 	}
 
