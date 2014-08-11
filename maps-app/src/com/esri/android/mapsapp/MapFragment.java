@@ -51,6 +51,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -121,8 +122,17 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static final String KEY_IS_LOCATION_TRACKING = "IsLocationTracking";
 
 	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
+	
+	private static FrameLayout.LayoutParams mlayoutParams;
 
-	private static int WIDTH_SEARCH_BOX = 1000;
+	private static int TOP_MARGIN_SEARCH = 55;
+	
+	private static int LEFT_MARGIN_SEARCH = 15;
+
+	private static int RIGHT_MARGIN_SEARCH = 15;
+
+	private static int BOTTOM_MARGIN_SEARCH = 0;
+
 
 	private static int HEIGHT_SEARCH_BOX = 125;
 
@@ -424,6 +434,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		mInflater = (LayoutInflater) getActivity().getSystemService(
 				Context.LAYOUT_INFLATER_SERVICE);
+		
+		 mlayoutParams = new FrameLayout.LayoutParams(
+				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, Gravity.LEFT
+						| Gravity.TOP);
+		 mlayoutParams.setMargins(LEFT_MARGIN_SEARCH, TOP_MARGIN_SEARCH, RIGHT_MARGIN_SEARCH, BOTTOM_MARGIN_SEARCH);
+
 		// set MapView into the activity layout
 		mMapContainer.addView(mMapView);
 
@@ -551,12 +567,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 */
 
 	private void showSearchBoxLayout() {
+		
 		mSearchBox = mInflater.inflate(R.layout.searchview, null);
-		FrameLayout.LayoutParams searchLayoutParams = new FrameLayout.LayoutParams(
-				WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.LEFT
-						| Gravity.TOP);
-		searchLayoutParams.setMargins(0, 55, 0, 0);
-		mSearchBox.setLayoutParams(searchLayoutParams);
+		
+		mSearchBox.setLayoutParams(mlayoutParams);
 
 		final SearchView mSearchview = (SearchView) mSearchBox
 				.findViewById(R.id.searchView1);
@@ -839,11 +853,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mMapContainer.removeView(mSearchBox);
 
 		mSearchResult = mInflater.inflate(R.layout.searchresult, null);
-		FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-				WIDTH_SEARCH_BOX, HEIGHT_SEARCH_BOX, Gravity.CENTER
-						| Gravity.TOP);
-		lp.setMargins(0, 55, 0, 0);
-		mSearchResult.setLayoutParams(lp);
+		mSearchResult.setLayoutParams(mlayoutParams);
 
 		TextView tv = (TextView) mSearchResult.findViewById(R.id.textView1);
 		tv.setTypeface(null, Typeface.BOLD);
@@ -1150,12 +1160,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			LinearLayout item = (LinearLayout) mSearchResult
 					.findViewById(R.id.linearSearchResultLayout);
 			
-			//Set Layout params for the view
-			FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-					WIDTH_SEARCH_BOX, (HEIGHT_SEARCH_BOX+30), Gravity.CENTER
-							| Gravity.TOP);
-			lp.setMargins(0, 55, 0, 0);
-			item.setLayoutParams(lp);
+						item.setLayoutParams(mlayoutParams);
 
 			//Set the text to be displayed
 			TextView tv = (TextView) item.findViewById(R.id.textView1);
