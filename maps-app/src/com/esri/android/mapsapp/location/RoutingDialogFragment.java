@@ -38,7 +38,13 @@ import com.esri.android.mapsapp.R;
 
 public class RoutingDialogFragment extends DialogFragment {
 	public static final String ARG_END_POINT_DEFAULT = "EndPointDefault";
+	
 	public static final String MY_LOCATION = "My Location";
+	
+	private static final String SEARCH_FROM = "From";
+	
+	private static final String SEARCH_TO = "To";
+
 
 	String mEndPointDefault;
 
@@ -109,6 +115,9 @@ public class RoutingDialogFragment extends DialogFragment {
 
 		mStartText.setIconifiedByDefault(false);
 		mEndText.setIconifiedByDefault(false);
+		
+		mStartText.setQueryHint(SEARCH_FROM);
+		mEndText.setQueryHint(SEARCH_TO);
 
 		mStartText.setQuery(MY_LOCATION, false);
 		mStartText.clearFocus();

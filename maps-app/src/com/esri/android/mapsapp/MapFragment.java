@@ -122,6 +122,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
 	
+	private static final String SEARCH_HINT = "Search";
+	
 	private static FrameLayout.LayoutParams mlayoutParams;
 
 	private static int TOP_MARGIN_SEARCH = 55;
@@ -577,6 +579,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		ImageView iv_route = (ImageView) mSearchBox.findViewById(R.id.imageView1);
 
 		mSearchview.setIconifiedByDefault(false);
+		mSearchview.setQueryHint(SEARCH_HINT);
 
 		//Adding the layout to the map conatiner
 		mMapContainer.addView(mSearchBox);
