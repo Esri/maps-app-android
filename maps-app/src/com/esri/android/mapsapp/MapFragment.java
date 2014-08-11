@@ -482,6 +482,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			public void onClick(View v) {
 
 				mCompass.setRotationAngle(0);
+				mCompass.setVisibility(View.GONE);
+				mMapView.setRotationAngle(0);
 				mMapView.getLocationDisplayManager().setAutoPanMode(
 						AutoPanMode.LOCATION);
 			}
