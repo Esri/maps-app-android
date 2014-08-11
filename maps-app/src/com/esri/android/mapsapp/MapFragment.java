@@ -113,6 +113,7 @@ import com.esri.core.tasks.na.StopGraphic;
  */
 public class MapFragment extends Fragment implements BasemapsDialogListener,
 		RoutingDialogListener, OnCancelListener {
+
 	public static final String TAG = MapFragment.class.getSimpleName();
 	private static final String KEY_PORTAL_ITEM_ID = "KEY_PORTAL_ITEM_ID";
 	private static final String KEY_BASEMAP_ITEM_ID = "KEY_BASEMAP_ITEM_ID";
@@ -465,15 +466,14 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Create the Compass custom view, and add it onto
 		// the MapView.
 		mCompass = new Compass(mapView.getContext(), null, mapView);
-
 		mCompass.setAlpha(1f);
 
 		compassFrameParams = new FrameLayout.LayoutParams(
 				FrameLayout.LayoutParams.WRAP_CONTENT,
 				FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.TOP
 						| Gravity.RIGHT);
-		compassFrameParams.topMargin = 200;
-		compassFrameParams.rightMargin = 35;
+		compassFrameParams.setMargins(900, 300, 0, 0);
+
 		mCompass.setLayoutParams(compassFrameParams);
 
 		// set MapView into the activity layout

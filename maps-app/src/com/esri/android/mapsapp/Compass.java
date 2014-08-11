@@ -36,7 +36,8 @@ public class Compass extends View implements SensorEventListener {
 
 		mPaint = new Paint();
 		mMatrix = new Matrix();
-		mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_compass);
+		mBitmap = BitmapFactory.decodeResource(getResources(),
+				R.drawable.ic_compass);
 		sensorManager = (SensorManager) context
 				.getSystemService(Context.SENSOR_SERVICE);
 		gsensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);

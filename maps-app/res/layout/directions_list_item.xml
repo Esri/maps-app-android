@@ -37,8 +37,8 @@
             android:gravity="left|center_vertical"
             android:singleLine="false"
             android:text="These are the directions and they may be more than one line"
-            android:textSize="@dimen/route_overview_text_size"
             android:textColor="@android:color/black"
+            android:textSize="@dimen/route_overview_text_size"
             tools:ignore="HardcodedText" />
 
         <TextView
@@ -49,8 +49,8 @@
             android:gravity="right|center_vertical"
             android:singleLine="true"
             android:text="19.3 km"
-            android:textSize="@dimen/route_overview_text_size"
             android:textColor="@android:color/darker_gray"
+            android:textSize="@dimen/route_overview_text_size"
             tools:ignore="HardcodedText" />
     </LinearLayout>
 
