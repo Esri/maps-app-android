@@ -902,6 +902,66 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	}
 	
+	/**
+	 * Shows the Routing result layout after successful routing
+	 *
+	 */
+	
+	private void showRoutingResultLayout(){
+		
+		//Remove the layours
+		mMapContainer.removeView(mSearchResult);
+		mMapContainer.removeView(mSearchBox);
+
+		//Inflate the new layout from the xml file
+		mSearchResult = mInflater.inflate(R.layout.searchresult, null);
+
+		mSearchResult.setLayoutParams(mlayoutParams);
+
+		//Initialize the textview and display the text
+		TextView tv = (TextView) mSearchResult.findViewById(R.id.textView1);
+		tv.setTypeface(null, Typeface.BOLD);
+		tv.setText("From: " + mStartLocation + " \nTo: " + mEndLocation);
+		
+		// Adding the layout
+		mMapContainer.addView(mSearchResult);
+
+		//Set the image as the car icon
+		ImageView iv_car = (ImageView) mSearchResult.findViewById(R.id.imageView1);
+		iv_car.setImageResource(R.drawable.ic_action_sedan2);
+
+		//Setup the listener for the "Cancel" icon
+		ImageView iv_cancel = (ImageView) mSearchResult
+				.findViewById(R.id.imageView3);
+		iv_cancel.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// Remove the search result view
+				mMapContainer.removeView(mSearchResult);
+				// Add the default search box view
+				showSearchBoxLayout();
+				// Remove all graphics from the map
+				resetGraphicsLayers();
+
+			}
+		});
+		
+		//Set up the listener for the "Show Directions" icon
+		ImageView iv_directions = (ImageView) mSearchResult.findViewById(R.id.imageView2);
+		iv_directions.setImageResource(R.drawable.ic_routing_take_center_fork);
+		iv_directions.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				showDirectionsDialogFragment();				
+			}
+		});
+
+
+	}
+	
+
 	/*
 	 * This class provides an AsyncTask that performs a geolocation request on a
 	 * background thread and displays the first result on the map on the UI
@@ -1162,55 +1222,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			// Save routing directions so user can display them later
 			mRoutingDirections = route.getRoutingDirections();
-
-			//Remove the layours
-			mMapContainer.removeView(mSearchResult);
-			mMapContainer.removeView(mSearchBox);
-
-			//Inflate the new layout from the xml file
-			mSearchResult = mInflater.inflate(R.layout.searchresult, null);
-
-			mSearchResult.setLayoutParams(mlayoutParams);
-
-			//Initialize the textview and display the text
-			TextView tv = (TextView) mSearchResult.findViewById(R.id.textView1);
-			tv.setTypeface(null, Typeface.BOLD);
-			tv.setText("From: " + mStartLocation + " \nTo: " + mEndLocation);
 			
-			// Adding the layout
-			mMapContainer.addView(mSearchResult);
-
-			//Set the image as the car icon
-			ImageView iv_car = (ImageView) mSearchResult.findViewById(R.id.imageView1);
-			iv_car.setImageResource(R.drawable.ic_action_sedan2);
-
-			//Setup the listener for the "Cancel" icon
-			ImageView iv_cancel = (ImageView) mSearchResult
-					.findViewById(R.id.imageView3);
-			iv_cancel.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					// Remove the search result view
-					mMapContainer.removeView(mSearchResult);
-					// Add the default search box view
-					showSearchBoxLayout();
-					// Remove all graphics from the map
-					resetGraphicsLayers();
-
-				}
-			});
-			
-			//Set up the listener for the "Show Directions" icon
-			ImageView iv_directions = (ImageView) mSearchResult.findViewById(R.id.imageView2);
-			iv_directions.setImageResource(R.drawable.ic_routing_take_center_fork);
-			iv_directions.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View v) {
-					showDirectionsDialogFragment();				
-				}
-			});
+			//Show Routing Result Layout
+			showRoutingResultLayout();
 
 		}
 
