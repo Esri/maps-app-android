@@ -35,6 +35,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.AsyncTask;
@@ -67,6 +68,7 @@ import com.esri.android.map.LocationDisplayManager;
 import com.esri.android.map.LocationDisplayManager.AutoPanMode;
 import com.esri.android.map.MapOnTouchListener;
 import com.esri.android.map.MapView;
+import com.esri.android.map.event.OnPinchListener;
 import com.esri.android.map.event.OnSingleTapListener;
 import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.mapsapp.account.AccountManager;
@@ -458,7 +460,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * 
 	 * @param mapView
 	 */
-	private void setMapView(MapView mapView) {
+	private void setMapView(final MapView mapView) {
 		mMapView = mapView;
 		mMapView.setEsriLogoVisible(true);
 		mMapView.enableWrapAround(true);
@@ -475,6 +477,15 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		compassFrameParams.setMargins(900, 300, 0, 0);
 
 		mCompass.setLayoutParams(compassFrameParams);
+
+		mCompass.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+
+				mCompass.setRotationAngle(0);
+				mMapView.getLocationDisplayManager().setAutoPanMode(
+						AutoPanMode.LOCATION);
+			}
+		});
 
 		// set MapView into the activity layout
 		gpsButton = new Button(getActivity());
@@ -498,16 +509,24 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				mMapView.setRotationAngle(0);
 
 				if (mIsLocationTracking) {
+					mCompass.sensorManager
+							.registerListener(mCompass.sel, mCompass.gsensor,
+									SensorManager.SENSOR_DELAY_NORMAL);
+					mCompass.sensorManager
+							.registerListener(mCompass.sel, mCompass.msensor,
+									SensorManager.SENSOR_DELAY_NORMAL);
 					gpsButton
 							.setBackgroundResource(R.drawable.ic_device_access_location_blue);
 					mMapView.getLocationDisplayManager().setAutoPanMode(
 							AutoPanMode.COMPASS);
 					mCompass.setVisibility(View.VISIBLE);
+
 					mIsLocationTracking = false;
 				} else {
 					gpsButton
 							.setBackgroundResource(R.drawable.ic_device_access_location_black);
 					mCompass.setVisibility(View.GONE);
+					mCompass.sensorManager.unregisterListener(mCompass.sel);
 					startLocationTracking();
 				}
 
@@ -519,6 +538,54 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mMapContainer.addView(mCompass);
 		mMapContainer.addView(gpsButton);
 
+		mMapView.setOnPinchListener(new OnPinchListener() {
+
+			@Override
+			public void postPointersDown(float x1, float y1, float x2,
+					float y2, double factor) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void postPointersMove(float x1, float y1, float x2,
+					float y2, double factor) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void postPointersUp(float x1, float y1, float x2, float y2,
+					double factor) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void prePointersDown(float x1, float y1, float x2, float y2,
+					double factor) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void prePointersMove(float x1, float y1, float x2, float y2,
+					double factor) {
+				// TODO Auto-generated method stub
+				mCompass.setVisibility(View.VISIBLE);
+				mCompass.sensorManager.unregisterListener(mCompass.sel);
+				mCompass.setRotationAngle(mMapView.getRotationAngle());
+
+			}
+
+			@Override
+			public void prePointersUp(float x1, float y1, float x2, float y2,
+					double factor) {
+				// TODO Auto-generated method stub
+
+			}
+
+		});
 		// create button add parameters frame layout add to map container
 
 		// Setup listener for map initialized
@@ -543,20 +610,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 					addGraphicLayers();
 				}
 			}
-		});
-
-		mMapView.setOnSingleTapListener(new OnSingleTapListener() {
-			@Override
-			public void onSingleTap(float x, float y) {
-
-				// When a single tap gesture is received, reset the map to its
-				// default rotation angle,
-				// where North is shown at the top of the device.
-				mMapView.setRotationAngle(0);
-				mCompass.setVisibility(View.GONE);
-
-			}
-
 		});
 
 		// Setup use of magnifier on a long press on the map

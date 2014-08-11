@@ -24,12 +24,13 @@ public class Compass extends View implements SensorEventListener {
 	Matrix mMatrix;
 	MapView mMapView;
 
-	private SensorManager sensorManager;
-	private Sensor gsensor;
-	private Sensor msensor;
+	public SensorManager sensorManager;
+	public Sensor gsensor;
+	public Sensor msensor;
 	private float[] mGravity = new float[3];
 	private float[] mGeomagnetic = new float[3];
 	private float azimuth = 0f;
+	public SensorEventListener sel;
 
 	public Compass(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -51,32 +52,33 @@ public class Compass extends View implements SensorEventListener {
 	public Compass(Context context, AttributeSet attrs, MapView mapView) {
 		this(context, attrs);
 
-		// Save reference to the MapView passed in to this compass.
 		mMapView = mapView;
 		if (mMapView != null) {
-
-			// Set an OnPinchListener on the map to listen for the pinch gesture
-			// which may change the map rotation.
 			mMapView.setOnPinchListener(new OnPinchListener() {
 
 				private static final long serialVersionUID = 1L;
 
+				@Override
 				public void prePointersUp(float arg0, float arg1, float arg2,
 						float arg3, double arg4) {
 				}
 
+				@Override
 				public void prePointersMove(float arg0, float arg1, float arg2,
 						float arg3, double arg4) {
 				}
 
+				@Override
 				public void prePointersDown(float arg0, float arg1, float arg2,
 						float arg3, double arg4) {
 				}
 
+				@Override
 				public void postPointersUp(float arg0, float arg1, float arg2,
 						float arg3, double arg4) {
 				}
 
+				@Override
 				public void postPointersMove(float arg0, float arg1,
 						float arg2, float arg3, double arg4) {
 					// Update the compass angle from the map rotation angle (the
@@ -94,10 +96,11 @@ public class Compass extends View implements SensorEventListener {
 	}
 
 	public void start() {
+		sel = this;
 		sensorManager.registerListener(this, gsensor,
-				SensorManager.SENSOR_DELAY_GAME);
+				SensorManager.SENSOR_DELAY_NORMAL);
 		sensorManager.registerListener(this, msensor,
-				SensorManager.SENSOR_DELAY_GAME);
+				SensorManager.SENSOR_DELAY_NORMAL);
 	}
 
 	public void stop() {
