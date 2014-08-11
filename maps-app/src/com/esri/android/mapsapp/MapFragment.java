@@ -55,7 +55,6 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
@@ -132,9 +131,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static int RIGHT_MARGIN_SEARCH = 15;
 
 	private static int BOTTOM_MARGIN_SEARCH = 0;
-
-
-	private static int HEIGHT_SEARCH_BOX = 125;
 
 	// The circle area specified by search_radius and input lat/lon serves
 	// searching purpose.
@@ -432,9 +428,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mMapView.setEsriLogoVisible(true);
 		mMapView.enableWrapAround(true);
 
+		//Creating an inflater
 		mInflater = (LayoutInflater) getActivity().getSystemService(
 				Context.LAYOUT_INFLATER_SERVICE);
 		
+		//Setting up the layout params for the searchview and searchresult layout
 		 mlayoutParams = new FrameLayout.LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, Gravity.LEFT
 						| Gravity.TOP);
@@ -443,6 +441,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// set MapView into the activity layout
 		mMapContainer.addView(mMapView);
 
+		//Displaying the searchbox layout
 		showSearchBoxLayout();
 
 		// Setup listener for map initialized
@@ -568,18 +567,22 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private void showSearchBoxLayout() {
 		
+		//Infalting the layout from the xml file
 		mSearchBox = mInflater.inflate(R.layout.searchview, null);
-		
+		//Setting the layout parameters to the layout
 		mSearchBox.setLayoutParams(mlayoutParams);
-
+		//Initializing the serachview and the image view
 		final SearchView mSearchview = (SearchView) mSearchBox
 				.findViewById(R.id.searchView1);
-		mSearchview.setIconifiedByDefault(false);
-		ImageView iv = (ImageView) mSearchBox.findViewById(R.id.imageView1);
+		ImageView iv_route = (ImageView) mSearchBox.findViewById(R.id.imageView1);
 
+		mSearchview.setIconifiedByDefault(false);
+
+		//Adding the layout to the map conatiner
 		mMapContainer.addView(mSearchBox);
 
-		iv.setOnClickListener(new OnClickListener() {
+		//Setup the listener for the route onclick
+		iv_route.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
@@ -588,6 +591,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 		});
 
+		//Setup the listener when the search button is pressed on the keyboard
 		mSearchview.setOnQueryTextListener(new OnQueryTextListener() {
 
 			@Override
@@ -849,18 +853,23 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 */
 	
 	private void showSearchResultLayout(String address){
-		// Remove the layout
+		// Remove the layouts
 		mMapContainer.removeView(mSearchBox);
+		mMapContainer.removeView(mSearchResult);
 
+		//Inflate the new layout from the xml file
 		mSearchResult = mInflater.inflate(R.layout.searchresult, null);
+		//Set layout parameters
 		mSearchResult.setLayoutParams(mlayoutParams);
 
+		//Initialize the textview and set its text
 		TextView tv = (TextView) mSearchResult.findViewById(R.id.textView1);
 		tv.setTypeface(null, Typeface.BOLD);
 		tv.setText(address);
-		// Adding the layout
+		// Adding the search result layout to the map container
 		mMapContainer.addView(mSearchResult);
 
+		//Setup the listener for the "cancel" icon 
 		ImageView iv_cancel = (ImageView) mSearchResult
 				.findViewById(R.id.imageView3);
 		iv_cancel.setOnClickListener(new OnClickListener() {
@@ -877,6 +886,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 		});
 
+		//Set up the listener for the "Get Directions" icon
 		ImageView iv_route = (ImageView) mSearchResult
 				.findViewById(R.id.imageView2);
 		iv_route.setOnClickListener(new OnClickListener() {
@@ -1150,30 +1160,29 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			// Save routing directions so user can display them later
 			mRoutingDirections = route.getRoutingDirections();
 
-			//Remove the views
+			//Remove the layours
 			mMapContainer.removeView(mSearchResult);
 			mMapContainer.removeView(mSearchBox);
 
-			//Inflate the layout from the xml
+			//Inflate the new layout from the xml file
 			mSearchResult = mInflater.inflate(R.layout.searchresult, null);
 
-			LinearLayout item = (LinearLayout) mSearchResult
-					.findViewById(R.id.linearSearchResultLayout);
-			
-						item.setLayoutParams(mlayoutParams);
+			mSearchResult.setLayoutParams(mlayoutParams);
 
-			//Set the text to be displayed
-			TextView tv = (TextView) item.findViewById(R.id.textView1);
+			//Initialize the textview and display the text
+			TextView tv = (TextView) mSearchResult.findViewById(R.id.textView1);
 			tv.setTypeface(null, Typeface.BOLD);
 			tv.setText("From: " + mStartLocation + " \nTo: " + mEndLocation);
 			
 			// Adding the layout
-			mMapContainer.addView(item);
+			mMapContainer.addView(mSearchResult);
 
-			ImageView iv_car = (ImageView) item.findViewById(R.id.imageView1);
+			//Set the image as the car icon
+			ImageView iv_car = (ImageView) mSearchResult.findViewById(R.id.imageView1);
 			iv_car.setImageResource(R.drawable.ic_action_sedan2);
 
-			ImageView iv_cancel = (ImageView) item
+			//Setup the listener for the "Cancel" icon
+			ImageView iv_cancel = (ImageView) mSearchResult
 					.findViewById(R.id.imageView3);
 			iv_cancel.setOnClickListener(new OnClickListener() {
 
@@ -1188,8 +1197,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 				}
 			});
-
-			ImageView iv_directions = (ImageView) item.findViewById(R.id.imageView2);
+			
+			//Set up the listener for the "Show Directions" icon
+			ImageView iv_directions = (ImageView) mSearchResult.findViewById(R.id.imageView2);
 			iv_directions.setImageResource(R.drawable.ic_routing_take_center_fork);
 			iv_directions.setOnClickListener(new OnClickListener() {
 				
