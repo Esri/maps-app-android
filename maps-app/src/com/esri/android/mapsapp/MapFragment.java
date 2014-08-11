@@ -1325,13 +1325,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 				// Address string is saved for use in routing
 				mLocationLayerPointString = address.toString();
-				// show results in callout
-				showCallout(mPoint, mLocationLayerPointString, 10);
 				// center the map to result location
 				mMapView.centerAt(mPoint, true);
 				
-				
+				//Show the result on the search result layout
 				showSearchResultLayout(address.toString());
+				
 			}
 		}
 	}
