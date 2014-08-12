@@ -33,18 +33,18 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SearchView;
+import android.widget.SearchView.OnQueryTextListener;
 
 import com.esri.android.mapsapp.R;
 
 public class RoutingDialogFragment extends DialogFragment {
 	public static final String ARG_END_POINT_DEFAULT = "EndPointDefault";
-	
-	public static final String MY_LOCATION = "My Location";
-	
-	private static final String SEARCH_FROM = "From";
-	
-	private static final String SEARCH_TO = "To";
 
+	public static final String MY_LOCATION = "My Location";
+
+	private static final String SEARCH_FROM = "From";
+
+	private static final String SEARCH_TO = "To";
 
 	String mEndPointDefault;
 
@@ -108,30 +108,28 @@ public class RoutingDialogFragment extends DialogFragment {
 			Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.routing_layout, container, false);
 		getDialog().setTitle(R.string.title_routing_dialog);
-		//Initialize searchviews
+		// Initialize searchviews
 		mStartText = (SearchView) view.findViewById(R.id.startPoint);
 		mEndText = (SearchView) view.findViewById(R.id.endPoint);
 
 		mStartText.setIconifiedByDefault(false);
 		mEndText.setIconifiedByDefault(false);
-		
-		//Set hint for searchviews
+
+		// Set hint for searchviews
 		mStartText.setQueryHint(SEARCH_FROM);
 		mEndText.setQueryHint(SEARCH_TO);
 
-		
-		//Change default search icons for the search view
-		int startIconId = mStartText.getContext().getResources().
-                getIdentifier("android:id/search_mag_icon", null, null);
-		ImageView start_icon = (ImageView)mStartText.findViewById(startIconId);
+		// Change default search icons for the search view
+		int startIconId = mStartText.getContext().getResources()
+				.getIdentifier("android:id/search_mag_icon", null, null);
+		ImageView start_icon = (ImageView) mStartText.findViewById(startIconId);
 		start_icon.setImageResource(R.drawable.pin_circle_red);
 
-		int endIconId = mEndText.getContext().getResources().
-                getIdentifier("android:id/search_mag_icon", null, null);
-		ImageView end_icon = (ImageView)mEndText.findViewById(endIconId);
+		int endIconId = mEndText.getContext().getResources()
+				.getIdentifier("android:id/search_mag_icon", null, null);
+		ImageView end_icon = (ImageView) mEndText.findViewById(endIconId);
 		end_icon.setImageResource(R.drawable.pin_circle_blue);
 
-		
 		mStartText.setQuery(MY_LOCATION, false);
 		mStartText.clearFocus();
 		mEndText.requestFocus();
@@ -141,6 +139,7 @@ public class RoutingDialogFragment extends DialogFragment {
 		mSwap = (ImageView) view.findViewById(R.id.iv_interchange);
 
 		mButton = (Button) view.findViewById(R.id.getRouteButton);
+		//Set up onClick listener for the "Get Route" button
 		mButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
@@ -153,19 +152,73 @@ public class RoutingDialogFragment extends DialogFragment {
 			}
 
 		});
-		
+
+		//Interchange the text in the searchviews
 		mSwap.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
-				//Swap the places
+				// Swap the places
 				String temp = mStartText.getQuery().toString();
-				mStartText.setQuery(mEndText.getQuery().toString(),false);
-				mEndText.setQuery(temp,false);
-				
+				mStartText.setQuery(mEndText.getQuery().toString(), false);
+				mEndText.setQuery(temp, false);
+
+			}
+		});
+
+		//Setup listener when the search button is clicked n the keyboard for the searchviews
+		mEndText.setOnQueryTextListener(new OnQueryTextListener() {
+
+			@Override
+			public boolean onQueryTextSubmit(String query) {
+				String startPoint = mStartText.getQuery().toString();
+				String endPoint = mEndText.getQuery().toString();
+				if (startPoint.length() > 0) {
+					if (mRoutingDialogListener.onGetRoute(startPoint, endPoint)) {
+						dismiss();
+					}
+				}
+				else{
+					//"From" text is null
+					mEndText.clearFocus();
+					mStartText.requestFocus();
+				}
+				return true;
+			}
+
+			@Override
+			public boolean onQueryTextChange(String newText) {
+				// TODO Auto-generated method stub
+				return false;
 			}
 		});
 		
+		mStartText.setOnQueryTextListener(new OnQueryTextListener() {
+
+			@Override
+			public boolean onQueryTextSubmit(String query) {
+				String startPoint = mStartText.getQuery().toString();
+				String endPoint = mEndText.getQuery().toString();
+				if (endPoint.length() > 0) {
+					if (mRoutingDialogListener.onGetRoute(startPoint, endPoint)) {
+						dismiss();
+					}
+				}
+				else{
+					//"To" text is null
+					mStartText.clearFocus();
+					mEndText.requestFocus();
+				}
+				return true;
+			}
+
+			@Override
+			public boolean onQueryTextChange(String newText) {
+				// TODO Auto-generated method stub
+				return false;
+			}
+		});
+
 		return view;
 	}
 
