@@ -69,7 +69,6 @@ import com.esri.android.map.LocationDisplayManager.AutoPanMode;
 import com.esri.android.map.MapOnTouchListener;
 import com.esri.android.map.MapView;
 import com.esri.android.map.event.OnPinchListener;
-import com.esri.android.map.event.OnSingleTapListener;
 import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
@@ -161,9 +160,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private EditText mSearchEditText;
 	private MotionEvent mLongPressEvent;
 	Compass mCompass;
-	LinearLayout rel, haha;
-	private Button gpsButton;
-	LayoutParams compassFrameParams, gpsFrameParams;
+	LayoutParams compassFrameParams;
 
 	@SuppressWarnings("rawtypes")
 	// - using this only to cancel pending tasks in a generic way
@@ -291,6 +288,27 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 			routingFrag.setArguments(arguments);
 			routingFrag.show(getFragmentManager(), null);
+			return true;
+
+		case R.id.location:
+			// Toggle location tracking on or off
+			mMapView.setRotationAngle(0);
+			if (mIsLocationTracking) {
+				mCompass.sensorManager.registerListener(mCompass.sel,
+						mCompass.gsensor, SensorManager.SENSOR_DELAY_NORMAL);
+				mCompass.sensorManager.registerListener(mCompass.sel,
+						mCompass.msensor, SensorManager.SENSOR_DELAY_NORMAL);
+				mMapView.getLocationDisplayManager().setAutoPanMode(
+						AutoPanMode.COMPASS);
+				mCompass.setVisibility(View.VISIBLE);
+
+				mIsLocationTracking = false;
+			} else {
+				mCompass.setVisibility(View.GONE);
+				mCompass.sensorManager.unregisterListener(mCompass.sel);
+				startLocationTracking();
+			}
+
 			return true;
 
 		case R.id.basemaps:
@@ -490,56 +508,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 		});
 
-		// set MapView into the activity layout
-		gpsButton = new Button(getActivity());
-
-		gpsButton
-				.setBackgroundResource(R.drawable.ic_action_location);
-		gpsFrameParams = new FrameLayout.LayoutParams(
-				FrameLayout.LayoutParams.WRAP_CONTENT,
-				FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM
-						| Gravity.RIGHT);
-		gpsFrameParams.bottomMargin = 25;
-		gpsFrameParams.rightMargin = 15;
-		gpsButton.setLayoutParams(gpsFrameParams);
-
-		gpsButton.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-
-				mMapView.setRotationAngle(0);
-
-				if (mIsLocationTracking) {
-					mCompass.sensorManager
-							.registerListener(mCompass.sel, mCompass.gsensor,
-									SensorManager.SENSOR_DELAY_NORMAL);
-					mCompass.sensorManager
-							.registerListener(mCompass.sel, mCompass.msensor,
-									SensorManager.SENSOR_DELAY_NORMAL);
-					gpsButton
-							.setBackgroundResource(R.drawable.ic_device_access_location_blue);
-					mMapView.getLocationDisplayManager().setAutoPanMode(
-							AutoPanMode.COMPASS);
-					mCompass.setVisibility(View.VISIBLE);
-
-					mIsLocationTracking = false;
-				} else {
-					gpsButton
-							.setBackgroundResource(R.drawable.ic_action_location);
-					mCompass.setVisibility(View.GONE);
-					mCompass.sensorManager.unregisterListener(mCompass.sel);
-					startLocationTracking();
-				}
-
-			}
-
-		});
-
 		mMapContainer.addView(mMapView);
 		mMapContainer.addView(mCompass);
-		mMapContainer.addView(gpsButton);
+		// mMapContainer.addView(gpsButton);
 
 		mMapView.setOnPinchListener(new OnPinchListener() {
 
