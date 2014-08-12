@@ -908,7 +908,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * Shows the Routing result layout after successful routing
 	 * 
 	 * @param time
-	 * @param miles
+	 * @param distance
 	 * 
 	 */
 
@@ -935,11 +935,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Initialize the textvieww and display the text
 		TextView tv_from = (TextView) mSearchResult.findViewById(R.id.tv_from);
 		tv_from.setTypeface(null, Typeface.BOLD);
-		tv_from.setText(mStartLocation);
+		tv_from.setText(" "+mStartLocation);
 
 		TextView tv_to = (TextView) mSearchResult.findViewById(R.id.tv_to);
 		tv_to.setTypeface(null, Typeface.BOLD);
-		tv_to.setText(mEndLocation);
+		tv_to.setText(" "+mEndLocation);
 
 		// Rounding off the values
 		distance = Math.round(distance * 10.0) / 10.0;
