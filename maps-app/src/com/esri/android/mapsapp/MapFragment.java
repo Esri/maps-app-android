@@ -121,13 +121,13 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static final String KEY_IS_LOCATION_TRACKING = "IsLocationTracking";
 
 	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
-	
+
 	private static final String SEARCH_HINT = "Search";
-	
+
 	private static FrameLayout.LayoutParams mlayoutParams;
 
 	private static int TOP_MARGIN_SEARCH = 55;
-	
+
 	private static int LEFT_MARGIN_SEARCH = 15;
 
 	private static int RIGHT_MARGIN_SEARCH = 15;
@@ -293,7 +293,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 			return true;
 
-
 		case R.id.action_measure:
 			// initialize some resources for the measure tool, optional.
 			Unit[] linearUnits = new Unit[] {
@@ -430,20 +429,21 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mMapView.setEsriLogoVisible(true);
 		mMapView.enableWrapAround(true);
 
-		//Creating an inflater
+		// Creating an inflater
 		mInflater = (LayoutInflater) getActivity().getSystemService(
 				Context.LAYOUT_INFLATER_SERVICE);
-		
-		//Setting up the layout params for the searchview and searchresult layout
-		 mlayoutParams = new FrameLayout.LayoutParams(
-				LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, Gravity.LEFT
-						| Gravity.TOP);
-		 mlayoutParams.setMargins(LEFT_MARGIN_SEARCH, TOP_MARGIN_SEARCH, RIGHT_MARGIN_SEARCH, BOTTOM_MARGIN_SEARCH);
+
+		// Setting up the layout params for the searchview and searchresult
+		// layout
+		mlayoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+				LayoutParams.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP);
+		mlayoutParams.setMargins(LEFT_MARGIN_SEARCH, TOP_MARGIN_SEARCH,
+				RIGHT_MARGIN_SEARCH, BOTTOM_MARGIN_SEARCH);
 
 		// set MapView into the activity layout
 		mMapContainer.addView(mMapView);
 
-		//Displaying the searchbox layout
+		// Displaying the searchbox layout
 		showSearchBoxLayout();
 
 		// Setup listener for map initialized
@@ -515,7 +515,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 
 		});
-	
+
 	}
 
 	/**
@@ -536,12 +536,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		routingFrag.show(getFragmentManager(), null);
 
 	}
-	
+
 	/**
 	 * Displays the Directions Dialog Fragment
 	 */
 
-	private void showDirectionsDialogFragment(){
+	private void showDirectionsDialogFragment() {
 		// Launch a DirectionsListFragment to display list of directions
 		final DirectionsDialogFragment frag = new DirectionsDialogFragment();
 		frag.setRoutingDirections(mRoutingDirections,
@@ -562,29 +562,31 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		getFragmentManager().beginTransaction().add(frag, null).commit();
 
 	}
+
 	/**
 	 * 
 	 * 
 	 */
 
 	private void showSearchBoxLayout() {
-		
-		//Infalting the layout from the xml file
+
+		// Infalting the layout from the xml file
 		mSearchBox = mInflater.inflate(R.layout.searchview, null);
-		//Setting the layout parameters to the layout
+		// Setting the layout parameters to the layout
 		mSearchBox.setLayoutParams(mlayoutParams);
-		//Initializing the serachview and the image view
+		// Initializing the serachview and the image view
 		final SearchView mSearchview = (SearchView) mSearchBox
 				.findViewById(R.id.searchView1);
-		ImageView iv_route = (ImageView) mSearchBox.findViewById(R.id.imageView1);
+		ImageView iv_route = (ImageView) mSearchBox
+				.findViewById(R.id.imageView1);
 
 		mSearchview.setIconifiedByDefault(false);
 		mSearchview.setQueryHint(SEARCH_HINT);
 
-		//Adding the layout to the map conatiner
+		// Adding the layout to the map conatiner
 		mMapContainer.addView(mSearchBox);
 
-		//Setup the listener for the route onclick
+		// Setup the listener for the route onclick
 		iv_route.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -594,7 +596,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 		});
 
-		//Setup the listener when the search button is pressed on the keyboard
+		// Setup the listener when the search button is pressed on the keyboard
 		mSearchview.setOnQueryTextListener(new OnQueryTextListener() {
 
 			@Override
@@ -848,31 +850,30 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		}
 	}
 
-	
 	/**
-	 * Shows the search result in the layout after successful geocoding and 
+	 * Shows the search result in the layout after successful geocoding and
 	 * reverse geocoding
-	 *
+	 * 
 	 */
-	
-	private void showSearchResultLayout(String address){
+
+	private void showSearchResultLayout(String address) {
 		// Remove the layouts
 		mMapContainer.removeView(mSearchBox);
 		mMapContainer.removeView(mSearchResult);
 
-		//Inflate the new layout from the xml file
-		mSearchResult = mInflater.inflate(R.layout.searchresult, null);
-		//Set layout parameters
+		// Inflate the new layout from the xml file
+		mSearchResult = mInflater.inflate(R.layout.search_result, null);
+		// Set layout parameters
 		mSearchResult.setLayoutParams(mlayoutParams);
 
-		//Initialize the textview and set its text
+		// Initialize the textview and set its text
 		TextView tv = (TextView) mSearchResult.findViewById(R.id.textView1);
 		tv.setTypeface(null, Typeface.BOLD);
 		tv.setText(address);
 		// Adding the search result layout to the map container
 		mMapContainer.addView(mSearchResult);
 
-		//Setup the listener for the "cancel" icon 
+		// Setup the listener for the "cancel" icon
 		ImageView iv_cancel = (ImageView) mSearchResult
 				.findViewById(R.id.imageView3);
 		iv_cancel.setOnClickListener(new OnClickListener() {
@@ -889,48 +890,73 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 		});
 
-		//Set up the listener for the "Get Directions" icon
+		// Set up the listener for the "Get Directions" icon
 		ImageView iv_route = (ImageView) mSearchResult
 				.findViewById(R.id.imageView2);
 		iv_route.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				onGetRoute(getString(R.string.my_location), mLocationLayerPointString);
+				onGetRoute(getString(R.string.my_location),
+						mLocationLayerPointString);
 			}
 		});
 
 	}
-	
+
 	/**
 	 * Shows the Routing result layout after successful routing
-	 *
+	 * 
+	 * @param time
+	 * @param miles
+	 * 
 	 */
-	
-	private void showRoutingResultLayout(){
-		
-		//Remove the layours
+
+	private void showRoutingResultLayout(double distance, double time) {
+
+		// Remove the layours
 		mMapContainer.removeView(mSearchResult);
 		mMapContainer.removeView(mSearchBox);
 
-		//Inflate the new layout from the xml file
-		mSearchResult = mInflater.inflate(R.layout.searchresult, null);
+		// Inflate the new layout from the xml file
+		mSearchResult = mInflater.inflate(R.layout.routing_result, null);
 
 		mSearchResult.setLayoutParams(mlayoutParams);
 
-		//Initialize the textview and display the text
-		TextView tv = (TextView) mSearchResult.findViewById(R.id.textView1);
-		tv.setTypeface(null, Typeface.BOLD);
-		tv.setText("From: " + mStartLocation + " \nTo: " + mEndLocation);
-		
+		// Shorten the start and end location by finding the first comma if
+		// present
+		int index_from = mStartLocation.indexOf(",");
+		int index_to = mEndLocation.indexOf(",");
+		if (index_from != -1)
+			mStartLocation = mStartLocation.substring(0, index_from);
+		if (index_to != -1)
+			mEndLocation = mEndLocation.substring(0, index_to);
+
+		// Initialize the textvieww and display the text
+		TextView tv_from = (TextView) mSearchResult.findViewById(R.id.tv_from);
+		tv_from.setTypeface(null, Typeface.BOLD);
+		tv_from.setText(mStartLocation);
+
+		TextView tv_to = (TextView) mSearchResult.findViewById(R.id.tv_to);
+		tv_to.setTypeface(null, Typeface.BOLD);
+		tv_to.setText(mEndLocation);
+
+		// Rounding off the values
+		distance = Math.round(distance * 10.0) / 10.0;
+		time = Math.round(time * 10.0) / 10.0;
+
+		TextView tv_time = (TextView) mSearchResult.findViewById(R.id.tv_time);
+		tv_time.setTypeface(null, Typeface.BOLD);
+		tv_time.setText(time + " mins");
+
+		TextView tv_dist = (TextView) mSearchResult.findViewById(R.id.tv_dist);
+		tv_dist.setTypeface(null, Typeface.BOLD);
+		tv_dist.setText(" (" + distance + " miles)");
+
 		// Adding the layout
 		mMapContainer.addView(mSearchResult);
 
-		//Set the image as the car icon
-		ImageView iv_car = (ImageView) mSearchResult.findViewById(R.id.imageView1);
-		iv_car.setImageResource(R.drawable.ic_action_sedan2);
-
-		//Setup the listener for the "Cancel" icon
+		// Setup the listener for the "Cancel" icon
 		ImageView iv_cancel = (ImageView) mSearchResult
 				.findViewById(R.id.imageView3);
 		iv_cancel.setOnClickListener(new OnClickListener() {
@@ -946,21 +972,19 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			}
 		});
-		
-		//Set up the listener for the "Show Directions" icon
-		ImageView iv_directions = (ImageView) mSearchResult.findViewById(R.id.imageView2);
-		iv_directions.setImageResource(R.drawable.ic_routing_take_center_fork);
+
+		// Set up the listener for the "Show Directions" icon
+		ImageView iv_directions = (ImageView) mSearchResult
+				.findViewById(R.id.imageView2);
 		iv_directions.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
-				showDirectionsDialogFragment();				
+				showDirectionsDialogFragment();
 			}
 		});
 
-
 	}
-	
 
 	/*
 	 * This class provides an AsyncTask that performs a geolocation request on a
@@ -1222,9 +1246,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			// Save routing directions so user can display them later
 			mRoutingDirections = route.getRoutingDirections();
-			
-			//Show Routing Result Layout
-			showRoutingResultLayout();
+
+			// Show Routing Result Layout
+			showRoutingResultLayout(route.getTotalMiles(),
+					route.getTotalMinutes());
 
 		}
 
@@ -1327,10 +1352,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				mLocationLayerPointString = address.toString();
 				// center the map to result location
 				mMapView.centerAt(mPoint, true);
-				
-				//Show the result on the search result layout
+
+				// Show the result on the search result layout
 				showSearchResultLayout(address.toString());
-				
+
 			}
 		}
 	}
