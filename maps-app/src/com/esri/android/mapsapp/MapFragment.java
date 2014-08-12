@@ -494,7 +494,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		gpsButton = new Button(getActivity());
 
 		gpsButton
-				.setBackgroundResource(R.drawable.ic_device_access_location_black);
+				.setBackgroundResource(R.drawable.ic_action_location);
 		gpsFrameParams = new FrameLayout.LayoutParams(
 				FrameLayout.LayoutParams.WRAP_CONTENT,
 				FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM
@@ -527,7 +527,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 					mIsLocationTracking = false;
 				} else {
 					gpsButton
-							.setBackgroundResource(R.drawable.ic_device_access_location_black);
+							.setBackgroundResource(R.drawable.ic_action_location);
 					mCompass.setVisibility(View.GONE);
 					mCompass.sensorManager.unregisterListener(mCompass.sel);
 					startLocationTracking();
