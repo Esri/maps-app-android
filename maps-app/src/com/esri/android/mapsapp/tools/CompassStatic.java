@@ -1,7 +1,9 @@
-package com.esri.android.mapsapp;
+package com.esri.android.mapsapp.tools;
 
 import com.esri.android.map.MapView;
 import com.esri.android.map.event.OnPinchListener;
+import com.esri.android.mapsapp.R;
+import com.esri.android.mapsapp.R.drawable;
 
 import android.content.Context;
 import android.graphics.Bitmap;

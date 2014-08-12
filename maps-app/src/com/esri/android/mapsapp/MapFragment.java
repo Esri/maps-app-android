@@ -79,6 +79,7 @@ import com.esri.android.mapsapp.location.DirectionsDialogFragment;
 import com.esri.android.mapsapp.location.DirectionsDialogFragment.DirectionsDialogListener;
 import com.esri.android.mapsapp.location.RoutingDialogFragment;
 import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogListener;
+import com.esri.android.mapsapp.tools.Compass;
 import com.esri.android.mapsapp.tools.MeasuringTool;
 import com.esri.android.mapsapp.util.TaskExecutor;
 import com.esri.android.mapsapp.util.UiUtils;
