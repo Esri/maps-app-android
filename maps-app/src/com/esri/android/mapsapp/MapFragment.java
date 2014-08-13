@@ -129,7 +129,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static final String SEARCH_HINT = "Search";
 
 	private static FrameLayout.LayoutParams mlayoutParams;
-
+	
+	// Margins parameters for search view
 	private static int TOP_MARGIN_SEARCH = 55;
 
 	private static int LEFT_MARGIN_SEARCH = 15;
@@ -137,8 +138,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static int RIGHT_MARGIN_SEARCH = 15;
 
 	private static int BOTTOM_MARGIN_SEARCH = 0;
-
-	private static int TOP_MARGIN_COMPASS = 180;
+	
+	// Margin parameters for compass
+	private static int TOP_MARGIN_COMPASS = 300;
 
 	private static int LEFT_MARGIN_COMPASS = 0;
 
@@ -282,7 +284,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 				mapView.zoomin();
 
-				setMapView(mapView);
 			}
 		}
 		return mMapContainer;
