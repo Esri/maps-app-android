@@ -1066,9 +1066,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				// add graphic to location layer
 				mLocationLayer.addGraphic(resultLocGraphic);
 
-				// show a callout for return address
+				// Get the address
 				String address = geocodeResult.getAddress();
-				showCallout(resultPoint, address, 10);
 
 				mLocationLayerPoint = resultPoint;
 
