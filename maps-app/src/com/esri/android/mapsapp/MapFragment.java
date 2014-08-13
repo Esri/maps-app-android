@@ -522,6 +522,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		mMapView.setOnPinchListener(new OnPinchListener() {
 
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public void postPointersDown(float x1, float y1, float x2,
 					float y2, double factor) {
