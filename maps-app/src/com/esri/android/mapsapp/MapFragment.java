@@ -129,7 +129,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static final String SEARCH_HINT = "Search";
 
 	private static FrameLayout.LayoutParams mlayoutParams;
-
+	
 	// Margins parameters for search view
 	private static int TOP_MARGIN_SEARCH = 55;
 
@@ -138,7 +138,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static int RIGHT_MARGIN_SEARCH = 15;
 
 	private static int BOTTOM_MARGIN_SEARCH = 0;
-
+	
 	// Margin parameters for compass
 	private static int TOP_MARGIN_COMPASS = 300;
 
@@ -520,11 +520,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		mMapView.setOnPinchListener(new OnPinchListener() {
 
-			/**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-
 			@Override
 			public void postPointersDown(float x1, float y1, float x2,
 					float y2, double factor) {
@@ -548,11 +543,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			@Override
 			public void prePointersMove(float x1, float y1, float x2, float y2,
 					double factor) {
-				if (mMapView.getRotationAngle() != 0.0) {
-					mCompass.setVisibility(View.VISIBLE);
-					mCompass.sensorManager.unregisterListener(mCompass.sel);
-					mCompass.setRotationAngle(mMapView.getRotationAngle());
-				}
+				mCompass.setVisibility(View.VISIBLE);
+				mCompass.sensorManager.unregisterListener(mCompass.sel);
+				mCompass.setRotationAngle(mMapView.getRotationAngle());
 			}
 
 			@Override
