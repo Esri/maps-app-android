@@ -19,11 +19,11 @@ import android.view.View;
 
 public class Compass extends View implements SensorEventListener {
 
-	float mAngle = 0;
-	Paint mPaint;
-	Bitmap mBitmap;
-	Matrix mMatrix;
-	MapView mMapView;
+	private float mAngle = 0;
+	private Paint mPaint;
+	private Bitmap mBitmap;
+	private Matrix mMatrix;
+	private MapView mMapView;
 
 	public SensorManager sensorManager;
 	public Sensor gsensor;

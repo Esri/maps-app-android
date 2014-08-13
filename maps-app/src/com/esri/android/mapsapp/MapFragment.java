@@ -34,6 +34,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.hardware.SensorManager;
 import android.location.Location;
@@ -43,19 +44,21 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnKeyListener;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.FrameLayout.LayoutParams;
+import android.widget.ImageView;
+import android.widget.SearchView;
+import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -113,12 +116,35 @@ import com.esri.core.tasks.na.StopGraphic;
  */
 public class MapFragment extends Fragment implements BasemapsDialogListener,
 		RoutingDialogListener, OnCancelListener {
-
 	public static final String TAG = MapFragment.class.getSimpleName();
+
 	private static final String KEY_PORTAL_ITEM_ID = "KEY_PORTAL_ITEM_ID";
+
 	private static final String KEY_BASEMAP_ITEM_ID = "KEY_BASEMAP_ITEM_ID";
+
 	private static final String KEY_IS_LOCATION_TRACKING = "IsLocationTracking";
+
 	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
+
+	private static final String SEARCH_HINT = "Search";
+
+	private static FrameLayout.LayoutParams mlayoutParams;
+
+	private static int TOP_MARGIN_SEARCH = 55;
+
+	private static int LEFT_MARGIN_SEARCH = 15;
+
+	private static int RIGHT_MARGIN_SEARCH = 15;
+
+	private static int BOTTOM_MARGIN_SEARCH = 0;
+
+	private static int TOP_MARGIN_COMPASS = 180;
+
+	private static int LEFT_MARGIN_COMPASS = 0;
+
+	private static int BOTTOM_MARGIN_COMPASS = 0;
+
+	private static int RIGHT_MARGIN_COMPASS = 0;
 
 	// The circle area specified by search_radius and input lat/lon serves
 	// searching purpose.
@@ -126,43 +152,62 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	// first
 	// GPS fix is retrieved.
 	private final static double SEARCH_RADIUS = 10;
+
 	private String mPortalItemId;
+
 	private String mBasemapPortalItemId;
+
 	private FrameLayout mMapContainer;
+
 	private MapView mMapView;
+
 	private CalloutStyle mCalloutStyle;
+
 	private int mMaxCalloutWidth;
+
 	private int mMaxCalloutHeight;
+
 	private String mMapViewState;
 
 	// GPS location tracking
 	private boolean mIsLocationTracking;
+
 	private Point mLocation = null;
 
 	// Graphics layer to show geocode and reverse geocode results
 	private GraphicsLayer mLocationLayer;
 
 	private Point mLocationLayerPoint;
+
 	private String mLocationLayerPointString;
 
 	// Graphics layer to show routes
 	private GraphicsLayer mRouteLayer;
 
 	private List<RouteDirection> mRoutingDirections;
-	private MenuItem mActionItemDirections;
 
 	// Spatial references used for projecting points
 	private final SpatialReference mWm = SpatialReference.create(102100);
 
 	private final SpatialReference mEgs = SpatialReference.create(4326);
-	private EditText mSearchEditText;
+
+	private Compass mCompass;
+
+	private LayoutParams compassFrameParams;
+
 	private MotionEvent mLongPressEvent;
-	Compass mCompass;
-	LayoutParams compassFrameParams;
 
 	@SuppressWarnings("rawtypes")
 	// - using this only to cancel pending tasks in a generic way
 	private AsyncTask mPendingTask;
+
+	private View mSearchBox;
+
+	private View mSearchResult;
+
+	private LayoutInflater mInflater;
+
+	private String mStartLocation, mEndLocation;
 
 	public static MapFragment newInstance(String portalItemId,
 			String basemapPortalItemId) {
@@ -176,7 +221,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		return mapFragment;
 	}
 
-	private MapFragment() {
+	public MapFragment() {
 		// make MapFragment ctor private - use newInstance() instead
 	}
 
@@ -217,7 +262,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			// load the WebMap
 			loadWebMapIntoMapView(mPortalItemId, mBasemapPortalItemId,
 					AccountManager.getInstance().getPortal());
-
 		} else {
 			if (mBasemapPortalItemId != null) {
 				// show a map with the basemap represented by
@@ -238,6 +282,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 				mapView.zoomin();
 
+				setMapView(mapView);
 			}
 		}
 		return mMapContainer;
@@ -250,42 +295,18 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Inflate the menu items for use in the action bar
 		inflater.inflate(R.menu.actions, menu);
 
-		// Get a reference to the EditText widget for the search option
-		View searchRef = menu.findItem(R.id.menu_search).getActionView();
-		mSearchEditText = (EditText) searchRef.findViewById(R.id.searchText);
-
-		// Set key listener to start search if Enter key pressed
-		mSearchEditText.setOnKeyListener(new OnKeyListener() {
-			@Override
-			public boolean onKey(View v, int keyCode, KeyEvent event) {
-				if (keyCode == KeyEvent.KEYCODE_ENTER) {
-					onSearchButtonClicked(mSearchEditText);
-					return true;
-				}
-				return false;
-			}
-		});
-
-		// Save a reference to the Directions button
-		mActionItemDirections = menu.findItem(R.id.directions);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.route:
-			// Show RoutingDialogFragment to get routing start and end points.
-			// This calls back to onGetRoute() to do the routing.
-			RoutingDialogFragment routingFrag = new RoutingDialogFragment();
-			routingFrag.setRoutingDialogListener(this);
-			Bundle arguments = new Bundle();
-			if (mLocationLayerPoint != null) {
-				arguments.putString(
-						RoutingDialogFragment.ARG_END_POINT_DEFAULT,
-						mLocationLayerPointString);
-			}
-			routingFrag.setArguments(arguments);
-			routingFrag.show(getFragmentManager(), null);
+
+		case R.id.basemaps:
+			// Show BasemapsDialogFragment to offer a choice if basemaps.
+			// This calls back to onBasemapChanged() if one is selected.
+			BasemapsDialogFragment basemapsFrag = new BasemapsDialogFragment();
+			basemapsFrag.setBasemapsDialogListener(this);
+			basemapsFrag.show(getFragmentManager(), null);
 			return true;
 
 		case R.id.location:
@@ -307,35 +328,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				startLocationTracking();
 			}
 
-			return true;
-
-		case R.id.basemaps:
-			// Show BasemapsDialogFragment to offer a choice if basemaps.
-			// This calls back to onBasemapChanged() if one is selected.
-			BasemapsDialogFragment basemapsFrag = new BasemapsDialogFragment();
-			basemapsFrag.setBasemapsDialogListener(this);
-			basemapsFrag.show(getFragmentManager(), null);
-			return true;
-
-		case R.id.directions:
-			// Launch a DirectionsListFragment to display list of directions
-			final DirectionsDialogFragment frag = new DirectionsDialogFragment();
-			frag.setRoutingDirections(mRoutingDirections,
-					new DirectionsDialogListener() {
-
-						@Override
-						public void onDirectionSelected(int position) {
-							// User has selected a particular direction -
-							// dismiss the dialog and
-							// zoom to the selected direction
-							frag.dismiss();
-							RouteDirection direction = mRoutingDirections
-									.get(position);
-							mMapView.setExtent(direction.getGeometry());
-						}
-
-					});
-			getFragmentManager().beginTransaction().add(frag, null).commit();
 			return true;
 
 		case R.id.action_measure:
@@ -477,7 +469,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * 
 	 * @param mapView
 	 */
-	private void setMapView(final MapView mapView) {
+	private void setMapView(MapView mapView) {
+
+		// Creating an inflater
+		mInflater = (LayoutInflater) getActivity().getSystemService(
+				Context.LAYOUT_INFLATER_SERVICE);
+
 		mMapView = mapView;
 		mMapView.setEsriLogoVisible(true);
 		mMapView.enableWrapAround(true);
@@ -489,9 +486,18 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		compassFrameParams = new FrameLayout.LayoutParams(
 				FrameLayout.LayoutParams.WRAP_CONTENT,
-				FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.TOP
-						| Gravity.RIGHT);
-		compassFrameParams.setMargins(900, 300, 0, 0);
+				FrameLayout.LayoutParams.WRAP_CONTENT);
+
+		((MarginLayoutParams) compassFrameParams).setMargins(
+				LEFT_MARGIN_COMPASS, TOP_MARGIN_COMPASS, RIGHT_MARGIN_COMPASS,
+				BOTTOM_MARGIN_COMPASS);
+
+		// Setting up the layout params for the searchview and searchresult
+		// layout
+		mlayoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+				LayoutParams.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP);
+		mlayoutParams.setMargins(LEFT_MARGIN_SEARCH, TOP_MARGIN_SEARCH,
+				RIGHT_MARGIN_SEARCH, BOTTOM_MARGIN_SEARCH);
 
 		mCompass.setLayoutParams(compassFrameParams);
 
@@ -506,59 +512,49 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 		});
 
+		// set MapView into the activity layout
 		mMapContainer.addView(mMapView);
 		mMapContainer.addView(mCompass);
-		// mMapContainer.addView(gpsButton);
+
+		// Displaying the searchbox layout
+		showSearchBoxLayout();
 
 		mMapView.setOnPinchListener(new OnPinchListener() {
 
 			@Override
 			public void postPointersDown(float x1, float y1, float x2,
 					float y2, double factor) {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
 			public void postPointersMove(float x1, float y1, float x2,
 					float y2, double factor) {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
 			public void postPointersUp(float x1, float y1, float x2, float y2,
 					double factor) {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
 			public void prePointersDown(float x1, float y1, float x2, float y2,
 					double factor) {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
 			public void prePointersMove(float x1, float y1, float x2, float y2,
 					double factor) {
-				// TODO Auto-generated method stub
 				mCompass.setVisibility(View.VISIBLE);
 				mCompass.sensorManager.unregisterListener(mCompass.sel);
 				mCompass.setRotationAngle(mMapView.getRotationAngle());
-
 			}
 
 			@Override
 			public void prePointersUp(float x1, float y1, float x2, float y2,
 					double factor) {
-				// TODO Auto-generated method stub
-
 			}
 
 		});
-		// create button add parameters frame layout add to map container
 
 		// Setup listener for map initialized
 		mMapView.setOnStatusChangedListener(new OnStatusChangedListener() {
@@ -591,7 +587,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Setup OnTouchListener to detect and act on long-press
 		mMapView.setOnTouchListener(new MapOnTouchListener(getActivity(),
 				mMapView) {
-
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
@@ -627,11 +622,104 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 					mLongPressEvent = null;
 					// Remove any previous graphics
 					resetGraphicsLayers();
-					mSearchEditText.setText("");
 				}
 				return super.onDragPointerUp(from, to);
 			}
 
+		});
+
+	}
+
+	/**
+	 * 
+	 * Displays the Dialog Fragment which allows users to route
+	 */
+	private void showRoutingDialogFragment() {
+		// Show RoutingDialogFragment to get routing start and end points.
+		// This calls back to onGetRoute() to do the routing.
+		RoutingDialogFragment routingFrag = new RoutingDialogFragment();
+		routingFrag.setRoutingDialogListener(this);
+		Bundle arguments = new Bundle();
+		if (mLocationLayerPoint != null) {
+			arguments.putString(RoutingDialogFragment.ARG_END_POINT_DEFAULT,
+					mLocationLayerPointString);
+		}
+		routingFrag.setArguments(arguments);
+		routingFrag.show(getFragmentManager(), null);
+
+	}
+
+	/**
+	 * Displays the Directions Dialog Fragment
+	 */
+	private void showDirectionsDialogFragment() {
+		// Launch a DirectionsListFragment to display list of directions
+		final DirectionsDialogFragment frag = new DirectionsDialogFragment();
+		frag.setRoutingDirections(mRoutingDirections,
+				new DirectionsDialogListener() {
+
+					@Override
+					public void onDirectionSelected(int position) {
+						// User has selected a particular direction -
+						// dismiss the dialog and
+						// zoom to the selected direction
+						frag.dismiss();
+						RouteDirection direction = mRoutingDirections
+								.get(position);
+						mMapView.setExtent(direction.getGeometry());
+					}
+
+				});
+		getFragmentManager().beginTransaction().add(frag, null).commit();
+
+	}
+
+	/**
+	 * Displays the search view layout
+	 * 
+	 */
+	private void showSearchBoxLayout() {
+
+		// Infalting the layout from the xml file
+		mSearchBox = mInflater.inflate(R.layout.searchview, null);
+		// Setting the layout parameters to the layout
+		mSearchBox.setLayoutParams(mlayoutParams);
+		// Initializing the serachview and the image view
+		final SearchView mSearchview = (SearchView) mSearchBox
+				.findViewById(R.id.searchView1);
+		ImageView iv_route = (ImageView) mSearchBox
+				.findViewById(R.id.imageView1);
+
+		mSearchview.setIconifiedByDefault(false);
+		mSearchview.setQueryHint(SEARCH_HINT);
+
+		// Adding the layout to the map conatiner
+		mMapContainer.addView(mSearchBox);
+
+		// Setup the listener for the route onclick
+		iv_route.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				showRoutingDialogFragment();
+
+			}
+		});
+
+		// Setup the listener when the search button is pressed on the keyboard
+		mSearchview.setOnQueryTextListener(new OnQueryTextListener() {
+
+			@Override
+			public boolean onQueryTextSubmit(String query) {
+				onSearchButtonClicked(query);
+				mSearchview.clearFocus();
+				return true;
+			}
+
+			@Override
+			public boolean onQueryTextChange(String newText) {
+				return false;
+			}
 		});
 
 	}
@@ -646,10 +734,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * @param yOffsetDips
 	 *            the y offset of the callout in dips
 	 */
+	@SuppressWarnings("unused")
 	private void showCallout(Point location, String message, int yOffsetDips) {
 
-		View view = getActivity().getLayoutInflater().inflate(
-				R.layout.simple_callout_layout, null);
+		View view = mInflater.inflate(R.layout.simple_callout_layout, null);
 
 		TextView textView = (TextView) view
 				.findViewById(R.id.simple_callout_textview);
@@ -682,8 +770,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mLocationLayerPoint = null;
 		mLocationLayerPointString = null;
 		mRoutingDirections = null;
-		mActionItemDirections.setVisible(false);
-
 		hideCallout();
 	}
 
@@ -765,7 +851,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * 
 	 * @param view
 	 */
-	public void onSearchButtonClicked(View view) {
+	public void onSearchButtonClicked(String address) {
 
 		// Hide virtual keyboard
 		InputMethodManager inputManager = (InputMethodManager) getActivity()
@@ -776,8 +862,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Remove any previous graphics and routes
 		resetGraphicsLayers();
 
-		// Obtain address and execute locator task
-		String address = mSearchEditText.getText().toString();
 		executeLocatorTask(address);
 	}
 
@@ -838,7 +922,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		}
 		// Remove any previous graphics and routes
 		resetGraphicsLayers();
-		mSearchEditText.setText("");
 
 		// Do the routing
 		executeRoutingTask(startPoint, endPoint);
@@ -875,6 +958,142 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		if (mPendingTask != null) {
 			mPendingTask.cancel(true);
 		}
+	}
+
+	/**
+	 * Shows the search result in the layout after successful geocoding and
+	 * reverse geocoding
+	 * 
+	 */
+
+	private void showSearchResultLayout(String address) {
+		// Remove the layouts
+		mMapContainer.removeView(mSearchBox);
+		mMapContainer.removeView(mSearchResult);
+
+		// Inflate the new layout from the xml file
+		mSearchResult = mInflater.inflate(R.layout.search_result, null);
+		// Set layout parameters
+		mSearchResult.setLayoutParams(mlayoutParams);
+
+		// Initialize the textview and set its text
+		TextView tv = (TextView) mSearchResult.findViewById(R.id.textView1);
+		tv.setTypeface(null, Typeface.BOLD);
+		tv.setText(address);
+		// Adding the search result layout to the map container
+		mMapContainer.addView(mSearchResult);
+
+		// Setup the listener for the "cancel" icon
+		ImageView iv_cancel = (ImageView) mSearchResult
+				.findViewById(R.id.imageView3);
+		iv_cancel.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// Remove the search result view
+				mMapContainer.removeView(mSearchResult);
+				// Add the search box view
+				showSearchBoxLayout();
+				// Remove all graphics from the map
+				resetGraphicsLayers();
+
+			}
+		});
+
+		// Set up the listener for the "Get Directions" icon
+		ImageView iv_route = (ImageView) mSearchResult
+				.findViewById(R.id.imageView2);
+		iv_route.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				onGetRoute(getString(R.string.my_location),
+						mLocationLayerPointString);
+			}
+		});
+
+	}
+
+	/**
+	 * Shows the Routing result layout after successful routing
+	 * 
+	 * @param time
+	 * @param distance
+	 * 
+	 */
+
+	private void showRoutingResultLayout(double distance, double time) {
+
+		// Remove the layours
+		mMapContainer.removeView(mSearchResult);
+		mMapContainer.removeView(mSearchBox);
+
+		// Inflate the new layout from the xml file
+		mSearchResult = mInflater.inflate(R.layout.routing_result, null);
+
+		mSearchResult.setLayoutParams(mlayoutParams);
+
+		// Shorten the start and end location by finding the first comma if
+		// present
+		int index_from = mStartLocation.indexOf(",");
+		int index_to = mEndLocation.indexOf(",");
+		if (index_from != -1)
+			mStartLocation = mStartLocation.substring(0, index_from);
+		if (index_to != -1)
+			mEndLocation = mEndLocation.substring(0, index_to);
+
+		// Initialize the textvieww and display the text
+		TextView tv_from = (TextView) mSearchResult.findViewById(R.id.tv_from);
+		tv_from.setTypeface(null, Typeface.BOLD);
+		tv_from.setText(" " + mStartLocation);
+
+		TextView tv_to = (TextView) mSearchResult.findViewById(R.id.tv_to);
+		tv_to.setTypeface(null, Typeface.BOLD);
+		tv_to.setText(" " + mEndLocation);
+
+		// Rounding off the values
+		distance = Math.round(distance * 10.0) / 10.0;
+		time = Math.round(time * 10.0) / 10.0;
+
+		TextView tv_time = (TextView) mSearchResult.findViewById(R.id.tv_time);
+		tv_time.setTypeface(null, Typeface.BOLD);
+		tv_time.setText(time + " mins");
+
+		TextView tv_dist = (TextView) mSearchResult.findViewById(R.id.tv_dist);
+		tv_dist.setTypeface(null, Typeface.BOLD);
+		tv_dist.setText(" (" + distance + " miles)");
+
+		// Adding the layout
+		mMapContainer.addView(mSearchResult);
+
+		// Setup the listener for the "Cancel" icon
+		ImageView iv_cancel = (ImageView) mSearchResult
+				.findViewById(R.id.imageView3);
+		iv_cancel.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				// Remove the search result view
+				mMapContainer.removeView(mSearchResult);
+				// Add the default search box view
+				showSearchBoxLayout();
+				// Remove all graphics from the map
+				resetGraphicsLayers();
+
+			}
+		});
+
+		// Set up the listener for the "Show Directions" icon
+		ImageView iv_directions = (ImageView) mSearchResult
+				.findViewById(R.id.imageView2);
+		iv_directions.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				showDirectionsDialogFragment();
+			}
+		});
+
 	}
 
 	/*
@@ -957,14 +1176,14 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				// add graphic to location layer
 				mLocationLayer.addGraphic(resultLocGraphic);
 
-				// show a callout for return address
+				// Get the address
 				String address = geocodeResult.getAddress();
-				showCallout(resultPoint, address, 10);
 
 				mLocationLayerPoint = resultPoint;
 
 				// Zoom map to geocode result location
 				mMapView.zoomToResolution(geocodeResult.getLocation(), 2);
+				showSearchResultLayout(address);
 			}
 		}
 
@@ -1018,11 +1237,14 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				LocatorFindParameters startParam = params[0].get(0);
 				if (startParam.getText()
 						.equals(getString(R.string.my_location))) {
+					mStartLocation = getString(R.string.my_location);
 					startPoint = (Point) GeometryEngine.project(mLocation, mWm,
 							mEgs);
 				} else {
 					geocodeStartResult = locator.find(startParam);
 					startPoint = geocodeStartResult.get(0).getLocation();
+					mStartLocation = geocodeStartResult.get(0).getAddress();
+
 					if (isCancelled()) {
 						return null;
 					}
@@ -1030,8 +1252,16 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 				// Geocode the destination
 				LocatorFindParameters endParam = params[0].get(1);
-				geocodeEndResult = locator.find(endParam);
-				endPoint = geocodeEndResult.get(0).getLocation();
+				if (endParam.getText().equals(getString(R.string.my_location))) {
+					mEndLocation = getString(R.string.my_location);
+					endPoint = (Point) GeometryEngine.project(mLocation, mWm,
+							mEgs);
+				} else {
+					geocodeEndResult = locator.find(endParam);
+					endPoint = geocodeEndResult.get(0).getLocation();
+					mEndLocation = geocodeEndResult.get(0).getAddress();
+				}
+
 			} catch (Exception e) {
 				mException = e;
 				return null;
@@ -1123,7 +1353,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			// Save routing directions so user can display them later
 			mRoutingDirections = route.getRoutingDirections();
-			mActionItemDirections.setVisible(true);
+
+			// Show Routing Result Layout
+			showRoutingResultLayout(route.getTotalMiles(),
+					route.getTotalMinutes());
+
 		}
 
 		Graphic createMarkerGraphic(Point point, boolean endPoint) {
@@ -1223,10 +1457,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 				// Address string is saved for use in routing
 				mLocationLayerPointString = address.toString();
-				// show results in callout
-				showCallout(mPoint, mLocationLayerPointString, 10);
 				// center the map to result location
 				mMapView.centerAt(mPoint, true);
+
+				// Show the result on the search result layout
+				showSearchResultLayout(address.toString());
 			}
 		}
 	}
@@ -1244,5 +1479,4 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		float dp = px / (metrics.densityDpi / 160f);
 		return dp;
 	}
-
 }

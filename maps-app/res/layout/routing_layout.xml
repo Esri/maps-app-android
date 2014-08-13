@@ -1,37 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/white"
     android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".RoutingDialogFragment" >
+    android:paddingTop="@dimen/activity_vertical_margin" >
 
-    <EditText
-        android:id="@+id/startPoint"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text"
-        android:text="@string/my_location" >
+        android:orientation="horizontal" >
 
-        <requestFocus />
-    </EditText>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
 
-    <EditText
-        android:id="@+id/endPoint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="text" />
+            <SearchView
+                android:id="@+id/startPoint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+            </SearchView>
+
+            <SearchView
+                android:id="@+id/endPoint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+            </SearchView>
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/iv_interchange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="@string/swap_addresses"
+            android:src="@drawable/ic_action_revert" >
+
+        </ImageView>
+    </LinearLayout>
 
     <Button
         android:id="@+id/getRouteButton"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/get_route"
-        android:layout_marginTop="20dp" />
+        android:background="@android:color/holo_blue_light"
+        android:padding="5dp"
+        android:text="@string/get_route" 
+        android:layout_gravity="center_horizontal"/>
 
 </LinearLayout>
