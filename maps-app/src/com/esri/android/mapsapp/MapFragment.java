@@ -70,6 +70,7 @@ import com.esri.android.map.LocationDisplayManager.AutoPanMode;
 import com.esri.android.map.MapOnTouchListener;
 import com.esri.android.map.MapView;
 import com.esri.android.map.event.OnPinchListener;
+import com.esri.android.map.event.OnSingleTapListener;
 import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
@@ -129,7 +130,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static final String SEARCH_HINT = "Search";
 
 	private static FrameLayout.LayoutParams mlayoutParams;
-	
+
 	// Margins parameters for search view
 	private static int TOP_MARGIN_SEARCH = 55;
 
@@ -138,7 +139,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static int RIGHT_MARGIN_SEARCH = 15;
 
 	private static int BOTTOM_MARGIN_SEARCH = 0;
-	
+
 	// Margin parameters for compass
 	private static int TOP_MARGIN_COMPASS = 300;
 
@@ -148,6 +149,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private static int RIGHT_MARGIN_COMPASS = 0;
 
+	// Height and Width for the compass image
+	private static int HEIGHT = 110;
+	
+	private static int WIDTH = 110;
 	// The circle area specified by search_radius and input lat/lon serves
 	// searching purpose.
 	// It is also used to construct the extent which map zooms to after the
@@ -193,9 +198,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private final SpatialReference mEgs = SpatialReference.create(4326);
 
-	private Compass mCompass;
+	Compass mCompass;
 
-	private LayoutParams compassFrameParams;
+	LayoutParams compassFrameParams;
 
 	private MotionEvent mLongPressEvent;
 
@@ -278,7 +283,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 				// Set the MapView to allow the user to rotate the map when as
 				// part of a pinch gesture.
-				mapView.setAllowRotationByPinch(true);
+				// mapView.setAllowRotationByPinch(true);
 
 				setMapView(mapView);
 
@@ -448,7 +453,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 							MapView mapView = new MapView(getActivity(),
 									webmap, basemap, null, null);
 
-							mapView.setAllowRotationByPinch(true);
+							// mapView.setAllowRotationByPinch(true);
 
 							setMapView(mapView);
 							mapView.zoomin();
@@ -470,24 +475,23 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * 
 	 * @param mapView
 	 */
-	private void setMapView(MapView mapView) {
+	private void setMapView(final MapView mapView) {
+
+		mMapView = mapView;
+		mMapView.setEsriLogoVisible(true);
+		mMapView.enableWrapAround(true);
+		mapView.setAllowRotationByPinch(true);
 
 		// Creating an inflater
 		mInflater = (LayoutInflater) getActivity().getSystemService(
 				Context.LAYOUT_INFLATER_SERVICE);
 
-		mMapView = mapView;
-		mMapView.setEsriLogoVisible(true);
-		mMapView.enableWrapAround(true);
-
 		// Create the Compass custom view, and add it onto
 		// the MapView.
-		mCompass = new Compass(mapView.getContext(), null, mapView);
+		mCompass = new Compass(mapView.getContext());
 		mCompass.setAlpha(1f);
 
-		compassFrameParams = new FrameLayout.LayoutParams(
-				FrameLayout.LayoutParams.WRAP_CONTENT,
-				FrameLayout.LayoutParams.WRAP_CONTENT);
+		compassFrameParams = new FrameLayout.LayoutParams(HEIGHT, WIDTH);
 
 		((MarginLayoutParams) compassFrameParams).setMargins(
 				LEFT_MARGIN_COMPASS, TOP_MARGIN_COMPASS, RIGHT_MARGIN_COMPASS,
@@ -502,10 +506,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		mCompass.setLayoutParams(compassFrameParams);
 
-		mCompass.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
+		mCompass.setOnClickListener(new OnClickListener() {
 
-				mCompass.setRotationAngle(0);
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
 				mCompass.setVisibility(View.GONE);
 				mMapView.setRotationAngle(0);
 			}
@@ -513,6 +518,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// set MapView into the activity layout
 		mMapContainer.addView(mMapView);
+
 		mMapContainer.addView(mCompass);
 
 		// Displaying the searchbox layout
@@ -543,9 +549,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			@Override
 			public void prePointersMove(float x1, float y1, float x2, float y2,
 					double factor) {
-				mCompass.setVisibility(View.VISIBLE);
-				mCompass.sensorManager.unregisterListener(mCompass.sel);
-				mCompass.setRotationAngle(mMapView.getRotationAngle());
+				if (mMapView.getRotationAngle() > 5
+						&& mMapView.getRotationAngle() < 355) {
+					mCompass.setVisibility(View.VISIBLE);
+					mCompass.sensorManager.unregisterListener(mCompass.sel);
+					mCompass.setRotationAngle(mMapView.getRotationAngle());
+				}
 			}
 
 			@Override
@@ -563,8 +572,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			@Override
 			public void onStatusChanged(Object source, STATUS status) {
 
-				Log.i(TAG, "MapView.setOnStatusChangedListener() status="
-						+ status.toString());
 				if (source == mMapView && status == STATUS.INITIALIZED) {
 					if (mMapViewState == null) {
 						// Starting location tracking will cause zoom to My
@@ -681,8 +688,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Infalting the layout from the xml file
 		mSearchBox = mInflater.inflate(R.layout.searchview, null);
+
 		// Setting the layout parameters to the layout
 		mSearchBox.setLayoutParams(mlayoutParams);
+
 		// Initializing the serachview and the image view
 		final SearchView mSearchview = (SearchView) mSearchBox
 				.findViewById(R.id.searchView1);
@@ -733,7 +742,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * @param yOffsetDips
 	 *            the y offset of the callout in dips
 	 */
-	@SuppressWarnings("unused")
 	private void showCallout(Point location, String message, int yOffsetDips) {
 
 		View view = mInflater.inflate(R.layout.simple_callout_layout, null);

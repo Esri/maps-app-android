@@ -1,7 +1,6 @@
 package com.esri.android.mapsapp.tools;
 
 import com.esri.android.map.MapView;
-import com.esri.android.map.event.OnPinchListener;
 import com.esri.android.mapsapp.R;
 
 import android.content.Context;
@@ -14,7 +13,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.util.AttributeSet;
 import android.view.View;
 
 public class Compass extends View implements SensorEventListener {
@@ -33,8 +31,8 @@ public class Compass extends View implements SensorEventListener {
 	private float azimuth = 0f;
 	public SensorEventListener sel;
 
-	public Compass(Context context, AttributeSet attrs) {
-		super(context, attrs);
+	public Compass(Context context) {
+		super(context);
 
 		mPaint = new Paint();
 		mMatrix = new Matrix();
@@ -44,56 +42,6 @@ public class Compass extends View implements SensorEventListener {
 				.getSystemService(Context.SENSOR_SERVICE);
 		gsensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		msensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-	}
-
-	/**
-	 * Overloaded constructor that takes a MapView, from which the compass
-	 * rotation angle will be set.
-	 */
-	public Compass(Context context, AttributeSet attrs, MapView mapView) {
-		this(context, attrs);
-
-		mMapView = mapView;
-		if (mMapView != null) {
-			mMapView.setOnPinchListener(new OnPinchListener() {
-
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public void prePointersUp(float arg0, float arg1, float arg2,
-						float arg3, double arg4) {
-				}
-
-				@Override
-				public void prePointersMove(float arg0, float arg1, float arg2,
-						float arg3, double arg4) {
-				}
-
-				@Override
-				public void prePointersDown(float arg0, float arg1, float arg2,
-						float arg3, double arg4) {
-				}
-
-				@Override
-				public void postPointersUp(float arg0, float arg1, float arg2,
-						float arg3, double arg4) {
-				}
-
-				@Override
-				public void postPointersMove(float arg0, float arg1,
-						float arg2, float arg3, double arg4) {
-					// Update the compass angle from the map rotation angle (the
-					// arguments passed in to the method are not
-					// relevant in this case).
-					setRotationAngle(mMapView.getRotationAngle());
-				}
-
-				@Override
-				public void postPointersDown(float arg0, float arg1,
-						float arg2, float arg3, double arg4) {
-				}
-			});
-		}
 	}
 
 	public void start() {
