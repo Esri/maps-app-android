@@ -97,7 +97,6 @@ public class MapsAppActivity extends Activity {
   @Override
   protected void onResume() {
     super.onResume();
-
     updateDrawer();
   }
 

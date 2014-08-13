@@ -3,7 +3,6 @@ package com.esri.android.mapsapp.tools;
 import com.esri.android.map.MapView;
 import com.esri.android.map.event.OnPinchListener;
 import com.esri.android.mapsapp.R;
-import com.esri.android.mapsapp.R.drawable;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -100,9 +99,9 @@ public class Compass extends View implements SensorEventListener {
 	public void start() {
 		sel = this;
 		sensorManager.registerListener(this, gsensor,
-				SensorManager.SENSOR_DELAY_NORMAL);
+				SensorManager.SENSOR_DELAY_GAME);
 		sensorManager.registerListener(this, msensor,
-				SensorManager.SENSOR_DELAY_NORMAL);
+				SensorManager.SENSOR_DELAY_GAME);
 	}
 
 	public void stop() {
