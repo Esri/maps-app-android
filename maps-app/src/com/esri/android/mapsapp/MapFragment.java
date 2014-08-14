@@ -151,7 +151,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	// Height and Width for the compass image
 	private static int HEIGHT = 110;
-	
+
 	private static int WIDTH = 110;
 	// The circle area specified by search_radius and input lat/lon serves
 	// searching purpose.
@@ -549,8 +549,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			@Override
 			public void prePointersMove(float x1, float y1, float x2, float y2,
 					double factor) {
-				if (mMapView.getRotationAngle() > 5
-						&& mMapView.getRotationAngle() < 355) {
+				if (mMapView.getRotationAngle() > 5 || mMapView.getRotationAngle() < -5) {
 					mCompass.setVisibility(View.VISIBLE);
 					mCompass.sensorManager.unregisterListener(mCompass.sel);
 					mCompass.setRotationAngle(mMapView.getRotationAngle());
