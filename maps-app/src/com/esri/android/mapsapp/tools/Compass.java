@@ -1,3 +1,27 @@
+/* Copyright 1995-2014 Esri
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * For additional information, contact:
+ * Environmental Systems Research Institute, Inc.
+ * Attn: Contracts Dept
+ * 380 New York Street
+ * Redlands, California, USA 92373
+ *
+ * email: contracts@esri.com
+ *
+ */
+
 package com.esri.android.mapsapp.tools;
 
 import com.esri.android.map.MapView;
@@ -15,6 +39,12 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.view.View;
 
+/**
+ * The implementation of compass. There are two modes of operation for rotating
+ * the compass, one is using device motion sensors and latter using the pinch
+ * listeners.
+ * 
+ */
 public class Compass extends View implements SensorEventListener {
 
 	float mAngle = 0;
@@ -23,12 +53,21 @@ public class Compass extends View implements SensorEventListener {
 	Matrix mMatrix;
 	MapView mMapView;
 
+	// Handles the senors
 	public SensorManager sensorManager;
+
+	// Sensors for accelerometer and magnetometer
 	public Sensor gsensor;
 	public Sensor msensor;
+
+	// Used for orientation of the compass
 	private float[] mGravity = new float[3];
 	private float[] mGeomagnetic = new float[3];
+
+	// The angle of rotation of the compass
 	private float azimuth = 0f;
+
+	// To send and receive notification from the sensors.
 	public SensorEventListener sel;
 
 	public Compass(Context context) {
@@ -45,7 +84,10 @@ public class Compass extends View implements SensorEventListener {
 	}
 
 	public void start() {
+		// A copy of instance which is used to restart the sensors
 		sel = this;
+
+		// Enable the sensors
 		sensorManager.registerListener(this, gsensor,
 				SensorManager.SENSOR_DELAY_GAME);
 		sensorManager.registerListener(this, msensor,
@@ -53,6 +95,7 @@ public class Compass extends View implements SensorEventListener {
 	}
 
 	public void stop() {
+		// Disable the sensors
 		sensorManager.unregisterListener(this);
 	}
 
@@ -116,6 +159,7 @@ public class Compass extends View implements SensorEventListener {
 			float I[] = new float[9];
 			boolean success = SensorManager.getRotationMatrix(R, I, mGravity,
 					mGeomagnetic);
+
 			if (success) {
 				float orientation[] = new float[3];
 				SensorManager.getOrientation(R, orientation);

@@ -62,15 +62,12 @@ import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.esri.android.map.Callout;
-import com.esri.android.map.CalloutStyle;
 import com.esri.android.map.GraphicsLayer;
 import com.esri.android.map.LocationDisplayManager;
 import com.esri.android.map.LocationDisplayManager.AutoPanMode;
 import com.esri.android.map.MapOnTouchListener;
 import com.esri.android.map.MapView;
 import com.esri.android.map.event.OnPinchListener;
-import com.esri.android.map.event.OnSingleTapListener;
 import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
@@ -83,7 +80,6 @@ import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogList
 import com.esri.android.mapsapp.tools.Compass;
 import com.esri.android.mapsapp.tools.MeasuringTool;
 import com.esri.android.mapsapp.util.TaskExecutor;
-import com.esri.android.mapsapp.util.UiUtils;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.LinearUnit;
@@ -141,18 +137,19 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static int BOTTOM_MARGIN_SEARCH = 0;
 
 	// Margin parameters for compass
-	private static int TOP_MARGIN_COMPASS = 300;
+	private static int TOP_MARGIN_COMPASS = 200;
 
 	private static int LEFT_MARGIN_COMPASS = 0;
 
 	private static int BOTTOM_MARGIN_COMPASS = 0;
 
-	private static int RIGHT_MARGIN_COMPASS = 0;
+	private static int RIGHT_MARGIN_COMPASS = 20;
 
 	// Height and Width for the compass image
 	private static int HEIGHT = 110;
 
 	private static int WIDTH = 110;
+	
 	// The circle area specified by search_radius and input lat/lon serves
 	// searching purpose.
 	// It is also used to construct the extent which map zooms to after the
@@ -167,12 +164,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private FrameLayout mMapContainer;
 
 	private MapView mMapView;
-
-	private CalloutStyle mCalloutStyle;
-
-	private int mMaxCalloutWidth;
-
-	private int mMaxCalloutHeight;
 
 	private String mMapViewState;
 
@@ -246,17 +237,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			mBasemapPortalItemId = args.getString(KEY_BASEMAP_ITEM_ID);
 		}
 
-		mCalloutStyle = new CalloutStyle();
-		mCalloutStyle.setCornerCurve(getActivity().getResources()
-				.getDimensionPixelSize(R.dimen.place_callout_corner_curve));
-		mCalloutStyle.setFrameColor(getActivity().getResources().getColor(
-				R.color.place_callout_frame_color));
-		mCalloutStyle.setAnchor(Callout.ANCHOR_POSITION_LOWER_MIDDLE);
-
-		mMaxCalloutWidth = getActivity().getResources().getDimensionPixelSize(
-				R.dimen.place_callout_max_width);
-		mMaxCalloutHeight = getActivity().getResources().getDimensionPixelSize(
-				R.dimen.place_callout_max_height);
 	}
 
 	@Override
@@ -491,7 +471,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mCompass = new Compass(mapView.getContext());
 		mCompass.setAlpha(1f);
 
-		compassFrameParams = new FrameLayout.LayoutParams(HEIGHT, WIDTH, Gravity.RIGHT);
+		compassFrameParams = new FrameLayout.LayoutParams(HEIGHT, WIDTH,
+				Gravity.RIGHT);
 
 		((MarginLayoutParams) compassFrameParams).setMargins(
 				LEFT_MARGIN_COMPASS, TOP_MARGIN_COMPASS, RIGHT_MARGIN_COMPASS,
@@ -510,7 +491,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
 				mCompass.setVisibility(View.GONE);
 				mMapView.setRotationAngle(0);
 			}
@@ -525,6 +505,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		showSearchBoxLayout();
 
 		mMapView.setOnPinchListener(new OnPinchListener() {
+
+			/**
+			 * Default value
+			 */
+			private static final long serialVersionUID = 1L;
 
 			@Override
 			public void postPointersDown(float x1, float y1, float x2,
@@ -549,7 +534,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			@Override
 			public void prePointersMove(float x1, float y1, float x2, float y2,
 					double factor) {
-				if (mMapView.getRotationAngle() > 5 || mMapView.getRotationAngle() < -5) {
+				if (mMapView.getRotationAngle() > 5
+						|| mMapView.getRotationAngle() < -5) {
 					mCompass.setVisibility(View.VISIBLE);
 					mCompass.sensorManager.unregisterListener(mCompass.sel);
 					mCompass.setRotationAngle(mMapView.getRotationAngle());
@@ -732,42 +718,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	}
 
 	/**
-	 * Shows a mini callout on the map.
-	 * 
-	 * @param location
-	 *            the location of the callout
-	 * @param message
-	 *            the content of the callout
-	 * @param yOffsetDips
-	 *            the y offset of the callout in dips
-	 */
-	private void showCallout(Point location, String message, int yOffsetDips) {
-
-		View view = mInflater.inflate(R.layout.simple_callout_layout, null);
-
-		TextView textView = (TextView) view
-				.findViewById(R.id.simple_callout_textview);
-		textView.setText(message);
-
-		int yOffset = UiUtils.dipsToPixels(yOffsetDips);
-
-		Callout callout = mMapView.getCallout();
-		callout.setStyle(mCalloutStyle);
-		callout.setMaxWidth(mMaxCalloutWidth);
-		callout.setMaxHeight(mMaxCalloutHeight);
-		callout.setOffset(0, yOffset);
-		callout.animatedShow(location, view);
-	}
-
-	/**
-	 * Hides the callout.
-	 */
-	private void hideCallout() {
-		Callout callout = mMapView.getCallout();
-		callout.hide();
-	}
-
-	/**
 	 * Clears all graphics out of the location layer and the route layer.
 	 */
 	void resetGraphicsLayers() {
@@ -776,7 +726,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mLocationLayerPoint = null;
 		mLocationLayerPointString = null;
 		mRoutingDirections = null;
-		hideCallout();
 	}
 
 	/**
@@ -979,6 +928,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Inflate the new layout from the xml file
 		mSearchResult = mInflater.inflate(R.layout.search_result, null);
+
 		// Set layout parameters
 		mSearchResult.setLayoutParams(mlayoutParams);
 
@@ -986,6 +936,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		TextView tv = (TextView) mSearchResult.findViewById(R.id.textView1);
 		tv.setTypeface(null, Typeface.BOLD);
 		tv.setText(address);
+
 		// Adding the search result layout to the map container
 		mMapContainer.addView(mSearchResult);
 
@@ -998,8 +949,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			public void onClick(View v) {
 				// Remove the search result view
 				mMapContainer.removeView(mSearchResult);
+
 				// Add the search box view
 				showSearchBoxLayout();
+
 				// Remove all graphics from the map
 				resetGraphicsLayers();
 
