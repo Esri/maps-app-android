@@ -491,7 +491,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mCompass = new Compass(mapView.getContext());
 		mCompass.setAlpha(1f);
 
-		compassFrameParams = new FrameLayout.LayoutParams(HEIGHT, WIDTH);
+		compassFrameParams = new FrameLayout.LayoutParams(HEIGHT, WIDTH, Gravity.RIGHT);
 
 		((MarginLayoutParams) compassFrameParams).setMargins(
 				LEFT_MARGIN_COMPASS, TOP_MARGIN_COMPASS, RIGHT_MARGIN_COMPASS,
