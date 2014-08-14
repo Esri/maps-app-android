@@ -60,7 +60,7 @@ public class MapsAppActivity extends Activity {
   DrawerLayout mDrawerLayout;
 
   ContentBrowserFragment mBrowseFragment;
-
+  
   /**
    * The FrameLayout that hosts the main content of the activity, such as the MapView
    */
@@ -97,7 +97,6 @@ public class MapsAppActivity extends Activity {
   @Override
   protected void onResume() {
     super.onResume();
-
     updateDrawer();
   }
 
