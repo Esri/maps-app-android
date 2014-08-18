@@ -46,6 +46,9 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -204,8 +207,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	int width, height;
 
-	private Button gpsButton;
-
 	LayoutParams gpsFrameParams;
 
 	public static MapFragment newInstance(String portalItemId,
@@ -243,6 +244,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+
 		mMapContainer = (FrameLayout) inflater.inflate(
 				R.layout.map_fragment_layout, null);
 
@@ -282,7 +284,36 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		return mMapContainer;
 	}
 
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		super.onCreateOptionsMenu(menu, inflater);
 
+		// Inflate the menu items for use in the action bar
+		inflater.inflate(R.menu.action, menu);
+
+	}
+
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+
+		case R.id.location:
+			// Toggle location tracking on or off
+			if (mIsLocationTracking) {
+				item.setIcon(R.drawable.ic_action_compass_mode);
+				mMapView.getLocationDisplayManager().setAutoPanMode(
+						AutoPanMode.COMPASS);
+				mCompass.setVisibility(View.VISIBLE);
+				mIsLocationTracking = false;
+			} else {
+				item.setIcon(android.R.drawable.ic_menu_mylocation);
+				mCompass.setVisibility(View.GONE);
+				startLocationTracking();
+			}
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
 
 	@Override
 	public void onPause() {
@@ -306,7 +337,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Start the MapView and LocationDisplayManager running again
 		if (mMapView != null) {
-//			mCompass.start();
+			// mCompass.start();
 			mMapView.unpause();
 			if (mMapViewState != null) {
 				mMapView.restoreState(mMapViewState);
@@ -442,45 +473,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		});
 
 		// set MapView into the activity layout
-		gpsButton = new Button(getActivity());
-
-		gpsButton.setBackgroundResource(R.drawable.ic_location1);
-		gpsFrameParams = new FrameLayout.LayoutParams(
-				FrameLayout.LayoutParams.WRAP_CONTENT,
-				FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM
-						| Gravity.RIGHT);
-
-		gpsButton.setLayoutParams(gpsFrameParams);
-
-		gpsButton.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-
-				mMapView.setRotationAngle(0);
-
-				if (mIsLocationTracking) {
-					gpsButton.setBackgroundResource(R.drawable.ic_compass1);
-					mMapView.getLocationDisplayManager().setAutoPanMode(
-							AutoPanMode.COMPASS);
-					mCompass.setVisibility(View.VISIBLE);
-					mIsLocationTracking = false;
-				} else {
-					gpsButton.setBackgroundResource(R.drawable.ic_location1);
-					mCompass.setVisibility(View.GONE);
-					startLocationTracking();
-				}
-
-			}
-
-		});
-
-		// set MapView into the activity layout
 		mMapContainer.addView(mMapView);
 
 		mMapContainer.addView(mCompass);
-
-		mMapContainer.addView(gpsButton);
 
 		// Displaying the searchbox layout
 		showSearchBoxLayout();
