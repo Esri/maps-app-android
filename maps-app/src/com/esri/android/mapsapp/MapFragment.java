@@ -158,7 +158,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private FrameLayout mMapContainer;
 
-	private MapView mMapView;
+	public static MapView mMapView;
 
 	private String mMapViewState;
 
@@ -282,84 +282,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		return mMapContainer;
 	}
 
-	// @Override
-	// public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-	// super.onCreateOptionsMenu(menu, inflater);
-	//
-	// // Inflate the menu items for use in the action bar
-	// inflater.inflate(R.menu.actions, menu);
-	//
-	// }
-	//
-	// @Override
-	// public boolean onOptionsItemSelected(MenuItem item) {
-	// switch (item.getItemId()) {
-	//
-	// case R.id.basemaps:
-	// // Show BasemapsDialogFragment to offer a choice if basemaps.
-	// // This calls back to onBasemapChanged() if one is selected.
-	// BasemapsDialogFragment basemapsFrag = new BasemapsDialogFragment();
-	// basemapsFrag.setBasemapsDialogListener(this);
-	// basemapsFrag.show(getFragmentManager(), null);
-	// return true;
-	//
-	// case R.id.location:
-	// // Toggle location tracking on or off
-	// mMapView.setRotationAngle(0);
-	// if (mIsLocationTracking) {
-	// item.setIcon(R.drawable.ic_action_compass_mode);
-	// mCompass.sensorManager.registerListener(mCompass.sel,
-	// mCompass.gsensor, SensorManager.SENSOR_DELAY_NORMAL);
-	// mCompass.sensorManager.registerListener(mCompass.sel,
-	// mCompass.msensor, SensorManager.SENSOR_DELAY_NORMAL);
-	// mMapView.getLocationDisplayManager().setAutoPanMode(
-	// AutoPanMode.COMPASS);
-	// mCompass.setVisibility(View.VISIBLE);
-	//
-	// mIsLocationTracking = false;
-	// } else {
-	// item.setIcon(android.R.drawable.ic_menu_mylocation);
-	// mCompass.setVisibility(View.GONE);
-	// mCompass.sensorManager.unregisterListener(mCompass.sel);
-	// startLocationTracking();
-	// }
-	//
-	// return true;
-	//
-	// case R.id.action_measure:
-	// // initialize some resources for the measure tool, optional.
-	// Unit[] linearUnits = new Unit[] {
-	// Unit.create(LinearUnit.Code.CENTIMETER),
-	// Unit.create(LinearUnit.Code.METER),
-	// Unit.create(LinearUnit.Code.KILOMETER),
-	// Unit.create(LinearUnit.Code.INCH),
-	// Unit.create(LinearUnit.Code.FOOT),
-	// Unit.create(LinearUnit.Code.YARD),
-	// Unit.create(LinearUnit.Code.MILE_STATUTE) };
-	// SimpleMarkerSymbol markerSymbol = new SimpleMarkerSymbol(
-	// Color.BLUE, 10,
-	// com.esri.core.symbol.SimpleMarkerSymbol.STYLE.DIAMOND);
-	// SimpleLineSymbol lineSymbol = new SimpleLineSymbol(Color.YELLOW, 3);
-	// SimpleFillSymbol fillSymbol = new SimpleFillSymbol(Color.argb(100,
-	// 0, 225, 255));
-	// fillSymbol.setOutline(new SimpleLineSymbol(Color.TRANSPARENT, 0));
-	//
-	// // create the tool, required.
-	// MeasuringTool measuringTool = new MeasuringTool(mMapView);
-	// // customize the tool, optional.
-	// measuringTool.setLinearUnits(linearUnits);
-	// measuringTool.setMarkerSymbol(markerSymbol);
-	// measuringTool.setLineSymbol(lineSymbol);
-	// measuringTool.setFillSymbol(fillSymbol);
-	//
-	// // fire up the tool, required.
-	// getActivity().startActionMode(measuringTool);
-	// return true;
-	//
-	// default:
-	// return super.onOptionsItemSelected(item);
-	// }
-	// }
+
 
 	@Override
 	public void onPause() {
@@ -383,7 +306,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Start the MapView and LocationDisplayManager running again
 		if (mMapView != null) {
-			mCompass.start();
+//			mCompass.start();
 			mMapView.unpause();
 			if (mMapViewState != null) {
 				mMapView.restoreState(mMapViewState);
