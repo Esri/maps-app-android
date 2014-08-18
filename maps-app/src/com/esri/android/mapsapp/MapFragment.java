@@ -449,8 +449,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				FrameLayout.LayoutParams.WRAP_CONTENT,
 				FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM
 						| Gravity.RIGHT);
-		// gpsFrameParams.bottomMargin = 25;
-		// gpsFrameParams.rightMargin = 15;
+
 		gpsButton.setLayoutParams(gpsFrameParams);
 
 		gpsButton.setOnClickListener(new View.OnClickListener() {
