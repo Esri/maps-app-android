@@ -169,7 +169,7 @@ public class Compass extends View implements SensorEventListener {
 				azimuth = (float) Math.toDegrees(orientation[0]); // orientation
 				azimuth = (azimuth + 360) % 360;
 
-				setRotationAngle(azimuth);
+				setRotationAngle(-azimuth);
 			}
 		}
 	}

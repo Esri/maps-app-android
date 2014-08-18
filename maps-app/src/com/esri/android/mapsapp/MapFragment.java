@@ -33,7 +33,6 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -43,7 +42,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -104,6 +102,7 @@ import com.esri.core.tasks.na.RouteParameters;
 import com.esri.core.tasks.na.RouteResult;
 import com.esri.core.tasks.na.RouteTask;
 import com.esri.core.tasks.na.StopGraphic;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 /**
  * Implements the view that shows the map.
@@ -134,13 +133,13 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static int BOTTOM_MARGIN_SEARCH = 0;
 
 	// Margin parameters for compass
-	private static int TOP_MARGIN_COMPASS = 280;
+	private static int TOP_MARGIN_COMPASS = 15;
 
 	private static int LEFT_MARGIN_COMPASS = 0;
 
 	private static int BOTTOM_MARGIN_COMPASS = 0;
 
-	private static int RIGHT_MARGIN_COMPASS = 15;
+	private static int RIGHT_MARGIN_COMPASS = 0;
 
 	// Height and Width for the compass image
 	private static int HEIGHT = 140;
@@ -274,12 +273,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 		}
 
-		DisplayMetrics metrics = this.getResources().getDisplayMetrics();
-
-		width = metrics.widthPixels;
-		height = metrics.heightPixels;
-		System.out.println(" width " + width);
-		System.out.println("height " + height);
 		return mMapContainer;
 	}
 
@@ -301,6 +294,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				item.setIcon(R.drawable.ic_action_compass_mode);
 				mMapView.getLocationDisplayManager().setAutoPanMode(
 						AutoPanMode.COMPASS);
+				mCompass.start();
 				mCompass.setVisibility(View.VISIBLE);
 				mIsLocationTracking = false;
 			} else {
@@ -429,32 +423,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mInflater = (LayoutInflater) getActivity().getSystemService(
 				Context.LAYOUT_INFLATER_SERVICE);
 
-		// Create the Compass custom view, and add it onto
-		// the MapView.
-		mCompass = new Compass(mapView.getContext());
-		mCompass.setAlpha(1f);
-
-		compassFrameParams = new FrameLayout.LayoutParams(HEIGHT, WIDTH,
-				Gravity.RIGHT);
-		mCompass.setRotationAngle(0);
-		
-
-		Resources r = getResources();
-
-		float pxTop = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-				110, r.getDisplayMetrics());
-		float pxRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-				05, r.getDisplayMetrics());
-
-		((MarginLayoutParams) compassFrameParams).setMargins(
-				LEFT_MARGIN_COMPASS, (int) pxTop, (int) pxRight,
-				BOTTOM_MARGIN_COMPASS);
-
-		// ((MarginLayoutParams) compassFrameParams).setMargins(
-		// width - RIGHT_MARGIN_COMPASS, TOP_MARGIN_COMPASS,
-		// RIGHT_MARGIN_COMPASS,
-		// height - TOP_MARGIN_COMPASS);
-
 		// Setting up the layout params for the searchview and searchresult
 		// layout
 		mlayoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,
@@ -462,21 +430,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mlayoutParams.setMargins(LEFT_MARGIN_SEARCH, TOP_MARGIN_SEARCH,
 				RIGHT_MARGIN_SEARCH, BOTTOM_MARGIN_SEARCH);
 
-		mCompass.setLayoutParams(compassFrameParams);
-
-		mCompass.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				mCompass.setVisibility(View.GONE);
-				mMapView.setRotationAngle(0);
-			}
-		});
-
 		// set MapView into the activity layout
 		mMapContainer.addView(mMapView);
-
-		mMapContainer.addView(mCompass);
 
 		// Displaying the searchbox layout
 		showSearchBoxLayout();
@@ -599,6 +554,45 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	}
 
 	/**
+	 * Adds the compass as per the height of the layout
+	 * 
+	 * @param height
+	 */
+	private void addCompass(int height) {
+		
+		mMapContainer.removeView(mCompass);
+		
+		// Create the Compass custom view, and add it onto
+		// the MapView.
+		mCompass = new Compass(mMapView.getContext());
+		mCompass.setAlpha(1f);
+		mCompass.setRotationAngle(45);
+		compassFrameParams = new FrameLayout.LayoutParams(HEIGHT, WIDTH,
+				Gravity.RIGHT);
+
+		TOP_MARGIN_COMPASS = TOP_MARGIN_SEARCH + height + 15;
+
+		((MarginLayoutParams) compassFrameParams).setMargins(
+				LEFT_MARGIN_COMPASS, TOP_MARGIN_COMPASS, RIGHT_MARGIN_COMPASS,
+				BOTTOM_MARGIN_COMPASS);
+
+		mCompass.setLayoutParams(compassFrameParams);
+
+		mCompass.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				mCompass.setVisibility(View.GONE);
+				mMapView.setRotationAngle(0);
+			}
+		});
+
+		// Add the compass on the map
+		mMapContainer.addView(mCompass);
+
+	}
+
+	/**
 	 * 
 	 * Displays the Dialog Fragment which allows users to route
 	 */
@@ -692,6 +686,19 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				return false;
 			}
 		});
+
+		// Add the compass after getting the height of the layout
+		mSearchBox.getViewTreeObserver().addOnGlobalLayoutListener(
+				new OnGlobalLayoutListener() {
+					@SuppressWarnings("deprecation")
+					@Override
+					public void onGlobalLayout() {
+						addCompass(mSearchBox.getHeight());
+						mSearchBox.getViewTreeObserver()
+								.removeGlobalOnLayoutListener(this);
+					}
+
+				});
 
 	}
 
@@ -949,6 +956,19 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 		});
 
+		// Add the compass after getting the height of the layout
+		mSearchResult.getViewTreeObserver().addOnGlobalLayoutListener(
+				new OnGlobalLayoutListener() {
+					@SuppressWarnings("deprecation")
+					@Override
+					public void onGlobalLayout() {
+						addCompass(mSearchResult.getHeight());
+						mSearchResult.getViewTreeObserver()
+								.removeGlobalOnLayoutListener(this);
+					}
+
+				});
+
 	}
 
 	/**
@@ -1030,6 +1050,19 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				showDirectionsDialogFragment();
 			}
 		});
+
+		// Add the compass after getting the height of the layout
+		mSearchResult.getViewTreeObserver().addOnGlobalLayoutListener(
+				new OnGlobalLayoutListener() {
+					@SuppressWarnings("deprecation")
+					@Override
+					public void onGlobalLayout() {
+						addCompass(mSearchResult.getHeight());
+						mSearchResult.getViewTreeObserver()
+								.removeGlobalOnLayoutListener(this);
+					}
+
+				});
 
 	}
 
