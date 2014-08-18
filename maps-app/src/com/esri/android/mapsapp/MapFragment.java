@@ -441,7 +441,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		Resources r = getResources();
 
 		float pxTop = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-				90, r.getDisplayMetrics());
+				100, r.getDisplayMetrics());
 		float pxRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
 				05, r.getDisplayMetrics());
 
