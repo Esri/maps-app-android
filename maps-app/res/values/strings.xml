@@ -38,9 +38,9 @@
     <string name="address">Place name or address</string>
 
     <!-- action bar titles -->
-    <string name="menu_basemaps">Basemaps</string>
+    <string name="menu_basemaps">Switch Basemap</string>
     <string name="action_location">Toggle Location Tracking</string>
-    <string name="action_measure">Edit Map</string>
+    <string name="action_measure">Measure</string>
 
     <!-- directions button text -->
     <string name="get_route">Get Route</string>
