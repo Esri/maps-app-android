@@ -276,12 +276,6 @@ public class MapsAppActivity extends Activity {
 	private void updateDrawer() {
 		mDrawerItems.clear();
 
-		LinearLayout drawer_layout = (LinearLayout) getLayoutInflater()
-				.inflate(R.layout.drawer_item_layout, null);
-		TextView text_drawer = (TextView) drawer_layout
-				.findViewById(R.id.drawer_item_textview);
-		ImageView icon_drawer = (ImageView) drawer_layout
-				.findViewById(R.id.drawer_item_icon);
 
 		DrawerItem item = null;
 		if (AccountManager.getInstance().isSignedIn()) {
@@ -303,9 +297,17 @@ public class MapsAppActivity extends Activity {
 			mDrawerItems.add(item);
 
 			// Sign Out
-			text_drawer.setText(getString(R.string.sign_out));
-			icon_drawer.setImageResource(R.drawable.ic_profile);
-			item = new DrawerItem(drawer_layout,
+			
+			LinearLayout view_signOut = (LinearLayout) getLayoutInflater()
+					.inflate(R.layout.drawer_item_layout, null);
+			TextView text_drawer_signOut = (TextView) view_signOut
+					.findViewById(R.id.drawer_item_textview);
+			ImageView icon_drawer_signOut = (ImageView) view_signOut
+					.findViewById(R.id.drawer_item_icon);
+
+			text_drawer_signOut.setText(getString(R.string.sign_out));
+			icon_drawer_signOut.setImageResource(R.drawable.ic_profile);
+			item = new DrawerItem(view_signOut,
 					new DrawerItem.OnClickListener() {
 
 						@Override
@@ -316,9 +318,16 @@ public class MapsAppActivity extends Activity {
 			mDrawerItems.add(item);
 
 			// My Maps
-			text_drawer.setText(getString(R.string.my_maps));
+			LinearLayout view_myMaps = (LinearLayout) getLayoutInflater()
+					.inflate(R.layout.drawer_item_layout, null);
+			TextView text_drawer_myMaps = (TextView) view_myMaps
+					.findViewById(R.id.drawer_item_textview);
+			ImageView icon_drawer_myMaps = (ImageView) view_myMaps
+					.findViewById(R.id.drawer_item_icon);
 
-			item = new DrawerItem(drawer_layout,
+			text_drawer_myMaps.setText(getString(R.string.my_maps));
+			icon_drawer_myMaps.setImageResource(R.drawable.ic_map32);
+			item = new DrawerItem(view_myMaps,
 					new DrawerItem.OnClickListener() {
 
 						@Override

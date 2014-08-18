@@ -2,6 +2,6 @@
 <resources>
 
     <!-- TODO: add your OAuth Client ID here-->
-    <string name="client_id">Bd4a0sJsiiSzuhcO</string>
+    <string name="client_id"></string>
 
 </resources>
