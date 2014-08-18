@@ -33,21 +33,19 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -55,6 +53,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.SearchView;
@@ -70,7 +69,6 @@ import com.esri.android.map.MapView;
 import com.esri.android.map.event.OnPinchListener;
 import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.mapsapp.account.AccountManager;
-import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogListener;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.android.mapsapp.location.DirectionsDialogFragment;
@@ -78,7 +76,6 @@ import com.esri.android.mapsapp.location.DirectionsDialogFragment.DirectionsDial
 import com.esri.android.mapsapp.location.RoutingDialogFragment;
 import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogListener;
 import com.esri.android.mapsapp.tools.Compass;
-import com.esri.android.mapsapp.tools.MeasuringTool;
 import com.esri.android.mapsapp.util.TaskExecutor;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.GeometryEngine;
@@ -92,10 +89,8 @@ import com.esri.core.portal.BaseMap;
 import com.esri.core.portal.Portal;
 import com.esri.core.portal.WebMap;
 import com.esri.core.symbol.PictureMarkerSymbol;
-import com.esri.core.symbol.SimpleFillSymbol;
 import com.esri.core.symbol.SimpleLineSymbol;
 import com.esri.core.symbol.SimpleLineSymbol.STYLE;
-import com.esri.core.symbol.SimpleMarkerSymbol;
 import com.esri.core.tasks.geocode.Locator;
 import com.esri.core.tasks.geocode.LocatorFindParameters;
 import com.esri.core.tasks.geocode.LocatorGeocodeResult;
@@ -137,19 +132,19 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static int BOTTOM_MARGIN_SEARCH = 0;
 
 	// Margin parameters for compass
-	private static int TOP_MARGIN_COMPASS = 200;
+	private static int TOP_MARGIN_COMPASS = 280;
 
 	private static int LEFT_MARGIN_COMPASS = 0;
 
 	private static int BOTTOM_MARGIN_COMPASS = 0;
 
-	private static int RIGHT_MARGIN_COMPASS = 20;
+	private static int RIGHT_MARGIN_COMPASS = 15;
 
 	// Height and Width for the compass image
-	private static int HEIGHT = 110;
+	private static int HEIGHT = 140;
 
-	private static int WIDTH = 110;
-	
+	private static int WIDTH = 140;
+
 	// The circle area specified by search_radius and input lat/lon serves
 	// searching purpose.
 	// It is also used to construct the extent which map zooms to after the
@@ -206,6 +201,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private LayoutInflater mInflater;
 
 	private String mStartLocation, mEndLocation;
+
+	int width, height;
+
+	private Button gpsButton;
+
+	LayoutParams gpsFrameParams;
 
 	public static MapFragment newInstance(String portalItemId,
 			String basemapPortalItemId) {
@@ -271,85 +272,94 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			}
 		}
+
+		DisplayMetrics metrics = this.getResources().getDisplayMetrics();
+
+		width = metrics.widthPixels;
+		height = metrics.heightPixels;
+		System.out.println(" width " + width);
+		System.out.println("height " + height);
 		return mMapContainer;
 	}
 
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		super.onCreateOptionsMenu(menu, inflater);
-
-		// Inflate the menu items for use in the action bar
-		inflater.inflate(R.menu.actions, menu);
-
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-
-		case R.id.basemaps:
-			// Show BasemapsDialogFragment to offer a choice if basemaps.
-			// This calls back to onBasemapChanged() if one is selected.
-			BasemapsDialogFragment basemapsFrag = new BasemapsDialogFragment();
-			basemapsFrag.setBasemapsDialogListener(this);
-			basemapsFrag.show(getFragmentManager(), null);
-			return true;
-
-		case R.id.location:
-			// Toggle location tracking on or off
-			mMapView.setRotationAngle(0);
-			if (mIsLocationTracking) {
-				mCompass.sensorManager.registerListener(mCompass.sel,
-						mCompass.gsensor, SensorManager.SENSOR_DELAY_NORMAL);
-				mCompass.sensorManager.registerListener(mCompass.sel,
-						mCompass.msensor, SensorManager.SENSOR_DELAY_NORMAL);
-				mMapView.getLocationDisplayManager().setAutoPanMode(
-						AutoPanMode.COMPASS);
-				mCompass.setVisibility(View.VISIBLE);
-
-				mIsLocationTracking = false;
-			} else {
-				mCompass.setVisibility(View.GONE);
-				mCompass.sensorManager.unregisterListener(mCompass.sel);
-				startLocationTracking();
-			}
-
-			return true;
-
-		case R.id.action_measure:
-			// initialize some resources for the measure tool, optional.
-			Unit[] linearUnits = new Unit[] {
-					Unit.create(LinearUnit.Code.CENTIMETER),
-					Unit.create(LinearUnit.Code.METER),
-					Unit.create(LinearUnit.Code.KILOMETER),
-					Unit.create(LinearUnit.Code.INCH),
-					Unit.create(LinearUnit.Code.FOOT),
-					Unit.create(LinearUnit.Code.YARD),
-					Unit.create(LinearUnit.Code.MILE_STATUTE) };
-			SimpleMarkerSymbol markerSymbol = new SimpleMarkerSymbol(
-					Color.BLUE, 10,
-					com.esri.core.symbol.SimpleMarkerSymbol.STYLE.DIAMOND);
-			SimpleLineSymbol lineSymbol = new SimpleLineSymbol(Color.YELLOW, 3);
-			SimpleFillSymbol fillSymbol = new SimpleFillSymbol(Color.argb(100,
-					0, 225, 255));
-			fillSymbol.setOutline(new SimpleLineSymbol(Color.TRANSPARENT, 0));
-
-			// create the tool, required.
-			MeasuringTool measuringTool = new MeasuringTool(mMapView);
-			// customize the tool, optional.
-			measuringTool.setLinearUnits(linearUnits);
-			measuringTool.setMarkerSymbol(markerSymbol);
-			measuringTool.setLineSymbol(lineSymbol);
-			measuringTool.setFillSymbol(fillSymbol);
-
-			// fire up the tool, required.
-			getActivity().startActionMode(measuringTool);
-			return true;
-
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}
+	// @Override
+	// public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+	// super.onCreateOptionsMenu(menu, inflater);
+	//
+	// // Inflate the menu items for use in the action bar
+	// inflater.inflate(R.menu.actions, menu);
+	//
+	// }
+	//
+	// @Override
+	// public boolean onOptionsItemSelected(MenuItem item) {
+	// switch (item.getItemId()) {
+	//
+	// case R.id.basemaps:
+	// // Show BasemapsDialogFragment to offer a choice if basemaps.
+	// // This calls back to onBasemapChanged() if one is selected.
+	// BasemapsDialogFragment basemapsFrag = new BasemapsDialogFragment();
+	// basemapsFrag.setBasemapsDialogListener(this);
+	// basemapsFrag.show(getFragmentManager(), null);
+	// return true;
+	//
+	// case R.id.location:
+	// // Toggle location tracking on or off
+	// mMapView.setRotationAngle(0);
+	// if (mIsLocationTracking) {
+	// item.setIcon(R.drawable.ic_action_compass_mode);
+	// mCompass.sensorManager.registerListener(mCompass.sel,
+	// mCompass.gsensor, SensorManager.SENSOR_DELAY_NORMAL);
+	// mCompass.sensorManager.registerListener(mCompass.sel,
+	// mCompass.msensor, SensorManager.SENSOR_DELAY_NORMAL);
+	// mMapView.getLocationDisplayManager().setAutoPanMode(
+	// AutoPanMode.COMPASS);
+	// mCompass.setVisibility(View.VISIBLE);
+	//
+	// mIsLocationTracking = false;
+	// } else {
+	// item.setIcon(android.R.drawable.ic_menu_mylocation);
+	// mCompass.setVisibility(View.GONE);
+	// mCompass.sensorManager.unregisterListener(mCompass.sel);
+	// startLocationTracking();
+	// }
+	//
+	// return true;
+	//
+	// case R.id.action_measure:
+	// // initialize some resources for the measure tool, optional.
+	// Unit[] linearUnits = new Unit[] {
+	// Unit.create(LinearUnit.Code.CENTIMETER),
+	// Unit.create(LinearUnit.Code.METER),
+	// Unit.create(LinearUnit.Code.KILOMETER),
+	// Unit.create(LinearUnit.Code.INCH),
+	// Unit.create(LinearUnit.Code.FOOT),
+	// Unit.create(LinearUnit.Code.YARD),
+	// Unit.create(LinearUnit.Code.MILE_STATUTE) };
+	// SimpleMarkerSymbol markerSymbol = new SimpleMarkerSymbol(
+	// Color.BLUE, 10,
+	// com.esri.core.symbol.SimpleMarkerSymbol.STYLE.DIAMOND);
+	// SimpleLineSymbol lineSymbol = new SimpleLineSymbol(Color.YELLOW, 3);
+	// SimpleFillSymbol fillSymbol = new SimpleFillSymbol(Color.argb(100,
+	// 0, 225, 255));
+	// fillSymbol.setOutline(new SimpleLineSymbol(Color.TRANSPARENT, 0));
+	//
+	// // create the tool, required.
+	// MeasuringTool measuringTool = new MeasuringTool(mMapView);
+	// // customize the tool, optional.
+	// measuringTool.setLinearUnits(linearUnits);
+	// measuringTool.setMarkerSymbol(markerSymbol);
+	// measuringTool.setLineSymbol(lineSymbol);
+	// measuringTool.setFillSymbol(fillSymbol);
+	//
+	// // fire up the tool, required.
+	// getActivity().startActionMode(measuringTool);
+	// return true;
+	//
+	// default:
+	// return super.onOptionsItemSelected(item);
+	// }
+	// }
 
 	@Override
 	public void onPause() {
@@ -474,9 +484,21 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		compassFrameParams = new FrameLayout.LayoutParams(HEIGHT, WIDTH,
 				Gravity.RIGHT);
 
+		Resources r = getResources();
+
+		float pxTop = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+				120, r.getDisplayMetrics());
+		float pxRight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+				05, r.getDisplayMetrics());
+
 		((MarginLayoutParams) compassFrameParams).setMargins(
-				LEFT_MARGIN_COMPASS, TOP_MARGIN_COMPASS, RIGHT_MARGIN_COMPASS,
+				LEFT_MARGIN_COMPASS, (int) pxTop, (int) pxRight,
 				BOTTOM_MARGIN_COMPASS);
+
+		// ((MarginLayoutParams) compassFrameParams).setMargins(
+		// width - RIGHT_MARGIN_COMPASS, TOP_MARGIN_COMPASS,
+		// RIGHT_MARGIN_COMPASS,
+		// height - TOP_MARGIN_COMPASS);
 
 		// Setting up the layout params for the searchview and searchresult
 		// layout
@@ -497,9 +519,46 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		});
 
 		// set MapView into the activity layout
+		gpsButton = new Button(getActivity());
+
+		gpsButton.setBackgroundResource(R.drawable.ic_location1);
+		gpsFrameParams = new FrameLayout.LayoutParams(
+				FrameLayout.LayoutParams.WRAP_CONTENT,
+				FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM
+						| Gravity.RIGHT);
+		// gpsFrameParams.bottomMargin = 25;
+		// gpsFrameParams.rightMargin = 15;
+		gpsButton.setLayoutParams(gpsFrameParams);
+
+		gpsButton.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+
+				mMapView.setRotationAngle(0);
+
+				if (mIsLocationTracking) {
+					gpsButton.setBackgroundResource(R.drawable.ic_compass1);
+					mMapView.getLocationDisplayManager().setAutoPanMode(
+							AutoPanMode.COMPASS);
+					mCompass.setVisibility(View.VISIBLE);
+					mIsLocationTracking = false;
+				} else {
+					gpsButton.setBackgroundResource(R.drawable.ic_location1);
+					mCompass.setVisibility(View.GONE);
+					startLocationTracking();
+				}
+
+			}
+
+		});
+
+		// set MapView into the activity layout
 		mMapContainer.addView(mMapView);
 
 		mMapContainer.addView(mCompass);
+
+		mMapContainer.addView(gpsButton);
 
 		// Displaying the searchbox layout
 		showSearchBoxLayout();
@@ -671,15 +730,16 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 */
 	private void showSearchBoxLayout() {
 
-		// Infalting the layout from the xml file
+		// Inflating the layout from the xml file
 		mSearchBox = mInflater.inflate(R.layout.searchview, null);
 
 		// Setting the layout parameters to the layout
 		mSearchBox.setLayoutParams(mlayoutParams);
 
-		// Initializing the serachview and the image view
+		// Initializing the searchview and the image view
 		final SearchView mSearchview = (SearchView) mSearchBox
 				.findViewById(R.id.searchView1);
+
 		ImageView iv_route = (ImageView) mSearchBox
 				.findViewById(R.id.imageView1);
 
