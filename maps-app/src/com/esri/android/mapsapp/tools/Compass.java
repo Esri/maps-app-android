@@ -37,7 +37,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.view.View;
-import android.widget.FrameLayout;
 
 /**
  * The implementation of compass. There are two modes of operation for rotating
@@ -78,11 +77,6 @@ public class Compass extends View implements SensorEventListener {
 		mPaint = new Paint();
 		mMatrix = new Matrix();
 		
-		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
-				FrameLayout.LayoutParams.MATCH_PARENT);
-
-//		BitmapFactory.Options o = new BitmapFactory.Options();
-//		o.inTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
 		mBitmap = BitmapFactory.decodeResource(getResources(),
 				R.drawable.ic_compass);
 				
@@ -175,7 +169,7 @@ public class Compass extends View implements SensorEventListener {
 				azimuth = (float) Math.toDegrees(orientation[0]); // orientation
 				azimuth = (azimuth + 360) % 360;
 
-				setRotationAngle(-azimuth);
+				setRotationAngle(azimuth);
 			}
 		}
 	}

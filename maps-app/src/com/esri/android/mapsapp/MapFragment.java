@@ -436,6 +436,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		compassFrameParams = new FrameLayout.LayoutParams(HEIGHT, WIDTH,
 				Gravity.RIGHT);
+		mCompass.setRotationAngle(0);
+		
 
 		Resources r = getResources();
 
