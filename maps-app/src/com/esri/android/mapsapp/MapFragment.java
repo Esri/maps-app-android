@@ -298,9 +298,15 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				mCompass.setVisibility(View.VISIBLE);
 				mIsLocationTracking = false;
 			} else {
-				item.setIcon(android.R.drawable.ic_menu_mylocation);
-				mCompass.setVisibility(View.GONE);
 				startLocationTracking();
+				item.setIcon(android.R.drawable.ic_menu_mylocation);
+				if (mMapView.getRotationAngle() != 0) {
+					mCompass.setVisibility(View.VISIBLE);
+					mCompass.setRotationAngle(mMapView.getRotationAngle());
+				} else {
+					mCompass.setVisibility(View.GONE);
+				}
+
 			}
 			return true;
 		default:
@@ -559,9 +565,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * @param height
 	 */
 	private void addCompass(int height) {
-		
+
 		mMapContainer.removeView(mCompass);
-		
+
 		// Create the Compass custom view, and add it onto
 		// the MapView.
 		mCompass = new Compass(mMapView.getContext());
@@ -577,6 +583,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				BOTTOM_MARGIN_COMPASS);
 
 		mCompass.setLayoutParams(compassFrameParams);
+
+		mCompass.setVisibility(View.GONE);
 
 		mCompass.setOnClickListener(new OnClickListener() {
 
