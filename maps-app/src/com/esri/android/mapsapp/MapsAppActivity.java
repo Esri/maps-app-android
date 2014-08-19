@@ -66,10 +66,7 @@ import com.esri.core.symbol.SimpleMarkerSymbol;
  */
 public class MapsAppActivity extends Activity {
 
-	private static final String TAG = MapsAppActivity.class.getSimpleName();
-
 	DrawerLayout mDrawerLayout;
-
 	ContentBrowserFragment mBrowseFragment;
 
 	/**
