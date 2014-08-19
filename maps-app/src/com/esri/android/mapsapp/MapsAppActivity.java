@@ -66,7 +66,8 @@ import com.esri.core.symbol.SimpleMarkerSymbol;
  */
 public class MapsAppActivity extends Activity {
 
-	DrawerLayout mDrawerLayout;
+	public static DrawerLayout mDrawerLayout;
+	
 	ContentBrowserFragment mBrowseFragment;
 
 	/**
@@ -428,8 +429,9 @@ public class MapsAppActivity extends Activity {
 				 // fire up the tool, required.
 				 startActionMode(measuringTool);
 				 
-				 //close the drawer
-				 mDrawerLayout.closeDrawers();
+				 
+				 //Close and lock the drawer
+				 mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 			}
 		});
 		mDrawerItems.add(item);
@@ -481,4 +483,5 @@ public class MapsAppActivity extends Activity {
 			return drawerItem.getView();
 		}
 	}
+
 }

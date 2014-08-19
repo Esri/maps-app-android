@@ -30,6 +30,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Color;
+import android.support.v4.widget.DrawerLayout;
 import android.view.ActionMode;
 import android.view.ActionMode.Callback;
 import android.view.ActionProvider;
@@ -50,6 +51,7 @@ import com.esri.android.map.CalloutPopupWindow;
 import com.esri.android.map.GraphicsLayer;
 import com.esri.android.map.MapView;
 import com.esri.android.map.event.OnSingleTapListener;
+import com.esri.android.mapsapp.MapsAppActivity;
 import com.esri.core.geometry.AreaUnit;
 import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.LinearUnit;
@@ -165,6 +167,7 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
   private ActionMode mMode;
   private Polyline mLine;
   private Polygon mPolygon;
+  
 
   public MeasuringTool(MapView map) {
     this.mMap = map;
@@ -245,6 +248,8 @@ public class MeasuringTool implements Callback, OnSingleTapListener {
     mLayer = null;
     mMap.setOnSingleTapListener(mOldOnSingleTapListener);
     mPoints = null;
+    //Unlock the Navigation Drawer
+    MapsAppActivity.mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
   }
 
   private void hideCallout() {
