@@ -26,7 +26,6 @@ package com.esri.android.mapsapp.tools;
 
 import com.esri.android.map.MapView;
 import com.esri.android.mapsapp.R;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -69,14 +68,18 @@ public class Compass extends View implements SensorEventListener {
 
 	// To send and receive notification from the sensors.
 	public SensorEventListener sel;
+	
+	int width;
 
 	public Compass(Context context) {
 		super(context);
 
 		mPaint = new Paint();
 		mMatrix = new Matrix();
+		
 		mBitmap = BitmapFactory.decodeResource(getResources(),
 				R.drawable.ic_compass);
+				
 		sensorManager = (SensorManager) context
 				.getSystemService(Context.SENSOR_SERVICE);
 		gsensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);

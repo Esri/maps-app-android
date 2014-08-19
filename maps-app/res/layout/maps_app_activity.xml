@@ -17,7 +17,7 @@
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@drawable/navigation_drawer_background"
+        android:background="@android:color/darker_gray"
         android:choiceMode="singleChoice"
         android:divider="@color/esri_gray"
         android:dividerHeight="1px" />

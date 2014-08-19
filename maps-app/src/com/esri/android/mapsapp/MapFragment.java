@@ -36,7 +36,6 @@ import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.AsyncTask;
@@ -70,7 +69,6 @@ import com.esri.android.map.MapView;
 import com.esri.android.map.event.OnPinchListener;
 import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.mapsapp.account.AccountManager;
-import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogListener;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.android.mapsapp.location.DirectionsDialogFragment;
@@ -78,7 +76,6 @@ import com.esri.android.mapsapp.location.DirectionsDialogFragment.DirectionsDial
 import com.esri.android.mapsapp.location.RoutingDialogFragment;
 import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogListener;
 import com.esri.android.mapsapp.tools.Compass;
-import com.esri.android.mapsapp.tools.MeasuringTool;
 import com.esri.android.mapsapp.util.TaskExecutor;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.GeometryEngine;
@@ -92,10 +89,8 @@ import com.esri.core.portal.BaseMap;
 import com.esri.core.portal.Portal;
 import com.esri.core.portal.WebMap;
 import com.esri.core.symbol.PictureMarkerSymbol;
-import com.esri.core.symbol.SimpleFillSymbol;
 import com.esri.core.symbol.SimpleLineSymbol;
 import com.esri.core.symbol.SimpleLineSymbol.STYLE;
-import com.esri.core.symbol.SimpleMarkerSymbol;
 import com.esri.core.tasks.geocode.Locator;
 import com.esri.core.tasks.geocode.LocatorFindParameters;
 import com.esri.core.tasks.geocode.LocatorGeocodeResult;
@@ -107,6 +102,7 @@ import com.esri.core.tasks.na.RouteParameters;
 import com.esri.core.tasks.na.RouteResult;
 import com.esri.core.tasks.na.RouteTask;
 import com.esri.core.tasks.na.StopGraphic;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 /**
  * Implements the view that shows the map.
@@ -137,19 +133,19 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static int BOTTOM_MARGIN_SEARCH = 0;
 
 	// Margin parameters for compass
-	private static int TOP_MARGIN_COMPASS = 200;
+	private static int TOP_MARGIN_COMPASS = 15;
 
 	private static int LEFT_MARGIN_COMPASS = 0;
 
 	private static int BOTTOM_MARGIN_COMPASS = 0;
 
-	private static int RIGHT_MARGIN_COMPASS = 20;
+	private static int RIGHT_MARGIN_COMPASS = 0;
 
 	// Height and Width for the compass image
-	private static int HEIGHT = 110;
+	private static int HEIGHT = 140;
 
-	private static int WIDTH = 110;
-	
+	private static int WIDTH = 140;
+
 	// The circle area specified by search_radius and input lat/lon serves
 	// searching purpose.
 	// It is also used to construct the extent which map zooms to after the
@@ -163,7 +159,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private FrameLayout mMapContainer;
 
-	private MapView mMapView;
+	public static MapView mMapView;
 
 	private String mMapViewState;
 
@@ -207,6 +203,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private String mStartLocation, mEndLocation;
 
+	int width, height;
+
+	LayoutParams gpsFrameParams;
+
 	public static MapFragment newInstance(String portalItemId,
 			String basemapPortalItemId) {
 		MapFragment mapFragment = new MapFragment();
@@ -242,6 +242,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+
 		mMapContainer = (FrameLayout) inflater.inflate(
 				R.layout.map_fragment_layout, null);
 
@@ -271,6 +272,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			}
 		}
+
 		return mMapContainer;
 	}
 
@@ -279,73 +281,34 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		super.onCreateOptionsMenu(menu, inflater);
 
 		// Inflate the menu items for use in the action bar
-		inflater.inflate(R.menu.actions, menu);
+		inflater.inflate(R.menu.action, menu);
 
 	}
 
-	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 
-		case R.id.basemaps:
-			// Show BasemapsDialogFragment to offer a choice if basemaps.
-			// This calls back to onBasemapChanged() if one is selected.
-			BasemapsDialogFragment basemapsFrag = new BasemapsDialogFragment();
-			basemapsFrag.setBasemapsDialogListener(this);
-			basemapsFrag.show(getFragmentManager(), null);
-			return true;
-
 		case R.id.location:
 			// Toggle location tracking on or off
-			mMapView.setRotationAngle(0);
 			if (mIsLocationTracking) {
-				mCompass.sensorManager.registerListener(mCompass.sel,
-						mCompass.gsensor, SensorManager.SENSOR_DELAY_NORMAL);
-				mCompass.sensorManager.registerListener(mCompass.sel,
-						mCompass.msensor, SensorManager.SENSOR_DELAY_NORMAL);
+				item.setIcon(R.drawable.ic_action_compass_mode);
 				mMapView.getLocationDisplayManager().setAutoPanMode(
 						AutoPanMode.COMPASS);
+				mCompass.start();
 				mCompass.setVisibility(View.VISIBLE);
-
 				mIsLocationTracking = false;
 			} else {
-				mCompass.setVisibility(View.GONE);
-				mCompass.sensorManager.unregisterListener(mCompass.sel);
 				startLocationTracking();
+				item.setIcon(android.R.drawable.ic_menu_mylocation);
+				if (mMapView.getRotationAngle() != 0) {
+					mCompass.setVisibility(View.VISIBLE);
+					mCompass.setRotationAngle(mMapView.getRotationAngle());
+				} else {
+					mCompass.setVisibility(View.GONE);
+				}
+
 			}
-
 			return true;
-
-		case R.id.action_measure:
-			// initialize some resources for the measure tool, optional.
-			Unit[] linearUnits = new Unit[] {
-					Unit.create(LinearUnit.Code.CENTIMETER),
-					Unit.create(LinearUnit.Code.METER),
-					Unit.create(LinearUnit.Code.KILOMETER),
-					Unit.create(LinearUnit.Code.INCH),
-					Unit.create(LinearUnit.Code.FOOT),
-					Unit.create(LinearUnit.Code.YARD),
-					Unit.create(LinearUnit.Code.MILE_STATUTE) };
-			SimpleMarkerSymbol markerSymbol = new SimpleMarkerSymbol(
-					Color.BLUE, 10,
-					com.esri.core.symbol.SimpleMarkerSymbol.STYLE.DIAMOND);
-			SimpleLineSymbol lineSymbol = new SimpleLineSymbol(Color.YELLOW, 3);
-			SimpleFillSymbol fillSymbol = new SimpleFillSymbol(Color.argb(100,
-					0, 225, 255));
-			fillSymbol.setOutline(new SimpleLineSymbol(Color.TRANSPARENT, 0));
-
-			// create the tool, required.
-			MeasuringTool measuringTool = new MeasuringTool(mMapView);
-			// customize the tool, optional.
-			measuringTool.setLinearUnits(linearUnits);
-			measuringTool.setMarkerSymbol(markerSymbol);
-			measuringTool.setLineSymbol(lineSymbol);
-			measuringTool.setFillSymbol(fillSymbol);
-
-			// fire up the tool, required.
-			getActivity().startActionMode(measuringTool);
-			return true;
-
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -373,7 +336,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Start the MapView and LocationDisplayManager running again
 		if (mMapView != null) {
-			mCompass.start();
+			// mCompass.start();
 			mMapView.unpause();
 			if (mMapViewState != null) {
 				mMapView.restoreState(mMapViewState);
@@ -466,18 +429,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mInflater = (LayoutInflater) getActivity().getSystemService(
 				Context.LAYOUT_INFLATER_SERVICE);
 
-		// Create the Compass custom view, and add it onto
-		// the MapView.
-		mCompass = new Compass(mapView.getContext());
-		mCompass.setAlpha(1f);
-
-		compassFrameParams = new FrameLayout.LayoutParams(HEIGHT, WIDTH,
-				Gravity.RIGHT);
-
-		((MarginLayoutParams) compassFrameParams).setMargins(
-				LEFT_MARGIN_COMPASS, TOP_MARGIN_COMPASS, RIGHT_MARGIN_COMPASS,
-				BOTTOM_MARGIN_COMPASS);
-
 		// Setting up the layout params for the searchview and searchresult
 		// layout
 		mlayoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,
@@ -485,21 +436,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mlayoutParams.setMargins(LEFT_MARGIN_SEARCH, TOP_MARGIN_SEARCH,
 				RIGHT_MARGIN_SEARCH, BOTTOM_MARGIN_SEARCH);
 
-		mCompass.setLayoutParams(compassFrameParams);
-
-		mCompass.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				mCompass.setVisibility(View.GONE);
-				mMapView.setRotationAngle(0);
-			}
-		});
-
 		// set MapView into the activity layout
 		mMapContainer.addView(mMapView);
-
-		mMapContainer.addView(mCompass);
 
 		// Displaying the searchbox layout
 		showSearchBoxLayout();
@@ -622,6 +560,47 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	}
 
 	/**
+	 * Adds the compass as per the height of the layout
+	 * 
+	 * @param height
+	 */
+	private void addCompass(int height) {
+
+		mMapContainer.removeView(mCompass);
+
+		// Create the Compass custom view, and add it onto
+		// the MapView.
+		mCompass = new Compass(mMapView.getContext());
+		mCompass.setAlpha(1f);
+		mCompass.setRotationAngle(45);
+		compassFrameParams = new FrameLayout.LayoutParams(HEIGHT, WIDTH,
+				Gravity.RIGHT);
+
+		TOP_MARGIN_COMPASS = TOP_MARGIN_SEARCH + height + 15;
+
+		((MarginLayoutParams) compassFrameParams).setMargins(
+				LEFT_MARGIN_COMPASS, TOP_MARGIN_COMPASS, RIGHT_MARGIN_COMPASS,
+				BOTTOM_MARGIN_COMPASS);
+
+		mCompass.setLayoutParams(compassFrameParams);
+
+		mCompass.setVisibility(View.GONE);
+
+		mCompass.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				mCompass.setVisibility(View.GONE);
+				mMapView.setRotationAngle(0);
+			}
+		});
+
+		// Add the compass on the map
+		mMapContainer.addView(mCompass);
+
+	}
+
+	/**
 	 * 
 	 * Displays the Dialog Fragment which allows users to route
 	 */
@@ -671,15 +650,16 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 */
 	private void showSearchBoxLayout() {
 
-		// Infalting the layout from the xml file
+		// Inflating the layout from the xml file
 		mSearchBox = mInflater.inflate(R.layout.searchview, null);
 
 		// Setting the layout parameters to the layout
 		mSearchBox.setLayoutParams(mlayoutParams);
 
-		// Initializing the serachview and the image view
+		// Initializing the searchview and the image view
 		final SearchView mSearchview = (SearchView) mSearchBox
 				.findViewById(R.id.searchView1);
+
 		ImageView iv_route = (ImageView) mSearchBox
 				.findViewById(R.id.imageView1);
 
@@ -714,6 +694,19 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				return false;
 			}
 		});
+
+		// Add the compass after getting the height of the layout
+		mSearchBox.getViewTreeObserver().addOnGlobalLayoutListener(
+				new OnGlobalLayoutListener() {
+					@SuppressWarnings("deprecation")
+					@Override
+					public void onGlobalLayout() {
+						addCompass(mSearchBox.getHeight());
+						mSearchBox.getViewTreeObserver()
+								.removeGlobalOnLayoutListener(this);
+					}
+
+				});
 
 	}
 
@@ -971,6 +964,19 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 		});
 
+		// Add the compass after getting the height of the layout
+		mSearchResult.getViewTreeObserver().addOnGlobalLayoutListener(
+				new OnGlobalLayoutListener() {
+					@SuppressWarnings("deprecation")
+					@Override
+					public void onGlobalLayout() {
+						addCompass(mSearchResult.getHeight());
+						mSearchResult.getViewTreeObserver()
+								.removeGlobalOnLayoutListener(this);
+					}
+
+				});
+
 	}
 
 	/**
@@ -1052,6 +1058,19 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				showDirectionsDialogFragment();
 			}
 		});
+
+		// Add the compass after getting the height of the layout
+		mSearchResult.getViewTreeObserver().addOnGlobalLayoutListener(
+				new OnGlobalLayoutListener() {
+					@SuppressWarnings("deprecation")
+					@Override
+					public void onGlobalLayout() {
+						addCompass(mSearchResult.getHeight());
+						mSearchResult.getViewTreeObserver()
+								.removeGlobalOnLayoutListener(this);
+					}
+
+				});
 
 	}
 
