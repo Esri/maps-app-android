@@ -33,3 +33,5 @@ Calculate distance or area in multiple units that are extendible.
 
 ### Sign into ArcGIS
 Sign into your ArcGIS account to add custom maps from your organization.
+
+![](sign-in.png)
