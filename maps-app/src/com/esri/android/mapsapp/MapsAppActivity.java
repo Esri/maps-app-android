@@ -33,6 +33,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -44,307 +45,437 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.account.SignInActivity;
+import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
+import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogListener;
+import com.esri.android.mapsapp.tools.MeasuringTool;
+import com.esri.core.geometry.LinearUnit;
+import com.esri.core.geometry.Unit;
+import com.esri.core.symbol.SimpleFillSymbol;
+import com.esri.core.symbol.SimpleLineSymbol;
+import com.esri.core.symbol.SimpleMarkerSymbol;
 
 /**
  * Entry point into the Maps App.
  */
 public class MapsAppActivity extends Activity {
 
-  private static final String TAG = MapsAppActivity.class.getSimpleName();
+	public static DrawerLayout mDrawerLayout;
+	
+	ContentBrowserFragment mBrowseFragment;
 
-  DrawerLayout mDrawerLayout;
+	/**
+	 * The FrameLayout that hosts the main content of the activity, such as the
+	 * MapView
+	 */
+	FrameLayout mContentFrame;
 
-  ContentBrowserFragment mBrowseFragment;
+	/**
+	 * The list of menu items in the navigation drawer
+	 */
+	private ListView mDrawerList;
 
-  /**
-   * The FrameLayout that hosts the main content of the activity, such as the MapView
-   */
-  FrameLayout mContentFrame;
+	private final List<DrawerItem> mDrawerItems = new ArrayList<DrawerItem>();
 
-  /**
-   * The list of menu items in the navigation drawer
-   */
-  private ListView mDrawerList;
+	/**
+	 * Helper component that ties the action bar to the navigation drawer.
+	 */
+	private ActionBarDrawerToggle mDrawerToggle;
 
-  private final List<DrawerItem> mDrawerItems = new ArrayList<DrawerItem>();
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-  /**
-   * Helper component that ties the action bar to the navigation drawer.
-   */
-  private ActionBarDrawerToggle mDrawerToggle;
+		/**
+		 * Unlock basic license level by setting your client id here. The client
+		 * id can be obtained on https://developers.arcgis.com
+		 */
+		// ArcGISRuntime.setClientId(getString(R.string.client_id));
 
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+		setContentView(R.layout.maps_app_activity);
+		setupDrawer();
 
-    /**
-     * Unlock basic license level by setting your client id here. The client id can be obtained on
-     * https://developers.arcgis.com
-     */
-    // ArcGISRuntime.setClientId(getString(R.string.client_id));
+		setView();
+	}
 
-    setContentView(R.layout.maps_app_activity);
-    setupDrawer();
+	@Override
+	protected void onResume() {
+		super.onResume();
+		updateDrawer();
+	}
 
-    setView();
-  }
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// first check if the drawer toggle button was selected
+		boolean handled = mDrawerToggle.onOptionsItemSelected(item);
+		if (!handled) {
+			handled = super.onOptionsItemSelected(item);
+		}
+		return handled;
+	}
 
-  @Override
-  protected void onResume() {
-    super.onResume();
+	/**
+	 * Initializes the navigation drawer.
+	 */
+	private void setupDrawer() {
+		mDrawerLayout = (DrawerLayout) findViewById(R.id.maps_app_activity_drawer_layout);
+		mContentFrame = (FrameLayout) findViewById(R.id.maps_app_activity_content_frame);
+		mDrawerList = (ListView) findViewById(R.id.maps_app_activity_left_drawer);
 
-    updateDrawer();
-  }
+		// Set the list's click listener
+		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    // first check if the drawer toggle button was selected
-    boolean handled = mDrawerToggle.onOptionsItemSelected(item);
-    if (!handled) {
-      handled = super.onOptionsItemSelected(item);
-    }
-    return handled;
-  }
+		// set a custom shadow that overlays the main content when the drawer
+		// opens
+		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
+				GravityCompat.START);
+		// set up the drawer's list view with items and click listener
 
-  /**
-   * Initializes the navigation drawer.
-   */
-  private void setupDrawer() {
-    mDrawerLayout = (DrawerLayout) findViewById(R.id.maps_app_activity_drawer_layout);
-    mContentFrame = (FrameLayout) findViewById(R.id.maps_app_activity_content_frame);
-    mDrawerList = (ListView) findViewById(R.id.maps_app_activity_left_drawer);
+		ActionBar actionBar = getActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setHomeButtonEnabled(true);
 
-    // Set the list's click listener
-    mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+		// ActionBarDrawerToggle ties together the the proper interactions
+		// between the navigation drawer and the action bar app icon.
+		mDrawerToggle = new ActionBarDrawerToggle(this, /* host Activity */
+		mDrawerLayout, /* DrawerLayout object */
+		R.drawable.ic_drawer, /* nav drawer image to replace 'Up' caret */
+		R.string.navigation_drawer_open, /* "open drawer" description for accessibility */
+		R.string.navigation_drawer_close /* "close drawer" description for accessibility */
+		) {
+			@Override
+			public void onDrawerClosed(View drawerView) {
+				super.onDrawerClosed(drawerView);
 
-    // set a custom shadow that overlays the main content when the drawer opens
-    mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-    // set up the drawer's list view with items and click listener
+				invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+			}
 
-    ActionBar actionBar = getActionBar();
-    actionBar.setDisplayHomeAsUpEnabled(true);
-    actionBar.setHomeButtonEnabled(true);
+			@Override
+			public void onDrawerOpened(View drawerView) {
+				super.onDrawerOpened(drawerView);
 
-    // ActionBarDrawerToggle ties together the the proper interactions
-    // between the navigation drawer and the action bar app icon.
-    mDrawerToggle = new ActionBarDrawerToggle(this, /* host Activity */
-    mDrawerLayout, /* DrawerLayout object */
-    R.drawable.ic_drawer, /* nav drawer image to replace 'Up' caret */
-    R.string.navigation_drawer_open, /* "open drawer" description for accessibility */
-    R.string.navigation_drawer_close /* "close drawer" description for accessibility */
-    ) {
-      @Override
-      public void onDrawerClosed(View drawerView) {
-        super.onDrawerClosed(drawerView);
+				invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+			}
+		};
 
-        invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-      }
+		// Defer code dependent on restoration of previous instance state.
+		mDrawerLayout.post(new Runnable() {
+			@Override
+			public void run() {
+				mDrawerToggle.syncState();
+			}
+		});
 
-      @Override
-      public void onDrawerOpened(View drawerView) {
-        super.onDrawerOpened(drawerView);
+		mDrawerLayout.setDrawerListener(mDrawerToggle);
 
-        invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-      }
-    };
+		updateDrawer();
+	}
 
-    // Defer code dependent on restoration of previous instance state.
-    mDrawerLayout.post(new Runnable() {
-      @Override
-      public void run() {
-        mDrawerToggle.syncState();
-      }
-    });
+	private void setView() {
+		if (AccountManager.getInstance().isSignedIn()) {
+			// we are signed in to a portal - show the content browser to choose
+			// a map
+			showContentBrowser();
+		} else {
+			// show the default map
+			showMap(null, null);
+		}
+	}
 
-    mDrawerLayout.setDrawerListener(mDrawerToggle);
+	/**
+	 * Opens the content browser that shows the user's maps.
+	 */
+	private void showContentBrowser() {
+		FragmentManager fragmentManager = getFragmentManager();
+		Fragment browseFragment = fragmentManager
+				.findFragmentByTag(ContentBrowserFragment.TAG);
+		if (browseFragment == null) {
+			browseFragment = new ContentBrowserFragment();
+		}
 
-    updateDrawer();
-  }
+		if (!browseFragment.isVisible()) {
+			FragmentTransaction transaction = fragmentManager
+					.beginTransaction();
+			transaction.add(R.id.maps_app_activity_content_frame,
+					browseFragment, ContentBrowserFragment.TAG);
+			transaction.addToBackStack(null);
+			transaction.commit();
 
-  private void setView() {
-    if (AccountManager.getInstance().isSignedIn()) {
-      // we are signed in to a portal - show the content browser to choose a map
-      showContentBrowser();
-    } else {
-      // show the default map
-      showMap(null, null);
-    }
-  }
+			invalidateOptionsMenu(); // reload the options menu
+		}
 
-  /**
-   * Opens the content browser that shows the user's maps.
-   */
-  private void showContentBrowser() {
-    FragmentManager fragmentManager = getFragmentManager();
-    Fragment browseFragment = fragmentManager.findFragmentByTag(ContentBrowserFragment.TAG);
-    if (browseFragment == null) {
-      browseFragment = new ContentBrowserFragment();
-    }
+		mDrawerLayout.closeDrawers();
+	}
 
-    if (!browseFragment.isVisible()) {
-      FragmentTransaction transaction = fragmentManager.beginTransaction();
-      transaction.add(R.id.maps_app_activity_content_frame, browseFragment, ContentBrowserFragment.TAG);
-      transaction.addToBackStack(null);
-      transaction.commit();
+	/**
+	 * Opens the map represented by the specified portal item or if null, opens
+	 * a default map.
+	 */
+	public void showMap(String portalItemId, String basemapPortalItemId) {
 
-      invalidateOptionsMenu(); // reload the options menu
-    }
+		// remove existing MapFragment explicitly, simply replacing it can cause
+		// the app to freeze when switching basemaps
+		FragmentTransaction transaction = null;
+		FragmentManager fragmentManager = getFragmentManager();
+		Fragment currentMapFragment = fragmentManager
+				.findFragmentByTag(MapFragment.TAG);
+		if (currentMapFragment != null) {
+			transaction = fragmentManager.beginTransaction();
+			transaction.remove(currentMapFragment);
+			transaction.commit();
+		}
 
-    mDrawerLayout.closeDrawers();
-  }
+		MapFragment mapFragment = MapFragment.newInstance(portalItemId,
+				basemapPortalItemId);
 
-  /**
-   * Opens the map represented by the specified portal item or if null, opens a default map.
-   */
-  public void showMap(String portalItemId, String basemapPortalItemId) {
+		transaction = fragmentManager.beginTransaction();
+		transaction.replace(R.id.maps_app_activity_content_frame, mapFragment,
+				MapFragment.TAG);
+		transaction.addToBackStack(null);
+		transaction.commit();
 
-    // remove existing MapFragment explicitly, simply replacing it can cause the app to freeze when switching basemaps
-    FragmentTransaction transaction = null;
-    FragmentManager fragmentManager = getFragmentManager();
-    Fragment currentMapFragment = fragmentManager.findFragmentByTag(MapFragment.TAG);
-    if (currentMapFragment != null) {
-      transaction = fragmentManager.beginTransaction();
-      transaction.remove(currentMapFragment);
-      transaction.commit();
-    }
+		invalidateOptionsMenu(); // reload the options menu
+	}
 
-    MapFragment mapFragment = MapFragment.newInstance(portalItemId, basemapPortalItemId);
+	private void showSignInActivity() {
+		Intent intent = new Intent(this, SignInActivity.class);
+		startActivity(intent);
 
-    transaction = fragmentManager.beginTransaction();
-    transaction.replace(R.id.maps_app_activity_content_frame, mapFragment, MapFragment.TAG);
-    transaction.addToBackStack(null);
-    transaction.commit();
+		mDrawerLayout.closeDrawers();
+	}
 
-    invalidateOptionsMenu(); // reload the options menu
-  }
+	/**
+	 * Resets the app to "signed out" state.
+	 */
+	private void signOut() {
+		AccountManager.getInstance().setPortal(null);
 
-  private void showSignInActivity() {
-    Intent intent = new Intent(this, SignInActivity.class);
-    startActivity(intent);
+		setView();
 
-    mDrawerLayout.closeDrawers();
-  }
+		updateDrawer();
+		mDrawerLayout.closeDrawers();
+	}
 
-  /**
-   * Resets the app to "signed out" state.
-   */
-  private void signOut() {
-    AccountManager.getInstance().setPortal(null);
+	/**
+	 * Updates the navigation drawer items.
+	 */
+	private void updateDrawer() {
+		mDrawerItems.clear();
 
-    setView();
 
-    updateDrawer();
-    mDrawerLayout.closeDrawers();
-  }
+		DrawerItem item = null;
+		if (AccountManager.getInstance().isSignedIn()) {
 
-  /**
-   * Updates the navigation drawer items.
-   */
-  private void updateDrawer() {
-    mDrawerItems.clear();
+			// user info
+			LinearLayout userInfoView = (LinearLayout) getLayoutInflater()
+					.inflate(R.layout.drawer_item_user_layout, null);
+			TextView textView = (TextView) userInfoView
+					.findViewById(R.id.drawer_item_fullname_textview);
+			textView.setText(AccountManager.getInstance().getPortalUser()
+					.getFullName());
 
-    DrawerItem item = null;
-    if (AccountManager.getInstance().isSignedIn()) {
+			textView = (TextView) userInfoView
+					.findViewById(R.id.drawer_item_username_textview);
+			textView.setText(AccountManager.getInstance().getPortalUser()
+					.getUsername());
 
-      // user info
-      View userInfoView = getLayoutInflater().inflate(R.layout.drawer_item_user_layout, null);
-      TextView textView = (TextView) userInfoView.findViewById(R.id.drawer_item_fullname_textview);
-      textView.setText(AccountManager.getInstance().getPortalUser().getFullName());
+			item = new DrawerItem(userInfoView, null);
+			mDrawerItems.add(item);
 
-      textView = (TextView) userInfoView.findViewById(R.id.drawer_item_username_textview);
-      textView.setText(AccountManager.getInstance().getPortalUser().getUsername());
+			// Sign Out
+			
+			LinearLayout view_signOut = (LinearLayout) getLayoutInflater()
+					.inflate(R.layout.drawer_item_layout, null);
+			TextView text_drawer_signOut = (TextView) view_signOut
+					.findViewById(R.id.drawer_item_textview);
+			ImageView icon_drawer_signOut = (ImageView) view_signOut
+					.findViewById(R.id.drawer_item_icon);
 
-      item = new DrawerItem(userInfoView, null);
-      mDrawerItems.add(item);
+			text_drawer_signOut.setText(getString(R.string.sign_out));
+			icon_drawer_signOut.setImageResource(R.drawable.ic_profile);
+			item = new DrawerItem(view_signOut,
+					new DrawerItem.OnClickListener() {
 
-      // Sign Out
-      TextView view = (TextView) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
-      view.setText(getString(R.string.sign_out));
+						@Override
+						public void onClick() {
+							signOut();
+						}
+					});
+			mDrawerItems.add(item);
 
-      item = new DrawerItem(view, new DrawerItem.OnClickListener() {
+			// My Maps
+			LinearLayout view_myMaps = (LinearLayout) getLayoutInflater()
+					.inflate(R.layout.drawer_item_layout, null);
+			TextView text_drawer_myMaps = (TextView) view_myMaps
+					.findViewById(R.id.drawer_item_textview);
+			ImageView icon_drawer_myMaps = (ImageView) view_myMaps
+					.findViewById(R.id.drawer_item_icon);
 
-        @Override
-        public void onClick() {
-          signOut();
-        }
-      });
-      mDrawerItems.add(item);
+			text_drawer_myMaps.setText(getString(R.string.my_maps));
+			icon_drawer_myMaps.setImageResource(R.drawable.ic_map32);
+			item = new DrawerItem(view_myMaps,
+					new DrawerItem.OnClickListener() {
 
-      // My Maps
-      view = (TextView) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
-      view.setText(getString(R.string.my_maps));
+						@Override
+						public void onClick() {
+							showContentBrowser();
+						}
+					});
+			mDrawerItems.add(item);
+		} else {
 
-      item = new DrawerItem(view, new DrawerItem.OnClickListener() {
+			// Adding the SIgn In item in the drawer
+			LinearLayout view_signIn = (LinearLayout) getLayoutInflater()
+					.inflate(R.layout.drawer_item_layout, null);
+			TextView text_drawer_signIn = (TextView) view_signIn
+					.findViewById(R.id.drawer_item_textview);
+			ImageView icon_drawer_signIn = (ImageView) view_signIn
+					.findViewById(R.id.drawer_item_icon);
 
-        @Override
-        public void onClick() {
-          showContentBrowser();
-        }
-      });
-      mDrawerItems.add(item);
-    } else {
-      TextView view = (TextView) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
-      view.setText(getString(R.string.sign_in));
+			text_drawer_signIn.setText(getString(R.string.sign_in));
+			icon_drawer_signIn.setImageResource(R.drawable.ic_profile);
+			item = new DrawerItem(view_signIn,
+					new DrawerItem.OnClickListener() {
 
-      item = new DrawerItem(view, new DrawerItem.OnClickListener() {
+						@Override
+						public void onClick() {
+							showSignInActivity();
+						}
+					});
+			mDrawerItems.add(item);
+		}
 
-        @Override
-        public void onClick() {
-          showSignInActivity();
-        }
-      });
-      mDrawerItems.add(item);
-    }
+		// Adding the basemap item in the drawer
+		LinearLayout view_basemap = (LinearLayout) getLayoutInflater().inflate(
+				R.layout.drawer_item_layout, null);
+		TextView text_drawer_basemap = (TextView) view_basemap
+				.findViewById(R.id.drawer_item_textview);
+		ImageView icon_drawer_basemap = (ImageView) view_basemap
+				.findViewById(R.id.drawer_item_icon);
 
-    BaseAdapter adapter = (BaseAdapter) mDrawerList.getAdapter();
-    if (adapter == null) {
-      adapter = new DrawerItemListAdapter();
-      mDrawerList.setAdapter(adapter);
-    } else {
-      adapter.notifyDataSetChanged();
-    }
-  }
+		text_drawer_basemap.setText(getString(R.string.menu_basemaps));
+		icon_drawer_basemap.setImageResource(R.drawable.action_basemaps);
+		item = new DrawerItem(view_basemap, new DrawerItem.OnClickListener() {
 
-  /**
-   * Handles selection of items in the navigation drawer.
-   */
-  private class DrawerItemClickListener implements OnItemClickListener {
+			@Override
+			public void onClick() {
+				 // Show BasemapsDialogFragment to offer a choice if basemaps.
+				 // This calls back to onBasemapChanged() if one is selected.
+				 BasemapsDialogFragment basemapsFrag = new BasemapsDialogFragment();
+				 basemapsFrag.setBasemapsDialogListener(new BasemapsDialogListener() {
+					
+					@Override
+					public void onBasemapChanged(String itemId) {
+						showMap(null,itemId);
+					}
+				});
+				 basemapsFrag.show(getFragmentManager(), null);
+				 mDrawerLayout.closeDrawers();
+			}
+		});
+		mDrawerItems.add(item);
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-      mDrawerItems.get(position).onClicked();
-    }
-  }
+		// Adding the Measure item in the Drawer
+		LinearLayout view_measure = (LinearLayout) getLayoutInflater().inflate(
+				R.layout.drawer_item_layout, null);
+		TextView text_drawer_measure = (TextView) view_measure
+				.findViewById(R.id.drawer_item_textview);
+		ImageView icon_drawer_measure = (ImageView) view_measure
+				.findViewById(R.id.drawer_item_icon);
 
-  /**
-   * Populates the navigation drawer list with items.
-   */
-  private class DrawerItemListAdapter extends BaseAdapter {
+		text_drawer_measure.setText(getString(R.string.action_measure));
+		icon_drawer_measure.setImageResource(android.R.drawable.ic_menu_edit);
+		item = new DrawerItem(view_measure, new DrawerItem.OnClickListener() {
 
-    @Override
-    public int getCount() {
-      return mDrawerItems.size();
-    }
+			@Override
+			public void onClick() {
+				 // initialize some resources for the measure tool, optional.
+				 Unit[] linearUnits = new Unit[] {
+				 Unit.create(LinearUnit.Code.CENTIMETER),
+				 Unit.create(LinearUnit.Code.METER),
+				 Unit.create(LinearUnit.Code.KILOMETER),
+				 Unit.create(LinearUnit.Code.INCH),
+				 Unit.create(LinearUnit.Code.FOOT),
+				 Unit.create(LinearUnit.Code.YARD),
+				 Unit.create(LinearUnit.Code.MILE_STATUTE) };
+				 SimpleMarkerSymbol markerSymbol = new SimpleMarkerSymbol(
+				 Color.BLUE, 10,
+				 com.esri.core.symbol.SimpleMarkerSymbol.STYLE.DIAMOND);
+				 SimpleLineSymbol lineSymbol = new SimpleLineSymbol(Color.YELLOW, 3);
+				 SimpleFillSymbol fillSymbol = new SimpleFillSymbol(Color.argb(100,
+				 0, 225, 255));
+				 fillSymbol.setOutline(new SimpleLineSymbol(Color.TRANSPARENT, 0));
+				
+				 // create the tool, required.
+				 MeasuringTool measuringTool = new MeasuringTool(MapFragment.mMapView);
+				 // customize the tool, optional.
+				 measuringTool.setLinearUnits(linearUnits);
+				 measuringTool.setMarkerSymbol(markerSymbol);
+				 measuringTool.setLineSymbol(lineSymbol);
+				 measuringTool.setFillSymbol(fillSymbol);
+				
+				 // fire up the tool, required.
+				 startActionMode(measuringTool);
+				 
+				 
+				 //Close and lock the drawer
+				 mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+			}
+		});
+		mDrawerItems.add(item);
 
-    @Override
-    public Object getItem(int position) {
-      return mDrawerItems.get(position);
-    }
+		BaseAdapter adapter = (BaseAdapter) mDrawerList.getAdapter();
+		if (adapter == null) {
+			adapter = new DrawerItemListAdapter();
+			mDrawerList.setAdapter(adapter);
+		} else {
+			adapter.notifyDataSetChanged();
+		}
+	}
 
-    @Override
-    public long getItemId(int position) {
-      return position;
-    }
+	/**
+	 * Handles selection of items in the navigation drawer.
+	 */
+	private class DrawerItemClickListener implements OnItemClickListener {
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-      DrawerItem drawerItem = (DrawerItem) getItem(position);
-      return drawerItem.getView();
-    }
-  }
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+				long id) {
+			mDrawerItems.get(position).onClicked();
+		}
+	}
+
+	/**
+	 * Populates the navigation drawer list with items.
+	 */
+	private class DrawerItemListAdapter extends BaseAdapter {
+
+		@Override
+		public int getCount() {
+			return mDrawerItems.size();
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return mDrawerItems.get(position);
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			DrawerItem drawerItem = (DrawerItem) getItem(position);
+			return drawerItem.getView();
+		}
+	}
+
 }

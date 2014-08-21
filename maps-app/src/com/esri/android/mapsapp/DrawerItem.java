@@ -25,6 +25,7 @@
 package com.esri.android.mapsapp;
 
 import android.view.View;
+import android.widget.LinearLayout;
 
 /**
  * Represents an item in the navigation drawer list.
@@ -36,9 +37,9 @@ public class DrawerItem {
 
   private final OnClickListener mListener;
 
-  private final View mView;
+  private final LinearLayout mView;
 
-  public DrawerItem(View view, OnClickListener listener) {
+  public DrawerItem(LinearLayout view, OnClickListener listener) {
     mView = view;
     mListener = listener;
   }
