@@ -698,12 +698,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Add the compass after getting the height of the layout
 		mSearchBox.getViewTreeObserver().addOnGlobalLayoutListener(
 				new OnGlobalLayoutListener() {
-					@SuppressWarnings("deprecation")
 					@Override
 					public void onGlobalLayout() {
 						addCompass(mSearchBox.getHeight());
-						mSearchBox.getViewTreeObserver()
-								.removeGlobalOnLayoutListener(this);
+						mSearchBox.getViewTreeObserver().removeGlobalOnLayoutListener(this);
 					}
 
 				});
@@ -967,12 +965,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Add the compass after getting the height of the layout
 		mSearchResult.getViewTreeObserver().addOnGlobalLayoutListener(
 				new OnGlobalLayoutListener() {
-					@SuppressWarnings("deprecation")
 					@Override
 					public void onGlobalLayout() {
 						addCompass(mSearchResult.getHeight());
-						mSearchResult.getViewTreeObserver()
-								.removeGlobalOnLayoutListener(this);
+						mSearchResult.getViewTreeObserver().removeGlobalOnLayoutListener(this);
 					}
 
 				});
@@ -1062,12 +1058,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Add the compass after getting the height of the layout
 		mSearchResult.getViewTreeObserver().addOnGlobalLayoutListener(
 				new OnGlobalLayoutListener() {
-					@SuppressWarnings("deprecation")
 					@Override
 					public void onGlobalLayout() {
 						addCompass(mSearchResult.getHeight());
-						mSearchResult.getViewTreeObserver()
-								.removeGlobalOnLayoutListener(this);
+						mSearchResult.getViewTreeObserver().removeGlobalOnLayoutListener(this);
 					}
 
 				});
