@@ -475,7 +475,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				if (mMapView.getRotationAngle() > 5
 						|| mMapView.getRotationAngle() < -5) {
 					mCompass.setVisibility(View.VISIBLE);
-					mCompass.sensorManager.unregisterListener(mCompass.sel);
+					mCompass.sensorManager.unregisterListener(mCompass.sensorEventListener);
 					mCompass.setRotationAngle(mMapView.getRotationAngle());
 				}
 			}

@@ -67,7 +67,7 @@ public class Compass extends View implements SensorEventListener {
 	private float azimuth = 0f;
 
 	// To send and receive notification from the sensors.
-	public SensorEventListener sel;
+	public SensorEventListener sensorEventListener;
 	
 	int width;
 
@@ -88,7 +88,7 @@ public class Compass extends View implements SensorEventListener {
 
 	public void start() {
 		// A copy of instance which is used to restart the sensors
-		sel = this;
+		sensorEventListener = this;
 
 		// Enable the sensors
 		sensorManager.registerListener(this, gsensor,
