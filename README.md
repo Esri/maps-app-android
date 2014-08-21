@@ -6,11 +6,12 @@ This repo provides a template app for Android devices calls Maps App that can be
 ![App](https://raw.githubusercontent.com/Esri/maps-app-android/master/maps-app.png)
 
 ## Features
-* Dynamically switching basemaps
-* Place Search
+* Dynamically switch basemaps
+* Place search
 * Geocode addresses
 * Reverse geocode
-* Routing
+* Route
+* Sign in to ArcGIS account
 
 ## Development Instructions
 The Maps App Android project is an Eclipse Android Application Project which can be directly cloned and imported into Eclipse.  
