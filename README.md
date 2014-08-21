@@ -14,7 +14,7 @@ This repo provides a template app for Android devices calls Maps App that can be
 * Sign in to ArcGIS account
 
 ## Development Instructions
-The Maps App Android project is an Eclipse Android Application Project which can be directly cloned and imported into Eclipse.  
+This Maps App repo is an Eclipse Android Application Project that can be directly cloned and imported into Eclipse.  
 
 ### Fork the Repo
 Click the **Fork** button in the [Maps App Android](https://github.com/Esri/maps-app-android) repo
