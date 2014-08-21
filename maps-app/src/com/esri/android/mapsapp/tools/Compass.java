@@ -52,7 +52,7 @@ public class Compass extends View implements SensorEventListener {
 	Matrix mMatrix;
 	MapView mMapView;
 
-	// Handles the senors
+	// Handles the sensors
 	public SensorManager sensorManager;
 
 	// Sensors for accelerometer and magnetometer
