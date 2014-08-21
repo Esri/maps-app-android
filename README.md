@@ -16,22 +16,22 @@ This repo provides a template app for Android devices calls Maps App that can be
 ## Development Instructions
 This Maps App repo is an Eclipse Android Application Project that can be directly cloned and imported into Eclipse.  
 
-### Fork the Repo
+### Fork the repo
 Click the **Fork** button in the [Maps App Android](https://github.com/Esri/maps-app-android) repo
 
 ### Clone the repo
 
 #### Eclipse
-1. [Clone the Maps App Android project in Eclipse](http://wiki.eclipse.org/EGit/User_Guide#Cloning_Remote_Repositories)
+1. [Clone the Maps App repo in Eclipse](http://wiki.eclipse.org/EGit/User_Guide#Cloning_Remote_Repositories)
 2. [Import the project](http://wiki.eclipse.org/EGit/User_Guide#Project_Import) into Eclipse
 
   ![Import](https://raw.githubusercontent.com/Esri/maps-app-android/master/import-project.png)
 
-3. Right Click the imported project and select **Convert to ArcGIS Android Project**
+3. Right click the imported project and select **Convert to ArcGIS Android Project**
 
   ![Convert Project](https://raw.githubusercontent.com/Esri/maps-app-android/master/convert-to-arcgis-project.png)
 
-4. Right Click the project and select **Android Tools > Add Support Library**.  Accept packages to install and click install.
+4. Right click the project and select **Android Tools > Add Support Library**.  Accept packages to install and click install.
 
 #### Command line Git
 1. [Clone the Maps App Android](https://help.github.com/articles/fork-a-repo#step-2-clone-your-fork)
