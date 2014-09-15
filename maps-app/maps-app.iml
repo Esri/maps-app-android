@@ -13,6 +13,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" exported="" name="arcgis-android-api-v10.2.3" level="application" />
+    <orderEntry type="library" exported="" name="android-support-v4" level="application" />
   </component>
 </module>
 
