@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Maps App</string>
+    <string name="basemap_thumbnail">basemap thumbnail</string>
+
+    <!-- navigation drawer -->
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="my_maps">My Maps</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="sign_in">Sign In</string>
+
+    <!-- sign in activity -->
+    <string name="title_sign_in_activity">Sign In</string>
+    <string name="specify_portal_url">Specify the URL to your organization or your ArcGIS portal</string>
+    <string name="continue_label">Continue</string>
+    <string name="cancel">Cancel</string>
+    <string name="verifying_portal">Verifying portal</string>
+    <string name="portal_url_hint">e.g., http://www.arcgis.com</string>
+    <string name="failed_sign_in">Failed to sign in.</string>
+
+    <!-- content browser -->
+    <string name="fetching_maps">Fetching maps</string>
+    <string name="refresh">Refresh</string>
+    <string name="no_maps">No maps</string>
+
+    <!-- webmap urls -->
+    <string name="default_basemap_url">http://www.arcgis.com/home/item.html?id=d5e02a0c1f2b4ec399823fdd3c2fdebd</string>
+
+    <!-- geocode service -->
+    <string name="geocode_url">http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer</string>
+
+    <!-- route service -->
+    <string name="routingservice_url">http://sampleserver3.arcgisonline.com/ArcGIS/rest/services/Network/USA/NAServer/Route</string>
+
+    <!-- place search hint -->
+    <string name="address">Place name or address</string>
+
+    <!-- action bar titles -->
+    <string name="menu_basemaps">Switch Basemap</string>
+    <string name="action_location">Toggle Location Tracking</string>
+    <string name="action_measure">Measure</string>
+
+    <!-- directions button text -->
+    <string name="get_route">Get Route</string>
+
+    <!-- location search hint -->
+    <string name="my_location">My Location</string>
+    <string name="need_location_fix">Need a location fix before \'My Location\' can be used</string>
+
+    <!-- dialog titles -->
+    <string name="title_basemaps_dialog">Select Base Map</string>
+    <string name="title_routing_dialog">Routing</string>
+    <string name="title_directions_dialog">Driving Directions</string>
+
+    <!-- progress dialog messages -->
+    <string name="fetching_basemap">Fetching Basemap</string>
+    <string name="fetching_basemaps">Fetching Basemap Gallery</string>
+    <string name="fetching_selected_basemap">Fetching Selected Basemap</string>
+    <string name="address_search">Searching for Address</string>
+    <string name="route_search">Searching for Route</string>
+    <string name="reverse_geocoding">Reverse Geocoding</string>
+    <string name="basemapSearchFailed">Basemap search failed</string>
+    <string name="routingFailed">Routing task failed</string>
+    <string name="addressSearchFailed">Address search failed</string>
+    <string name="noResultsFound">No results found</string>
+    <string name="route_time">Time</string>
+    <string name="route_distance">Distance</string>
+    <string name="swap_addresses">Interchange the addresses</string>
+    <string name="routing_title">Routing</string>
+    <string name="clearText">Clear Text</string>
+    
+    <!-- Routing Dialog Fragment -->
+	<string name="to">TO </string>
+	<string name="from">FROM </string>
+
+    <!-- ImageView content Descriptions -->
+    <string name="icon_for_searchResult">Icon indicating Search</string>
+    <string name="icon_for_directions_and_routing">Get Directions or Get Route</string>
+    <string name="icon_cancel">Remove the current search</string>
+    <string name="icon_clock">Display the clock</string>
+
+</resources>

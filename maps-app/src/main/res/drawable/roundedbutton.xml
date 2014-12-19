@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:padding="10dp"
+    android:shape="oval" >
+
+    <solid android:color="#44ffffff" /> <!-- this one is ths color of the Rounded Button -->
+
+    <padding
+        android:bottom="2dp"
+        android:left="2dp"
+        android:right="2dp"
+        android:top="2dp" />
+
+    <corners android:radius="10dip" />
+
+    <stroke
+        android:width="2sp"
+        android:color="#000000" />
+
+</shape>

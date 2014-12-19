@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/map_item_linearlayout"
+    android:layout_width="@dimen/map_item_width"
+    android:layout_height="@dimen/map_item_height"
+    android:background="@android:color/white"
+    android:orientation="horizontal" >
+
+    <ImageView
+        android:id="@+id/map_item_thumbnail_imageView"
+        android:layout_width="@dimen/map_item_thumbnail_width"
+        android:layout_height="@dimen/map_item_thumbnail_height"
+        android:padding="@dimen/map_item_thumbnail_padding"
+        android:scaleType="fitCenter"
+        tools:ignore="ContentDescription" />
+    
+    <TextView
+      android:id="@+id/map_item_title_textView"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:gravity="top"
+      android:paddingTop="@dimen/map_item_title_padding"
+      android:paddingRight="@dimen/map_item_title_padding"
+      android:paddingBottom="@dimen/map_item_title_padding"
+      style="@style/map_item_title_text"
+      android:text="Title"
+      tools:ignore="HardcodedText" />
+
+</LinearLayout>

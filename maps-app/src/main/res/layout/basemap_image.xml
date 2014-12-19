@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <FrameLayout
+        android:id="@+id/basemap_grid_item_thumbnail_framelayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/esri_off_white" >
+
+        <ImageView
+            android:id="@+id/basemap_grid_item_thumbnail_imageview"
+            style="@style/basemap_thumbnail_image"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:contentDescription="@string/basemap_thumbnail"
+            android:scaleType="fitXY" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/basemap_item_thumbnail_selector" />
+    </FrameLayout>
+
+    <RelativeLayout
+        android:id="@+id/basemap_grid_item_overlay_layout"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/basemap_grid_item_overlay_height"
+        android:layout_below="@+id/basemap_grid_item_thumbnail_framelayout"
+        android:background="@drawable/basemap_item_title_selector" >
+
+        <TextView
+            android:id="@+id/basemap_grid_item_title_textview"
+            style="@style/basemap_grid_item_title_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="National Geographic"
+            tools:ignore="HardcodedText" />
+
+    </RelativeLayout>
+
+</RelativeLayout>
