@@ -17,6 +17,7 @@ gen/
 
 # Local configuration file (sdk path, etc)
 local.properties
+.gradle/
 
 # Eclipse project files
 .settings/
@@ -26,8 +27,10 @@ libs/
 proguard/
 
 # Intellij project files
-*.iws
+*.ipr
+*.iml
 .idea/
+build/
 
 # SublimeText
 /*.sublime-project

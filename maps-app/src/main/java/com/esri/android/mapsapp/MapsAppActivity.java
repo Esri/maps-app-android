@@ -54,7 +54,7 @@ import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.account.SignInActivity;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogListener;
-import com.esri.android.mapsapp.tools.MeasuringTool;
+import com.esri.android.toolkit.analysis.MeasuringTool;
 import com.esri.core.geometry.LinearUnit;
 import com.esri.core.geometry.Unit;
 import com.esri.core.symbol.SimpleFillSymbol;
