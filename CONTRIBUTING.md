@@ -39,7 +39,7 @@ System requirements of the Android SDK are provided [here](https://developers.ar
 * [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/android/)
 
 ### Setting up your dev environment
-Install and setup your Eclipse developer environment [here](https://developers.arcgis.com/android/guide/install-and-set-up.htm). Once installed you can work with the project directly 
+Install and setup your Android Studio developer environment [here](https://developers.arcgis.com/android/guide/install-and-set-up.htm). Once installed you can work with the project directly 
 
 #### Fork the repo
 If you haven't already, got to https://github.com/Esri/maps-app-android and click the [Fork](https://github.com/Esri/maps-app-android/fork) button.
