@@ -35,7 +35,7 @@ here are some tips for creating a helpful report that will make fixing it much e
 System requirements of the Android SDK are provided [here](https://developers.arcgis.com/en/android/system-reqs.html).  Below are the basic developer requirements to working with ArcGIS Runtime SDK For Android in Eclipse: 
 
 * [JDK 6 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
-* [ADT Bundle](http://developer.android.com/sdk/index.html) **or** [Eclipse 4.2 +](https://www.eclipse.org/downloads/) with [ADT Plugin](http://developer.android.com/tools/sdk/eclipse-adt.html)
+* [Android Studio](http://developer.android.com/sdk/index.html)
 * [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/android/)
 
 ### Setting up your dev environment
