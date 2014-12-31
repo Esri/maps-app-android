@@ -61,13 +61,3 @@ $ git remote add upstream https://github.com/Esri/maps-app-android.git
 $ git fetch upstream
 # Pulls in changes not present in your local repository, without modifying your files
 ```
-
-#### Import Project into Eclipse
- * Open up Eclipse Git Repository Viewing Perspective
- * Expand the working directory to find the maps-app folder
- * Right click the maps-app project folder and select **Import Projects**
- * Ensure your project is selected and the **Import existing projects** radio button is selected and click Next
- * Inspect the Import Projects dialog to ensure your project is selected and click **Finish**
- * Change perspectives to **Java**
- * Right click the project **ArcGIS Tools > Convert to ArcGIS Project**
- * Make your changes and create a [pull request](https://help.github.com/articles/creating-a-pull-request)
