@@ -211,7 +211,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
       View view = convertView;
-      ViewHolder viewHolder = null;
+      ViewHolder viewHolder;
       if (view == null) {
         viewHolder = new ViewHolder();
         view = getActivity().getLayoutInflater().inflate(R.layout.map_item_layout, null);
@@ -248,7 +248,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
     Future<Void> thumbnailFetchTask;
 
     /**
-     * Cancels any pending tumbnail fetch task and fetches a new thumbnail for the corresponding PortalItem, unless a
+     * Cancels any pending thumbnail fetch task and fetches a new thumbnail for the corresponding PortalItem, unless a
      * cached thumbnail already exists.
      */
     void fetchTumbnail() {
