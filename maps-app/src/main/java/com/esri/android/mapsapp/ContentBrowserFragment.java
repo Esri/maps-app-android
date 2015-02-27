@@ -261,7 +261,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
   }
 
   /**
-   * Fetches the tumbnail of a PortalItem and sets it into the corresponding ImageView. Handles task cancellation by
+   * Fetches the thumbnail of a PortalItem and sets it into the corresponding ImageView. Handles task cancellation by
    * checking for the thread's interrupted state.
    */
   private class FetchPortalItemThumbnailTask implements Callable<Void> {
