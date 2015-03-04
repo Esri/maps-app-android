@@ -35,7 +35,7 @@ Once you have forked the repo, you can make a clone
 * [ArcGIS Mobile Blog](http://blogs.esri.com/esri/arcgis/category/mobile/)
 * [ArcGIS Developer Blog](http://blogs.esri.com/esri/arcgis/category/developer/)
 * [Google+](https://plus.google.com/+esri/posts)
-* [twitter@ArcGIS_Runtime](https://twitter.com/ArcGIS_Runtime)
+* [twitter@ArcGISRuntime](https://twitter.com/ArcGISRuntime)
 * [twitter@esri](http://twitter.com/esri)
 
 ## Issues
