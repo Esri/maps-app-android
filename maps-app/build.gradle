@@ -25,7 +25,10 @@ android {
 }
 
 dependencies {
+    // android support libraries
     compile 'com.android.support:support-v4:19.1.0'
     // ArcGIS Android 10.2.5 API
     compile 'com.esri.arcgis.android:arcgis-android:10.2.5'
+    // square libs
+    compile 'com.jakewharton:butterknife:6.1.0'
 }
