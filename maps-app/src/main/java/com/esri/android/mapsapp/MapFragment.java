@@ -648,7 +648,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * Displays the search view layout
 	 * 
 	 */
-	private void showSearchBoxLayout() {
+	private void    showSearchBoxLayout() {
 
 		// Inflating the layout from the xml file
 		mSearchBox = mInflater.inflate(R.layout.searchview, null);
