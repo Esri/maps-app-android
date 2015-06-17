@@ -61,6 +61,9 @@ import com.esri.core.symbol.SimpleFillSymbol;
 import com.esri.core.symbol.SimpleLineSymbol;
 import com.esri.core.symbol.SimpleMarkerSymbol;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
 /**
  * Entry point into the Maps App.
  */
@@ -74,12 +77,12 @@ public class MapsAppActivity extends Activity {
 	 * The FrameLayout that hosts the main content of the activity, such as the
 	 * MapView
 	 */
-	FrameLayout mContentFrame;
+    @InjectView(R.id.maps_app_activity_content_frame) FrameLayout mContentFrame;
 
 	/**
 	 * The list of menu items in the navigation drawer
 	 */
-	private ListView mDrawerList;
+	@InjectView(R.id.maps_app_activity_left_drawer) ListView mDrawerList;
 
 	private final List<DrawerItem> mDrawerItems = new ArrayList<DrawerItem>();
 
@@ -99,6 +102,9 @@ public class MapsAppActivity extends Activity {
 		// ArcGISRuntime.setClientId(getString(R.string.client_id));
 
 		setContentView(R.layout.maps_app_activity);
+
+        ButterKnife.inject(this);
+
 		setupDrawer();
 
 		setView();
@@ -125,8 +131,6 @@ public class MapsAppActivity extends Activity {
 	 */
 	private void setupDrawer() {
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.maps_app_activity_drawer_layout);
-		mContentFrame = (FrameLayout) findViewById(R.id.maps_app_activity_content_frame);
-		mDrawerList = (ListView) findViewById(R.id.maps_app_activity_left_drawer);
 
 		// Set the list's click listener
 		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
