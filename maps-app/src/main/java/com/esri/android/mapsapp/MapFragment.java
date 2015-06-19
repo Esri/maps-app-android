@@ -33,6 +33,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.database.MatrixCursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -40,6 +41,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -58,6 +60,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -95,6 +98,8 @@ import com.esri.core.tasks.geocode.Locator;
 import com.esri.core.tasks.geocode.LocatorFindParameters;
 import com.esri.core.tasks.geocode.LocatorGeocodeResult;
 import com.esri.core.tasks.geocode.LocatorReverseGeocodeResult;
+import com.esri.core.tasks.geocode.LocatorSuggestionParameters;
+import com.esri.core.tasks.geocode.LocatorSuggestionResult;
 import com.esri.core.tasks.na.NAFeaturesAsFeature;
 import com.esri.core.tasks.na.Route;
 import com.esri.core.tasks.na.RouteDirection;
@@ -116,6 +121,14 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static final String KEY_BASEMAP_ITEM_ID = "KEY_BASEMAP_ITEM_ID";
 
 	private static final String KEY_IS_LOCATION_TRACKING = "IsLocationTracking";
+
+	private static final String LOCATION_TITLE = "Location";
+
+	private static final String COLUMN_NAME_ADDRESS = "address";
+
+	private static final String COLUMN_NAME_X = "x";
+
+	private static final String COLUMN_NAME_Y = "y";
 
 	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
 
@@ -163,6 +176,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private String mMapViewState;
 
+	private SearchView mSearchview;
+
 	// GPS location tracking
 	private boolean mIsLocationTracking;
 
@@ -185,6 +200,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private final SpatialReference mEgs = SpatialReference.create(4326);
 
+	private MatrixCursor mSuggestionCursor;
+
+	private SimpleCursorAdapter mSuggestionAdapter;
+
 	Compass mCompass;
 
 	LayoutParams compassFrameParams;
@@ -196,6 +215,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private AsyncTask mPendingTask;
 
 	private View mSearchBox;
+
+	private Locator mLocator = Locator.createOnlineLocator();
 
 	private View mSearchResult;
 
@@ -451,27 +472,27 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			@Override
 			public void postPointersDown(float x1, float y1, float x2,
-					float y2, double factor) {
+										 float y2, double factor) {
 			}
 
 			@Override
 			public void postPointersMove(float x1, float y1, float x2,
-					float y2, double factor) {
+										 float y2, double factor) {
 			}
 
 			@Override
 			public void postPointersUp(float x1, float y1, float x2, float y2,
-					double factor) {
+									   double factor) {
 			}
 
 			@Override
 			public void prePointersDown(float x1, float y1, float x2, float y2,
-					double factor) {
+										double factor) {
 			}
 
 			@Override
 			public void prePointersMove(float x1, float y1, float x2, float y2,
-					double factor) {
+										double factor) {
 				if (mMapView.getRotationAngle() > 5
 						|| mMapView.getRotationAngle() < -5) {
 					mCompass.setVisibility(View.VISIBLE);
@@ -482,7 +503,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			@Override
 			public void prePointersUp(float x1, float y1, float x2, float y2,
-					double factor) {
+									  double factor) {
 			}
 
 		});
@@ -537,7 +558,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			@Override
 			public boolean onDragPointerUp(MotionEvent from,
-					final MotionEvent to) {
+										   final MotionEvent to) {
 				if (mLongPressEvent != null) {
 					// This is the end of a long-press that will have displayed
 					// the
@@ -648,7 +669,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * Displays the search view layout
 	 * 
 	 */
-	private void    showSearchBoxLayout() {
+	private void showSearchBoxLayout() {
 
 		// Inflating the layout from the xml file
 		mSearchBox = mInflater.inflate(R.layout.searchview, null);
@@ -657,7 +678,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mSearchBox.setLayoutParams(mlayoutParams);
 
 		// Initializing the searchview and the image view
-		final SearchView mSearchview = (SearchView) mSearchBox
+		mSearchview = (SearchView) mSearchBox
 				.findViewById(R.id.searchView1);
 
 		ImageView iv_route = (ImageView) mSearchBox
@@ -665,6 +686,14 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		mSearchview.setIconifiedByDefault(false);
 		mSearchview.setQueryHint(SEARCH_HINT);
+
+		//Set the suggestion cursor to an Adapter then set it to the search view
+		String[] cols = new String[]{COLUMN_NAME_ADDRESS};
+		int[] to = new int[]{R.id.suggestion_item_address};
+
+		mSuggestionAdapter = new SimpleCursorAdapter(mMapView.getContext(), R.layout.search_suggestion_item, mSuggestionCursor, cols, to, 0);
+		mSearchview.setSuggestionsAdapter(mSuggestionAdapter);
+		mSuggestionAdapter.notifyDataSetChanged();
 
 		// Adding the layout to the map conatiner
 		mMapContainer.addView(mSearchBox);
@@ -691,6 +720,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			@Override
 			public boolean onQueryTextChange(String newText) {
+				suggestPlace(newText);
 				return false;
 			}
 		});
@@ -706,6 +736,124 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 				});
 
+		mSearchview.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+
+			@Override
+			public boolean onSuggestionSelect(int position) {
+				return false;
+			}
+
+			@Override
+			public boolean onSuggestionClick(int position) {
+				// Obtain the content of the selected suggesting place via cursor
+				MatrixCursor cursor = (MatrixCursor) mSearchview.getSuggestionsAdapter().getItem(position);
+				int indexColumnSuggestion = cursor.getColumnIndex(COLUMN_NAME_ADDRESS);
+				int indexColumnX = cursor.getColumnIndex(COLUMN_NAME_X);
+				int indexColumnY = cursor.getColumnIndex(COLUMN_NAME_Y);
+				String address = cursor.getString(indexColumnSuggestion);
+				double x = cursor.getDouble(indexColumnX);
+				double y = cursor.getDouble(indexColumnY);
+
+				if ((x == 0.0) && (y == 0.0)) {
+					// Place has not been located. Find the place
+					executeLocatorTask(address);
+				} else {
+
+				}
+				cursor.close();
+
+				// Hide the soft keyboard
+				InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+				inputManager.hideSoftInputFromWindow(mSearchview.getWindowToken(), 0);
+				return true;
+			}
+		});
+
+	}
+
+	/**
+	 * Initialize Suggestion Cursor
+	 */
+	private void initSuggestionCursor() {
+		String[] cols = new String[]{BaseColumns._ID, COLUMN_NAME_ADDRESS, COLUMN_NAME_X, COLUMN_NAME_Y};
+		mSuggestionCursor = new MatrixCursor(cols);
+	}
+
+
+	/**
+	 * Create Suggestion list
+	 */
+	private void suggestPlace(String query) {
+		if (mLocator == null)
+			return;
+
+		new SuggestPlaceTask(mLocator).execute(query);
+	}
+
+
+	// Obtain a list of search suggestions.
+	private class SuggestPlaceTask extends AsyncTask<String, Void, List<LocatorSuggestionResult>> {
+		private Locator mLocator;
+
+		public SuggestPlaceTask(Locator locator) {
+			mLocator = locator;
+		}
+
+		@Override
+		protected List<LocatorSuggestionResult> doInBackground(String... queries) {
+			for (String query : queries) {
+
+				// Create suggestion parameter
+				LocatorSuggestionParameters params = new LocatorSuggestionParameters(query);
+
+				//Set the location to be used for proximity based suggestion
+				params.setLocation(mMapView.getCenter(),
+						mMapView.getSpatialReference());
+
+				// Calculate distance for search search operation
+				Envelope mapExtent = new Envelope();
+				mMapView.getExtent().queryEnvelope(mapExtent);
+
+				// assume map is in metres, other units wont work, double current
+				// envelope
+				double distance = (mapExtent != null && mapExtent.getWidth() > 0) ? mapExtent
+						.getWidth() * 2 : 10000;
+				params.setDistance(distance);
+
+				List<LocatorSuggestionResult> results = null;
+				try {
+					results = mLocator.suggest(params);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				return results;
+			}
+
+			return null;
+		}
+
+
+		@Override
+		protected void onPostExecute(List<LocatorSuggestionResult> results) {
+			if (results == null) {
+				return;
+			}
+
+			int key = 0;
+			// Add suggestion list to a cursor
+			initSuggestionCursor();
+			for (LocatorSuggestionResult result : results) {
+				mSuggestionCursor.addRow(new Object[]{key++, result.getText(), "0", "0"});
+			}
+
+			String[] cols = new String[]{COLUMN_NAME_ADDRESS};
+			int[] to = new int[]{R.id.suggestion_item_address};
+
+			mSuggestionAdapter = new SimpleCursorAdapter(mMapView.getContext(), R.layout.search_suggestion_item, mSuggestionCursor, cols, to, 0);
+			mSearchview.setSuggestionsAdapter(mSuggestionAdapter);
+			mSuggestionAdapter.notifyDataSetChanged();
+		}
 	}
 
 	/**

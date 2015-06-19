@@ -48,6 +48,7 @@
     <!-- location search hint -->
     <string name="my_location">My Location</string>
     <string name="need_location_fix">Need a location fix before \'My Location\' can be used</string>
+    <string name="suggestion_text">Suggestion</string>
 
     <!-- dialog titles -->
     <string name="title_basemaps_dialog">Select Base Map</string>
