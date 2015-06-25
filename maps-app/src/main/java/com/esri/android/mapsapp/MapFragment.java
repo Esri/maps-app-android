@@ -122,8 +122,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private static final String KEY_IS_LOCATION_TRACKING = "IsLocationTracking";
 
-	private static final String LOCATION_TITLE = "Location";
-
 	private static final String COLUMN_NAME_ADDRESS = "address";
 
 	private static final String COLUMN_NAME_X = "x";
