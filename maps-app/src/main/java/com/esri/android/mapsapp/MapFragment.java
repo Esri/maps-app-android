@@ -87,6 +87,7 @@ import com.esri.core.geometry.Point;
 import com.esri.core.geometry.Polyline;
 import com.esri.core.geometry.SpatialReference;
 import com.esri.core.geometry.Unit;
+import com.esri.core.map.CallbackListener;
 import com.esri.core.map.Graphic;
 import com.esri.core.portal.BaseMap;
 import com.esri.core.portal.Portal;
@@ -122,8 +123,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private static final String KEY_IS_LOCATION_TRACKING = "IsLocationTracking";
 
-	private static final String LOCATION_TITLE = "Location";
-
 	private static final String COLUMN_NAME_ADDRESS = "address";
 
 	private static final String COLUMN_NAME_X = "x";
@@ -133,6 +132,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
 
 	private static final String SEARCH_HINT = "Search";
+
+	private static final String FIND_PLACE = "Find";
+
+	private static final String SUGGEST_PLACE = "Suggest";
 
 	private static FrameLayout.LayoutParams mlayoutParams;
 
@@ -223,6 +226,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private LayoutInflater mInflater;
 
 	private String mStartLocation, mEndLocation;
+
+	private LocatorSuggestionParameters suggestParams;
+
+	private LocatorFindParameters findParams;
 
 	int width, height;
 
@@ -687,13 +694,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mSearchview.setIconifiedByDefault(false);
 		mSearchview.setQueryHint(SEARCH_HINT);
 
-		//Set the suggestion cursor to an Adapter then set it to the search view
-		String[] cols = new String[]{COLUMN_NAME_ADDRESS};
-		int[] to = new int[]{R.id.suggestion_item_address};
-
-		mSuggestionAdapter = new SimpleCursorAdapter(mMapView.getContext(), R.layout.search_suggestion_item, mSuggestionCursor, cols, to, 0);
-		mSearchview.setSuggestionsAdapter(mSuggestionAdapter);
-		mSuggestionAdapter.notifyDataSetChanged();
+		applySuggestionCursor();
 
 		// Adding the layout to the map conatiner
 		mMapContainer.addView(mSearchBox);
@@ -720,8 +721,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			@Override
 			public boolean onQueryTextChange(String newText) {
-				suggestPlace(newText);
-				return false;
+				if(mLocator == null)
+					return false;
+				getSuggestions(newText);
+				return true;
 			}
 		});
 
@@ -753,11 +756,31 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				String address = cursor.getString(indexColumnSuggestion);
 				double x = cursor.getDouble(indexColumnX);
 				double y = cursor.getDouble(indexColumnY);
+				String SUGGESTION_ADDRESS_DELIMINATOR = ", ";
 
 				if ((x == 0.0) && (y == 0.0)) {
 					// Place has not been located. Find the place
-					executeLocatorTask(address);
+					int index = address.indexOf(SUGGESTION_ADDRESS_DELIMINATOR);
+					if (index > 0) {
+						locatorParams(FIND_PLACE, address.substring(index + SUGGESTION_ADDRESS_DELIMINATOR.length()));
+						// Execute async task to find the address
+						LocatorAsyncTask locatorTask = new LocatorAsyncTask();
+						locatorTask.execute(findParams);
+						mPendingTask = locatorTask;
+
+						mLocationLayerPointString = address;
+					} else {
+						locatorParams(FIND_PLACE, address);
+						// Execute async task to find the address
+						LocatorAsyncTask locatorTask = new LocatorAsyncTask();
+						locatorTask.execute(findParams);
+						mPendingTask = locatorTask;
+
+						mLocationLayerPointString = address;
+					}
 				} else {
+					Point result = new Point(x,y);
+					displaySearchResult(result,address);
 
 				}
 				cursor.close();
@@ -779,82 +802,140 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mSuggestionCursor = new MatrixCursor(cols);
 	}
 
+	/**
+	 * Set the suggestion cursor to an Adapter then set it to the search view
+	 */
+	private void applySuggestionCursor() {
+		String[] cols = new String[]{COLUMN_NAME_ADDRESS};
+		int[] to = new int[]{R.id.suggestion_item_address};
+
+		mSuggestionAdapter = new SimpleCursorAdapter(mMapView.getContext(), R.layout.search_suggestion_item, mSuggestionCursor, cols, to, 0);
+		mSearchview.setSuggestionsAdapter(mSuggestionAdapter);
+		mSuggestionAdapter.notifyDataSetChanged();
+	}
+
 
 	/**
-	 * Create Suggestion list
+	 * Provide a character by character suggestions for the search string
+	 *
+	 * @param query String typed so far by the user to fetch the suggestions
 	 */
-	private void suggestPlace(String query) {
-		if (mLocator == null)
-			return;
+	private void getSuggestions(String query) {
+		final CallbackListener<List<LocatorSuggestionResult>> suggestCallback = new CallbackListener<List<LocatorSuggestionResult>>() {
+			@Override
+			public void onCallback(List<LocatorSuggestionResult> locSuggestionResult) {
+				final List<LocatorSuggestionResult> mLocatorSuggestionResult = locSuggestionResult;
+				if (mLocatorSuggestionResult == null)
+					return;
+				getActivity().runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						int key = 0;
+						if(mLocatorSuggestionResult.size() > 0) {
+							//Add suggestion list to a cursor
+							initSuggestionCursor();
+							for(LocatorSuggestionResult result : mLocatorSuggestionResult) {
+								mSuggestionCursor.addRow(new Object[]{key++, result.getText(), "0", "0"});
+							}
+							applySuggestionCursor();
+						}
+					}
+				});
 
-		new SuggestPlaceTask(mLocator).execute(query);
+			}
+
+			@Override
+			public void onError(Throwable throwable) {
+
+				//Log the error
+				Log.e(MapFragment.class.getSimpleName(), "No Results found!!");
+				Log.e(MapFragment.class.getSimpleName(), throwable.getMessage());
+			}
+		};
+
+		try {
+			// Initialize the locatorSugestion parameters
+			locatorParams(SUGGEST_PLACE,query);
+
+			mLocator.suggest(suggestParams, suggestCallback);
+		}
+		catch (Exception e) {
+			Log.e(MapFragment.class.getSimpleName(),"No Results found");
+			Log.e(MapFragment.class.getSimpleName(),e.getMessage());
+		}
+	}
+
+	/**
+	 * Initialize LocatorSuggestionParameters or LocatorFindParameters
+	 *
+	 * @param TYPE A String determining thr type of parameters to be initialized
+	 * @param query The string for which the locator parameters are to be initialized
+	 */
+	private void locatorParams(String TYPE, String query) {
+		if(TYPE.contentEquals(SUGGEST_PLACE)) {
+			// Create suggestion parameters
+			suggestParams = new LocatorSuggestionParameters(query);
+
+			// Use the centre of the current map extent as the location
+			suggestParams.setLocation(mMapView.getCenter(),
+					mMapView.getSpatialReference());
+
+			// Calculate distance for search operation
+			Envelope mapExtent = new Envelope();
+			mMapView.getExtent().queryEnvelope(mapExtent);
+
+			// assume map is in meters, other units wont work, double
+			// current envelope
+			double distance = (mapExtent != null && mapExtent.getWidth() > 0) ? mapExtent
+					.getWidth() * 2 : 10000;
+			suggestParams.setDistance(distance);
+
+
+
+		}
+
+		if (TYPE.contentEquals(FIND_PLACE)) {
+			// Create find parameters
+			findParams = new LocatorFindParameters(query);
+
+			// Use the centre of the current map extent as the location
+			findParams.setLocation(mMapView.getCenter(),
+			mMapView.getSpatialReference());
+
+			// Calculate distance for search operation
+			Envelope mapExtent = new Envelope();
+			mMapView.getExtent().queryEnvelope(mapExtent);
+
+			// assume map is in meters, double current envelope
+			double distance = (mapExtent != null && mapExtent.getWidth() > 0) ? mapExtent
+					.getWidth() * 2 : 10000;
+			findParams.setDistance(distance);
+
+			findParams.setOutSR(mMapView.getSpatialReference());
+		}
+	}
+
+	private void displaySearchResult(Point resultPoint, String address) {
+
+		// create marker symbol to represent location
+		Drawable drawable = getActivity().getResources().getDrawable(
+				R.drawable.pin_circle_red);
+		PictureMarkerSymbol resultSymbol = new PictureMarkerSymbol(
+				getActivity(), drawable);
+		// create graphic object for resulting location
+		Graphic resultLocGraphic = new Graphic(resultPoint,
+				resultSymbol);
+		// add graphic to location layer
+		mLocationLayer.addGraphic(resultLocGraphic);
+
+		mLocationLayerPoint = resultPoint;
+
+		// Zoom map to geocode result location
+		mMapView.zoomToResolution(resultPoint, 2);
+		showSearchResultLayout(address);
 	}
 
 
-	// Obtain a list of search suggestions.
-	private class SuggestPlaceTask extends AsyncTask<String, Void, List<LocatorSuggestionResult>> {
-		private Locator mLocator;
-
-		public SuggestPlaceTask(Locator locator) {
-			mLocator = locator;
-		}
-
-		@Override
-		protected List<LocatorSuggestionResult> doInBackground(String... queries) {
-			for (String query : queries) {
-
-				// Create suggestion parameter
-				LocatorSuggestionParameters params = new LocatorSuggestionParameters(query);
-
-				//Set the location to be used for proximity based suggestion
-				params.setLocation(mMapView.getCenter(),
-						mMapView.getSpatialReference());
-
-				// Calculate distance for search search operation
-				Envelope mapExtent = new Envelope();
-				mMapView.getExtent().queryEnvelope(mapExtent);
-
-				// assume map is in metres, other units wont work, double current
-				// envelope
-				double distance = (mapExtent != null && mapExtent.getWidth() > 0) ? mapExtent
-						.getWidth() * 2 : 10000;
-				params.setDistance(distance);
-
-				List<LocatorSuggestionResult> results = null;
-				try {
-					results = mLocator.suggest(params);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-				return results;
-			}
-
-			return null;
-		}
-
-
-		@Override
-		protected void onPostExecute(List<LocatorSuggestionResult> results) {
-			if (results == null) {
-				return;
-			}
-
-			int key = 0;
-			// Add suggestion list to a cursor
-			initSuggestionCursor();
-			for (LocatorSuggestionResult result : results) {
-				mSuggestionCursor.addRow(new Object[]{key++, result.getText(), "0", "0"});
-			}
-
-			String[] cols = new String[]{COLUMN_NAME_ADDRESS};
-			int[] to = new int[]{R.id.suggestion_item_address};
-
-			mSuggestionAdapter = new SimpleCursorAdapter(mMapView.getContext(), R.layout.search_suggestion_item, mSuggestionCursor, cols, to, 0);
-			mSearchview.setSuggestionsAdapter(mSuggestionAdapter);
-			mSuggestionAdapter.notifyDataSetChanged();
-		}
-	}
 
 	/**
 	 * Clears all graphics out of the location layer and the route layer.
@@ -943,7 +1024,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	/**
 	 * Called from search_layout.xml when user presses Search button.
 	 * 
-	 * @param view
+	 * @param address
 	 */
 	public void onSearchButtonClicked(String address) {
 
@@ -1285,25 +1366,13 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 				// get return geometry from geocode result
 				Point resultPoint = geocodeResult.getLocation();
-				// create marker symbol to represent location
-				Drawable drawable = getActivity().getResources().getDrawable(
-						R.drawable.pin_circle_red);
-				PictureMarkerSymbol resultSymbol = new PictureMarkerSymbol(
-						getActivity(), drawable);
-				// create graphic object for resulting location
-				Graphic resultLocGraphic = new Graphic(resultPoint,
-						resultSymbol);
-				// add graphic to location layer
-				mLocationLayer.addGraphic(resultLocGraphic);
 
 				// Get the address
 				String address = geocodeResult.getAddress();
 
-				mLocationLayerPoint = resultPoint;
+				// Display the result on the map
+				displaySearchResult(resultPoint,address);
 
-				// Zoom map to geocode result location
-				mMapView.zoomToResolution(geocodeResult.getLocation(), 2);
-				showSearchResultLayout(address);
 			}
 		}
 
