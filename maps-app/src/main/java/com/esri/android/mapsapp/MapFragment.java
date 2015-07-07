@@ -817,22 +817,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 							initSuggestionCursor();
 							for (final LocatorSuggestionResult result : locSuggestionResults) {
 
+								// add the locatorSuggestionResult to the ArrayList
 								suggestionsList.add(result);
-								// In the background, save the Suggestion and it's location in a Map
-/*								new Thread(new Runnable() {
-									@Override
-									public void run() {
-										List<LocatorGeocodeResult> locatorGeocodeResults;
-										try {
-											locatorGeocodeResults = mLocator.find(result, 2, null, mapSpatialReference);
-											LocatorGeocodeResult suggestionResult = locatorGeocodeResults.get(0);
-											suggestMap.put(result.getText(), suggestionResult.getLocation());
-										} catch (Exception e) {
-											Log.e(TAG, "Exception in FIND");
-											Log.e(TAG, e.getMessage());
-										}
-									}
-								}).start();*/
 
 								// Add the suggestion results to the cursor
 								mSuggestionCursor.addRow(new Object[]{key++, result.getText(), "0", "0"});
