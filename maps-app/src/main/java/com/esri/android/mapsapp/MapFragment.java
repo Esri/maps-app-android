@@ -27,6 +27,7 @@ package com.esri.android.mapsapp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 
 import android.app.Fragment;
@@ -230,6 +231,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private LocatorSuggestionParameters suggestParams;
 
 	private LocatorFindParameters findParams;
+
+	private final Map<String,Point> suggestMap = new TreeMap<String,Point>();
+
+	private static ArrayList<LocatorSuggestionResult> suggestionsList;
+
+	private SpatialReference mapSpatialReference;
 
 	int width, height;
 
@@ -524,6 +531,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			public void onStatusChanged(Object source, STATUS status) {
 
 				if (source == mMapView && status == STATUS.INITIALIZED) {
+
+					mapSpatialReference = mMapView.getSpatialReference();
+
 					if (mMapViewState == null) {
 						// Starting location tracking will cause zoom to My
 						// Location
@@ -751,43 +761,13 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				// Obtain the content of the selected suggesting place via cursor
 				MatrixCursor cursor = (MatrixCursor) mSearchview.getSuggestionsAdapter().getItem(position);
 				int indexColumnSuggestion = cursor.getColumnIndex(COLUMN_NAME_ADDRESS);
-				int indexColumnX = cursor.getColumnIndex(COLUMN_NAME_X);
-				int indexColumnY = cursor.getColumnIndex(COLUMN_NAME_Y);
-				String address = cursor.getString(indexColumnSuggestion);
-				double x = cursor.getDouble(indexColumnX);
-				double y = cursor.getDouble(indexColumnY);
-				String SUGGESTION_ADDRESS_DELIMINATOR = ", ";
+				final String address = cursor.getString(indexColumnSuggestion);
 
-				if ((x == 0.0) && (y == 0.0)) {
-					// Place has not been located. Find the place
-					int index = address.indexOf(SUGGESTION_ADDRESS_DELIMINATOR);
-					if (index > 0) {
-						locatorParams(FIND_PLACE, address.substring(index + SUGGESTION_ADDRESS_DELIMINATOR.length()));
-						// Execute async task to find the address
-						LocatorAsyncTask locatorTask = new LocatorAsyncTask();
-						locatorTask.execute(findParams);
-						mPendingTask = locatorTask;
+				// Find the Location of the suggestion
+				new FindLocationTask(address).execute(address);
 
-						mLocationLayerPointString = address;
-					} else {
-						locatorParams(FIND_PLACE, address);
-						// Execute async task to find the address
-						LocatorAsyncTask locatorTask = new LocatorAsyncTask();
-						locatorTask.execute(findParams);
-						mPendingTask = locatorTask;
-
-						mLocationLayerPointString = address;
-					}
-				} else {
-					Point result = new Point(x,y);
-					displaySearchResult(result,address);
-
-				}
 				cursor.close();
 
-				// Hide the soft keyboard
-				InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-				inputManager.hideSoftInputFromWindow(mSearchview.getWindowToken(), 0);
 				return true;
 			}
 		});
@@ -823,23 +803,45 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private void getSuggestions(String query) {
 		final CallbackListener<List<LocatorSuggestionResult>> suggestCallback = new CallbackListener<List<LocatorSuggestionResult>>() {
 			@Override
-			public void onCallback(List<LocatorSuggestionResult> locSuggestionResult) {
-				final List<LocatorSuggestionResult> mLocatorSuggestionResult = locSuggestionResult;
-				if (mLocatorSuggestionResult == null)
+			public void onCallback(List<LocatorSuggestionResult> locatorSuggestionResults) {
+				final List<LocatorSuggestionResult> locSuggestionResults = locatorSuggestionResults;
+				if (locatorSuggestionResults == null)
 					return;
+				suggestionsList = new ArrayList<LocatorSuggestionResult>();
 				getActivity().runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
 						int key = 0;
-						if(mLocatorSuggestionResult.size() > 0) {
-							//Add suggestion list to a cursor
+						if (locSuggestionResults.size() > 0) {
+							// Add suggestion list to a cursor
 							initSuggestionCursor();
-							for(LocatorSuggestionResult result : mLocatorSuggestionResult) {
+							for (final LocatorSuggestionResult result : locSuggestionResults) {
+
+								suggestionsList.add(result);
+								// In the background, save the Suggestion and it's location in a Map
+/*								new Thread(new Runnable() {
+									@Override
+									public void run() {
+										List<LocatorGeocodeResult> locatorGeocodeResults;
+										try {
+											locatorGeocodeResults = mLocator.find(result, 2, null, mapSpatialReference);
+											LocatorGeocodeResult suggestionResult = locatorGeocodeResults.get(0);
+											suggestMap.put(result.getText(), suggestionResult.getLocation());
+										} catch (Exception e) {
+											Log.e(TAG, "Exception in FIND");
+											Log.e(TAG, e.getMessage());
+										}
+									}
+								}).start();*/
+
+								// Add the suggestion results to the cursor
 								mSuggestionCursor.addRow(new Object[]{key++, result.getText(), "0", "0"});
 							}
+
 							applySuggestionCursor();
 						}
 					}
+
 				});
 
 			}
@@ -913,6 +915,80 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			findParams.setOutSR(mMapView.getSpatialReference());
 		}
+	}
+
+	//Fetch the Location from the suggestMap and display it
+	private class FindLocationTask extends AsyncTask<String,Void,Point> {
+		private Point resultPoint = null;
+		private String resultAddress;
+		private static final String TAG_LOCATOR_PROGRESS_DIALOG = "TAG_LOCATOR_PROGRESS_DIALOG";
+
+		private ProgressDialogFragment mProgressDialog;
+
+		public FindLocationTask(String address) {
+			resultAddress = address;
+		}
+
+		@Override
+		protected Point doInBackground(String... params) {
+
+			// get the Location for the suggestion from the ArrayList
+			for(LocatorSuggestionResult result: suggestionsList) {
+				if(resultAddress.matches(result.getText())) {
+					try {
+						resultPoint = ((mLocator.find(result, 2, null, mapSpatialReference)).get(0)).getLocation();
+					} catch (Exception e) {
+						Log.e(TAG,"Error in fetching the Location");
+						Log.e(TAG,e.getMessage());
+					}
+				}
+			}
+/*			do {
+				try {
+					resultPoint = suggestMap.get(params[0]);
+					// Project the Location to WGS 84
+					//resultPoint = (Point) GeometryEngine.project(temp, mapSpatialReference, SpatialReference.create(4326));
+
+				} catch (Exception e) {
+					Log.e(TAG,"Error in fetching the Location");
+				}
+			} while(resultPoint == null);*/
+
+			return resultPoint;
+		}
+
+		@Override
+		protected void onPreExecute() {
+			// Display progress dialog on UI thread
+			mProgressDialog = ProgressDialogFragment.newInstance(getActivity()
+					.getString(R.string.address_search));
+			// set the target fragment to receive cancel notification
+			mProgressDialog.setTargetFragment(MapFragment.this,
+					REQUEST_CODE_PROGRESS_DIALOG);
+			mProgressDialog.show(getActivity().getFragmentManager(),
+					TAG_LOCATOR_PROGRESS_DIALOG);
+		}
+
+		@Override
+		protected void onPostExecute(Point resultPoint) {
+			// Dismiss progress dialog
+			mProgressDialog.dismiss();
+			if (resultPoint == null)
+				return;
+
+			// Display the result
+			displaySearchResult(resultPoint,resultAddress);
+			hideKeyboard();
+		}
+
+	}
+
+	protected void hideKeyboard() {
+
+		// Hide soft keyboard
+		mSearchview.clearFocus();
+		InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		inputManager.hideSoftInputFromWindow(mSearchview.getWindowToken(), 0);
 	}
 
 	private void displaySearchResult(Point resultPoint, String address) {
@@ -1029,10 +1105,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	public void onSearchButtonClicked(String address) {
 
 		// Hide virtual keyboard
-		InputMethodManager inputManager = (InputMethodManager) getActivity()
-				.getSystemService(Context.INPUT_METHOD_SERVICE);
-		inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus()
-				.getWindowToken(), 0);
+		hideKeyboard();
 
 		// Remove any previous graphics and routes
 		resetGraphicsLayers();
