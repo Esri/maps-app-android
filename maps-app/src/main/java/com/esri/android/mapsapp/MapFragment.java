@@ -238,6 +238,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private SpatialReference mapSpatialReference;
 
+	private boolean suggestionClickFlag = false;
+
+	private Point resultEndPoint;
+
 	int width, height;
 
 	LayoutParams gpsFrameParams;
@@ -763,6 +767,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				int indexColumnSuggestion = cursor.getColumnIndex(COLUMN_NAME_ADDRESS);
 				final String address = cursor.getString(indexColumnSuggestion);
 
+				suggestionClickFlag = true;
 				// Find the Location of the suggestion
 				new FindLocationTask(address).execute(address);
 
@@ -807,6 +812,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				final List<LocatorSuggestionResult> locSuggestionResults = locatorSuggestionResults;
 				if (locatorSuggestionResults == null)
 					return;
+				suggestionClickFlag = false;
 				suggestionsList = new ArrayList<LocatorSuggestionResult>();
 				getActivity().runOnUiThread(new Runnable() {
 					@Override
@@ -929,16 +935,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 					}
 				}
 			}
-/*			do {
-				try {
-					resultPoint = suggestMap.get(params[0]);
-					// Project the Location to WGS 84
-					//resultPoint = (Point) GeometryEngine.project(temp, mapSpatialReference, SpatialReference.create(4326));
 
-				} catch (Exception e) {
-					Log.e(TAG,"Error in fetching the Location");
-				}
-			} while(resultPoint == null);*/
+			resultEndPoint = resultPoint;
 
 			return resultPoint;
 		}
@@ -1508,8 +1506,15 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 							mEgs);
 				} else {
 					geocodeEndResult = locator.find(endParam);
-					endPoint = geocodeEndResult.get(0).getLocation();
-					mEndLocation = geocodeEndResult.get(0).getAddress();
+					if(suggestionClickFlag) {
+
+						endPoint = (Point) GeometryEngine.project(resultEndPoint, mWm, mEgs);
+						mEndLocation = endParam.getText();
+					}
+					else {
+						endPoint = geocodeEndResult.get(0).getLocation();
+						mEndLocation = geocodeEndResult.get(0).getAddress();
+					}
 				}
 
 			} catch (Exception e) {
