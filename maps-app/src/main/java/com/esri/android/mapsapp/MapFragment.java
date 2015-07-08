@@ -992,6 +992,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		mLocationLayerPoint = resultPoint;
 
+		mLocationLayerPointString = address;
+
 		// Zoom map to geocode result location
 		mMapView.zoomToResolution(resultPoint, 2);
 		showSearchResultLayout(address);
