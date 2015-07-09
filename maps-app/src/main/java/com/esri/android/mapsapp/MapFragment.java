@@ -647,6 +647,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * Displays the Dialog Fragment which allows users to route
 	 */
 	private void showRoutingDialogFragment() {
+
+		suggestionClickFlag = false;
 		// Show RoutingDialogFragment to get routing start and end points.
 		// This calls back to onGetRoute() to do the routing.
 		RoutingDialogFragment routingFrag = new RoutingDialogFragment();
@@ -812,7 +814,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				final List<LocatorSuggestionResult> locSuggestionResults = locatorSuggestionResults;
 				if (locatorSuggestionResults == null)
 					return;
-				suggestionClickFlag = false;
 				suggestionsList = new ArrayList<LocatorSuggestionResult>();
 				getActivity().runOnUiThread(new Runnable() {
 					@Override
@@ -1170,6 +1171,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 */
 	@SuppressWarnings("unchecked")
 	private void executeRoutingTask(String start, String end) {
+		resetGraphicsLayers();
 		// Create a list of start end point params
 		LocatorFindParameters routeStartParams = new LocatorFindParameters(
 				start);
@@ -1229,6 +1231,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				// Remove the search result view
 				mMapContainer.removeView(mSearchResult);
 
+				suggestionClickFlag = false;
 				// Add the search box view
 				showSearchBoxLayout();
 
@@ -1506,12 +1509,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 							mEgs);
 				} else {
 					geocodeEndResult = locator.find(endParam);
-					if(suggestionClickFlag) {
+					if (suggestionClickFlag) {
 
 						endPoint = (Point) GeometryEngine.project(resultEndPoint, mWm, mEgs);
 						mEndLocation = endParam.getText();
-					}
-					else {
+					} else {
 						endPoint = geocodeEndResult.get(0).getLocation();
 						mEndLocation = geocodeEndResult.get(0).getAddress();
 					}
@@ -1546,7 +1548,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			NAFeaturesAsFeature routeFAF = new NAFeaturesAsFeature();
 			StopGraphic sgStart = new StopGraphic(startPoint);
 			StopGraphic sgEnd = new StopGraphic(endPoint);
-			routeFAF.setFeatures(new Graphic[] { sgStart, sgEnd });
+			routeFAF.setFeatures(new Graphic[]{sgStart, sgEnd});
 			routeFAF.setCompressedRequest(true);
 			routeParams.setStops(routeFAF);
 			routeParams.setOutSpatialReference(mMapView.getSpatialReference());
@@ -1579,7 +1581,20 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 
 			// Get first item in list of routes provided by server
-			Route route = result.getRoutes().get(0);
+			Route route;
+			try {
+				route = result.getRoutes().get(0);
+				if( route.getTotalMiles() == 0.0 || route.getTotalKilometers() == 0.0 ) {
+					throw new Exception("Can not find the Route");
+				}
+			} catch (Exception e) {
+				Toast.makeText(getActivity(), "We are sorry, we couldn't find the route. Please make " +
+								"sure the Source and Destination are different or are connected by road",
+						Toast.LENGTH_LONG).show();
+				Log.e(TAG,e.getMessage());
+				return;
+			}
+
 
 			// Create polyline graphic of the full route
 			SimpleLineSymbol lineSymbol = new SimpleLineSymbol(Color.RED, 2,
@@ -1600,8 +1615,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			Graphic endGraphic = createMarkerGraphic(endPoint, true);
 
 			// Add these graphics to route layer
-			mRouteLayer.addGraphics(new Graphic[] { routeGraphic, startGraphic,
-					endGraphic });
+			mRouteLayer.addGraphics(new Graphic[]{routeGraphic, startGraphic,
+					endGraphic});
 
 			// Zoom to the extent of the entire route with a padding
 			mMapView.setExtent(route.getEnvelope(), 100);
