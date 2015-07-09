@@ -482,4 +482,14 @@ public class MapsAppActivity extends Activity {
 		}
 	}
 
+	/**
+	 * Kill the process id
+	 */
+	@Override
+	public void onDestroy()
+	{
+		android.os.Process.killProcess(android.os.Process.myPid());
+		super.onDestroy();
+	}
+
 }
