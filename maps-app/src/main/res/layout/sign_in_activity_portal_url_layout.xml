@@ -37,6 +37,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="right" >
+            <Button
+                android:id="@+id/sign_in_activity_cancel_button"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/cancel" />
 
             <Button
                 android:id="@+id/sign_in_activity_continue_button"
@@ -45,12 +51,6 @@
                 android:layout_height="wrap_content"
                 android:text="@string/continue_label" />
 
-            <Button
-                android:id="@+id/sign_in_activity_cancel_button"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/cancel" />
         </LinearLayout>
     </LinearLayout>
 
