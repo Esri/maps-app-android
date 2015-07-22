@@ -233,13 +233,13 @@ public class DirectionsDialogFragment extends DialogFragment {
         case STAIRS:
         case DOOR_PASSAGE:
         default:
-          Log.w(TAG, "getRoutingIcon(), not coded to handle: " + maneuver.name());
+          Log.w(TAG, "getRoutingIcon() doesn't support: " + maneuver.name());
           return null;
       }
       try {
         return context.getResources().getDrawable(id);
       } catch (NotFoundException e) {
-        Log.w(TAG, "getRoutingIcon(), could not find drawable for: " + maneuver.name());
+        Log.w(TAG, "getRoutingIcon() can't find drawablew: " + maneuver.name());
         return null;
       }
     }
