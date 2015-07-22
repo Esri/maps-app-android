@@ -22,6 +22,7 @@
       android:gravity="top"
       android:paddingTop="@dimen/map_item_title_padding"
       android:paddingRight="@dimen/map_item_title_padding"
+      android:paddingLeft="@dimen/map_item_title_padding"
       android:paddingBottom="@dimen/map_item_title_padding"
       style="@style/map_item_title_text"
       android:text="Title"
