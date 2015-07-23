@@ -54,10 +54,6 @@ public class RoutingDialogFragment extends DialogFragment {
 
 	private RoutingDialogListener mRoutingDialogListener;
 
-	private ImageView mSwap;
-
-	private Button mButton;
-
 	/**
 	 * A callback interface that all activities containing this fragment must
 	 * implement, to receive a routing request from this fragment.
@@ -136,11 +132,11 @@ public class RoutingDialogFragment extends DialogFragment {
 		if (mEndPointDefault != null) {
 			mEndText.setQuery(mEndPointDefault, false);
 		}
-		mSwap = (ImageView) view.findViewById(R.id.iv_interchange);
+		ImageView swap = (ImageView) view.findViewById(R.id.iv_interchange);
 
-		mButton = (Button) view.findViewById(R.id.getRouteButton);
+		Button routeButton = (Button) view.findViewById(R.id.getRouteButton);
 		//Set up onClick listener for the "Get Route" button
-		mButton.setOnClickListener(new View.OnClickListener() {
+		routeButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
@@ -154,7 +150,7 @@ public class RoutingDialogFragment extends DialogFragment {
 		});
 
 		//Interchange the text in the searchviews
-		mSwap.setOnClickListener(new OnClickListener() {
+		swap.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
