@@ -151,7 +151,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
     @Override
     protected List<PortalItem> doInBackground(Void... params) {
 
-      final List<PortalItem> webMapItems = new ArrayList<PortalItem>();
+      final List<PortalItem> webMapItems = new ArrayList<>();
       try {
         // fetch the user's maps from the portal
         Portal portal = AccountManager.getInstance().getPortal();

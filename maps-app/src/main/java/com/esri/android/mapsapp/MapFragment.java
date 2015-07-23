@@ -232,7 +232,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private LocatorFindParameters findParams;
 
-	private final Map<String,Point> suggestMap = new TreeMap<String,Point>();
+	private final Map<String,Point> suggestMap = new TreeMap<>();
 
 	private static ArrayList<LocatorSuggestionResult> suggestionsList;
 
@@ -814,7 +814,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				final List<LocatorSuggestionResult> locSuggestionResults = locatorSuggestionResults;
 				if (locatorSuggestionResults == null)
 					return;
-				suggestionsList = new ArrayList<LocatorSuggestionResult>();
+				suggestionsList = new ArrayList<>();
 				getActivity().runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
@@ -1176,7 +1176,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		LocatorFindParameters routeStartParams = new LocatorFindParameters(
 				start);
 		LocatorFindParameters routeEndParams = new LocatorFindParameters(end);
-		List<LocatorFindParameters> routeParams = new ArrayList<LocatorFindParameters>();
+		List<LocatorFindParameters> routeParams = new ArrayList<>();
 
 		// Add params to list
 		routeParams.add(routeStartParams);

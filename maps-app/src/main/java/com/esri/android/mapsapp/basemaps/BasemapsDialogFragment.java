@@ -107,7 +107,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 
     // Inflate basemaps grid layout and setup list and adapter to back it
     GridView view = (GridView) inflater.inflate(R.layout.grid_layout, container, false);
-    mBasemapItemList = new ArrayList<BasemapItem>();
+    mBasemapItemList = new ArrayList<>();
     mBasemapsAdapter = new BasemapsAdapter(getActivity(), mBasemapItemList, this);
     view.setAdapter(mBasemapsAdapter);
     return view;

@@ -24,9 +24,6 @@
 
 package com.esri.android.mapsapp;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
@@ -61,6 +58,9 @@ import com.esri.core.symbol.SimpleFillSymbol;
 import com.esri.core.symbol.SimpleLineSymbol;
 import com.esri.core.symbol.SimpleMarkerSymbol;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
@@ -84,7 +84,7 @@ public class MapsAppActivity extends Activity {
 	 */
 	@InjectView(R.id.maps_app_activity_left_drawer) ListView mDrawerList;
 
-	private final List<DrawerItem> mDrawerItems = new ArrayList<DrawerItem>();
+	private final List<DrawerItem> mDrawerItems = new ArrayList<>();
 
 	/**
 	 * Helper component that ties the action bar to the navigation drawer.
