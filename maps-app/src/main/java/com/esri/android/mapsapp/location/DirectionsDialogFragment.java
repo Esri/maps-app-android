@@ -24,8 +24,6 @@
 
 package com.esri.android.mapsapp.location;
 
-import java.util.List;
-
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Context;
@@ -46,6 +44,8 @@ import android.widget.TextView;
 import com.esri.android.mapsapp.R;
 import com.esri.core.tasks.na.RouteDirection;
 import com.esri.core.tasks.na.RouteManeuverType;
+
+import java.util.List;
 
 public class DirectionsDialogFragment extends DialogFragment {
 
@@ -233,13 +233,13 @@ public class DirectionsDialogFragment extends DialogFragment {
         case STAIRS:
         case DOOR_PASSAGE:
         default:
-          Log.w(TAG, "getRoutingIcon() doesn't support: " + maneuver.name());
+          Log.w(TAG, maneuver.name() + "not supported");
           return null;
       }
       try {
         return context.getResources().getDrawable(id);
       } catch (NotFoundException e) {
-        Log.w(TAG, "getRoutingIcon() can't find drawablew: " + maneuver.name());
+        Log.w(TAG, "No drawable found for" + maneuver.name());
         return null;
       }
     }
