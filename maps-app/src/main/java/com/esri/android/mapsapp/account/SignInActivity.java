@@ -53,7 +53,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 
   public static final String TAG = SignInActivity.class.getSimpleName();
   
-  private static final String MSG_OBTAIN_CLIENT_ID = "You have to provide a client id in order to do OAuth sign in. You can obtain a client id by registering the application on https://developers.arcgis.com.";;;
+  private static final String MSG_OBTAIN_CLIENT_ID = "You have to provide a client id in order to do OAuth sign in. You can obtain a client id by registering the application on https://developers.arcgis.com.";
 
   private static final String HTTPS = "https://";
 
