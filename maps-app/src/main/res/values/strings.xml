@@ -81,5 +81,9 @@
     <string name="icon_for_directions_and_routing">Get Directions or Get Route</string>
     <string name="icon_cancel">Remove the current search</string>
     <string name="icon_clock">Display the clock</string>
+    <string name="suggest_item_icon">Suggest item icon</string>
+    <string name="directions_maneuver">directions maneuver</string>
+    <string name="drawer_time_icon">drawer item icon</string>
+    <string name="route_overview_symbol">route overview symbol</string>
 
 </resources>
