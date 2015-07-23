@@ -881,7 +881,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			// assume map is in meters, other units wont work, double
 			// current envelope
-			double distance = (mapExtent != null && mapExtent.getWidth() > 0) ? mapExtent
+			double distance = (mapExtent.getWidth() > 0) ? mapExtent
 					.getWidth() * 2 : 10000;
 			suggestParams.setDistance(distance);
 
@@ -902,7 +902,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			mMapView.getExtent().queryEnvelope(mapExtent);
 
 			// assume map is in meters, double current envelope
-			double distance = (mapExtent != null && mapExtent.getWidth() > 0) ? mapExtent
+			double distance = (mapExtent.getWidth() > 0) ? mapExtent
 					.getWidth() * 2 : 10000;
 			findParams.setDistance(distance);
 
@@ -1118,7 +1118,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mMapView.getExtent().queryEnvelope(mapExtent);
 		// assume map is in metres, other units wont work, double current
 		// envelope
-		double distance = (mapExtent != null && mapExtent.getWidth() > 0) ? mapExtent
+		double distance = (mapExtent.getWidth() > 0) ? mapExtent
 				.getWidth() * 2 : 10000;
 		findParams.setDistance(distance);
 		findParams.setMaxLocations(2);
