@@ -207,7 +207,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
       try {
         mPortalUrl = mPortalUrlEditText.getText().toString().trim();
         if (!mPortalUrl.startsWith(HTTP)) {
-          mPortalUrl = new StringBuilder(HTTP).append(mPortalUrl).toString();
+          mPortalUrl = HTTP + mPortalUrl;
         }
 
         Log.d(TAG, mPortalUrl);
