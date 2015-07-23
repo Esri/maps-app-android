@@ -24,11 +24,6 @@
 
 package com.esri.android.mapsapp;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -52,6 +47,11 @@ import com.esri.core.portal.PortalItemType;
 import com.esri.core.portal.PortalUser;
 import com.esri.core.portal.PortalUserContent;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+
 /**
  * Implements the view that shows the user's maps. Tapping on a map will open it.
  */
@@ -62,8 +62,6 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
   private GridView mMapGrid;
 
   private View mNoMapsInfo;
-
-  private View mRefreshButton;
 
   private List<PortalItem> mMaps;
 
@@ -77,8 +75,8 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
     mNoMapsInfo = view.findViewById(R.id.content_browser_fragment_no_maps_layout);
     mNoMapsInfo.setVisibility(View.GONE);
 
-    mRefreshButton = view.findViewById(R.id.content_browser_fragment_refresh_button);
-    mRefreshButton.setOnClickListener(this);
+    View refreshButton = view.findViewById(R.id.content_browser_fragment_refresh_button);
+    refreshButton.setOnClickListener(this);
 
     if (mMaps == null || mMaps.isEmpty()) {
       // fetch the user's maps
