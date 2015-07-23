@@ -1746,7 +1746,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 */
 	private float convertPixelsToDp(Context context, float px) {
 		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-		float dp = px / (metrics.densityDpi / 160f);
-		return dp;
+		return px / (metrics.densityDpi / 160f);
 	}
 }
