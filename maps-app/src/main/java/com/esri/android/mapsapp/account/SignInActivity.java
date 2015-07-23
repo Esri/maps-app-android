@@ -236,7 +236,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 
       mProgressDialog.dismiss();
 
-      switch (result.intValue()) {
+      switch (result) {
         case TYPE_OAUTH:
           signInWithOAuth();
           break;
