@@ -70,7 +70,7 @@ public class RoutingDialogFragment extends DialogFragment {
 		 *         If this method rejects the parameters it must display an
 		 *         explanatory Toast to the user before returning.
 		 */
-		public boolean onGetRoute(String startPoint, String endPoint);
+		boolean onGetRoute(String startPoint, String endPoint);
 	}
 
 	// Mandatory empty constructor for fragment manager to recreate fragment

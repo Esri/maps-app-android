@@ -61,7 +61,7 @@ public class DirectionsDialogFragment extends DialogFragment {
      *
      * @param position Position in Routing Directions list of the selected direction.
      */
-    public void onDirectionSelected(int position);
+    void onDirectionSelected(int position);
   }
 
   DirectionsDialogListener mDirectionsDialogListener;

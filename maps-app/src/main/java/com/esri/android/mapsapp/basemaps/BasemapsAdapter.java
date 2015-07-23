@@ -24,9 +24,6 @@
 
 package com.esri.android.mapsapp.basemaps;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,6 +34,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.esri.android.mapsapp.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BasemapsAdapter extends BaseAdapter {
 
@@ -49,7 +49,7 @@ public class BasemapsAdapter extends BaseAdapter {
      * 
      * @param listPosition Position within the list of an item that has been clicked.
      */
-    public void onBasemapItemClicked(int listPosition);
+    void onBasemapItemClicked(int listPosition);
   }
 
   BasemapsAdapterClickListener mOnClickListener;
