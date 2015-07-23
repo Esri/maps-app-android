@@ -227,7 +227,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
         authType = TYPE_UNDEFINED;
       }
 
-      return Integer.valueOf(authType);
+      return authType;
     }
 
     @Override
