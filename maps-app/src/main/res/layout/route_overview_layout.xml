@@ -22,7 +22,8 @@
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:src="@drawable/pin_green"
-        android:visibility="visible" />
+        android:visibility="visible"
+        android:contentDescription="@string/route_overview_symbol"/>
 
     <LinearLayout
         android:id="@+id/route_overview_info_layout"

@@ -24,8 +24,6 @@
 
 package com.esri.android.mapsapp.location;
 
-import java.util.List;
-
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Context;
@@ -47,6 +45,8 @@ import com.esri.android.mapsapp.R;
 import com.esri.core.tasks.na.RouteDirection;
 import com.esri.core.tasks.na.RouteManeuverType;
 
+import java.util.List;
+
 public class DirectionsDialogFragment extends DialogFragment {
 
   private static final String TAG = "DirectionsDialogFragment";
@@ -61,7 +61,7 @@ public class DirectionsDialogFragment extends DialogFragment {
      *
      * @param position Position in Routing Directions list of the selected direction.
      */
-    public void onDirectionSelected(int position);
+    void onDirectionSelected(int position);
   }
 
   DirectionsDialogListener mDirectionsDialogListener;
@@ -146,7 +146,7 @@ public class DirectionsDialogFragment extends DialogFragment {
       TextView textView = (TextView) v.findViewById(R.id.directions_text_textview);
       textView.setText(direction.getText());
       textView = (TextView) v.findViewById(R.id.directions_length_textview);
-      String lengthString = String.format("%.1f mi", Double.valueOf(direction.getLength()));
+      String lengthString = String.format("%.1f mi", direction.getLength());
       textView.setText(lengthString);
       return v;
     }
@@ -233,13 +233,13 @@ public class DirectionsDialogFragment extends DialogFragment {
         case STAIRS:
         case DOOR_PASSAGE:
         default:
-          Log.w(TAG, "getRoutingIcon(), not coded to handle: " + maneuver.name());
+          Log.w(TAG, maneuver.name() + "not supported");
           return null;
       }
       try {
         return context.getResources().getDrawable(id);
       } catch (NotFoundException e) {
-        Log.w(TAG, "getRoutingIcon(), could not find drawable for: " + maneuver.name());
+        Log.w(TAG, "No drawable found for" + maneuver.name());
         return null;
       }
     }

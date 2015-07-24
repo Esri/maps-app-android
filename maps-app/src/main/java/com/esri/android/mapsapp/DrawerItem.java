@@ -32,7 +32,7 @@ import android.widget.LinearLayout;
  */
 public class DrawerItem {
   public interface OnClickListener {
-    public void onClick();
+    void onClick();
   }
 
   private final OnClickListener mListener;

@@ -53,7 +53,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 
   public static final String TAG = SignInActivity.class.getSimpleName();
   
-  private static final String MSG_OBTAIN_CLIENT_ID = "You have to provide a client id in order to do OAuth sign in. You can obtain a client id by registering the application on https://developers.arcgis.com.";;;
+  private static final String MSG_OBTAIN_CLIENT_ID = "You have to provide a client id in order to do OAuth sign in. You can obtain a client id by registering the application on https://developers.arcgis.com.";
 
   private static final String HTTPS = "https://";
 
@@ -207,7 +207,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
       try {
         mPortalUrl = mPortalUrlEditText.getText().toString().trim();
         if (!mPortalUrl.startsWith(HTTP)) {
-          mPortalUrl = new StringBuilder(HTTP).append(mPortalUrl).toString();
+          mPortalUrl = HTTP + mPortalUrl;
         }
 
         Log.d(TAG, mPortalUrl);
@@ -227,7 +227,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
         authType = TYPE_UNDEFINED;
       }
 
-      return Integer.valueOf(authType);
+      return authType;
     }
 
     @Override
@@ -236,7 +236,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 
       mProgressDialog.dismiss();
 
-      switch (result.intValue()) {
+      switch (result) {
         case TYPE_OAUTH:
           signInWithOAuth();
           break;

@@ -43,7 +43,7 @@ public class ProgressDialogFragment extends DialogFragment {
 
   private OnCancelListener mOnCancelListener;
 
-  private ProgressDialogFragment() {
+  public ProgressDialogFragment() {
   }
 
   /**

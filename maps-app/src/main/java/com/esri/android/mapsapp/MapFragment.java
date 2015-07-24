@@ -232,7 +232,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private LocatorFindParameters findParams;
 
-	private final Map<String,Point> suggestMap = new TreeMap<String,Point>();
+	private final Map<String,Point> suggestMap = new TreeMap<>();
 
 	private static ArrayList<LocatorSuggestionResult> suggestionsList;
 
@@ -814,7 +814,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				final List<LocatorSuggestionResult> locSuggestionResults = locatorSuggestionResults;
 				if (locatorSuggestionResults == null)
 					return;
-				suggestionsList = new ArrayList<LocatorSuggestionResult>();
+				suggestionsList = new ArrayList<>();
 				getActivity().runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
@@ -881,7 +881,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			// assume map is in meters, other units wont work, double
 			// current envelope
-			double distance = (mapExtent != null && mapExtent.getWidth() > 0) ? mapExtent
+			double distance = (mapExtent.getWidth() > 0) ? mapExtent
 					.getWidth() * 2 : 10000;
 			suggestParams.setDistance(distance);
 
@@ -902,7 +902,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			mMapView.getExtent().queryEnvelope(mapExtent);
 
 			// assume map is in meters, double current envelope
-			double distance = (mapExtent != null && mapExtent.getWidth() > 0) ? mapExtent
+			double distance = (mapExtent.getWidth() > 0) ? mapExtent
 					.getWidth() * 2 : 10000;
 			findParams.setDistance(distance);
 
@@ -1118,7 +1118,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mMapView.getExtent().queryEnvelope(mapExtent);
 		// assume map is in metres, other units wont work, double current
 		// envelope
-		double distance = (mapExtent != null && mapExtent.getWidth() > 0) ? mapExtent
+		double distance = (mapExtent.getWidth() > 0) ? mapExtent
 				.getWidth() * 2 : 10000;
 		findParams.setDistance(distance);
 		findParams.setMaxLocations(2);
@@ -1176,7 +1176,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		LocatorFindParameters routeStartParams = new LocatorFindParameters(
 				start);
 		LocatorFindParameters routeEndParams = new LocatorFindParameters(end);
-		List<LocatorFindParameters> routeParams = new ArrayList<LocatorFindParameters>();
+		List<LocatorFindParameters> routeParams = new ArrayList<>();
 
 		// Add params to list
 		routeParams.add(routeStartParams);
@@ -1746,7 +1746,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 */
 	private float convertPixelsToDp(Context context, float px) {
 		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-		float dp = px / (metrics.densityDpi / 160f);
-		return dp;
+		return px / (metrics.densityDpi / 160f);
 	}
 }

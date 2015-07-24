@@ -24,8 +24,6 @@
 
 package com.esri.android.mapsapp.basemaps;
 
-import java.util.ArrayList;
-
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -52,6 +50,8 @@ import com.esri.core.portal.PortalQueryParams;
 import com.esri.core.portal.PortalQueryParams.PortalQuerySortOrder;
 import com.esri.core.portal.PortalQueryResultSet;
 
+import java.util.ArrayList;
+
 /**
  * Implements the dialog that provides a collection of basemaps to the user.
  */
@@ -71,7 +71,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
      * 
      * @param itemId portal item id of the selected basemap
      */
-    public void onBasemapChanged(String itemId);
+    void onBasemapChanged(String itemId);
   }
 
   private BasemapsDialogListener mBasemapsDialogListener;
@@ -107,7 +107,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 
     // Inflate basemaps grid layout and setup list and adapter to back it
     GridView view = (GridView) inflater.inflate(R.layout.grid_layout, container, false);
-    mBasemapItemList = new ArrayList<BasemapItem>();
+    mBasemapItemList = new ArrayList<>();
     mBasemapsAdapter = new BasemapsAdapter(getActivity(), mBasemapItemList, this);
     view.setAdapter(mBasemapsAdapter);
     return view;

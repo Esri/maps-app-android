@@ -19,6 +19,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:src="@drawable/action_basemaps" />
+        android:src="@drawable/action_basemaps"
+        android:contentDescription="@string/drawer_time_icon"/>
     
 </LinearLayout>

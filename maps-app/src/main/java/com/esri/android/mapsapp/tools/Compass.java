@@ -24,8 +24,6 @@
 
 package com.esri.android.mapsapp.tools;
 
-import com.esri.android.map.MapView;
-import com.esri.android.mapsapp.R;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -37,6 +35,9 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.view.View;
+
+import com.esri.android.map.MapView;
+import com.esri.android.mapsapp.R;
 
 /**
  * The implementation of compass. There are two modes of operation for rotating
@@ -62,9 +63,6 @@ public class Compass extends View implements SensorEventListener {
 	// Used for orientation of the compass
 	private float[] mGravity = new float[3];
 	private float[] mGeomagnetic = new float[3];
-
-	// The angle of rotation of the compass
-	private float azimuth = 0f;
 
 	// To send and receive notification from the sensors.
 	public SensorEventListener sensorEventListener;
@@ -166,7 +164,7 @@ public class Compass extends View implements SensorEventListener {
 			if (success) {
 				float orientation[] = new float[3];
 				SensorManager.getOrientation(R, orientation);
-				azimuth = (float) Math.toDegrees(orientation[0]); // orientation
+				float azimuth = (float) Math.toDegrees(orientation[0]);
 				azimuth = (azimuth + 360) % 360;
 
 				setRotationAngle(-azimuth);
