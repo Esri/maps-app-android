@@ -596,7 +596,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mCompass.setRotationAngle(45);
 		int HEIGHT = 140;
 		int WIDTH = 140;
-		compassFrameParams = new FrameLayout.LayoutParams(HEIGHT, WIDTH,
+		compassFrameParams = new FrameLayout.LayoutParams(WIDTH, HEIGHT,
 				Gravity.RIGHT);
 
 		int TOP_MARGIN_COMPASS = TOP_MARGIN_SEARCH + height + 15;
