@@ -143,26 +143,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	// Margins parameters for search view
 	private static int TOP_MARGIN_SEARCH = 55;
 
-	private static int LEFT_MARGIN_SEARCH = 15;
-
-	private static int RIGHT_MARGIN_SEARCH = 15;
-
-	private static int BOTTOM_MARGIN_SEARCH = 0;
-
-	// Margin parameters for compass
-	private static int TOP_MARGIN_COMPASS = 15;
-
-	private static int LEFT_MARGIN_COMPASS = 0;
-
-	private static int BOTTOM_MARGIN_COMPASS = 0;
-
-	private static int RIGHT_MARGIN_COMPASS = 0;
-
-	// Height and Width for the compass image
-	private static int HEIGHT = 140;
-
-	private static int WIDTH = 140;
-
 	// The circle area specified by search_radius and input lat/lon serves
 	// searching purpose.
 	// It is also used to construct the extent which map zooms to after the
@@ -206,8 +186,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private MatrixCursor mSuggestionCursor;
 
-	private SimpleCursorAdapter mSuggestionAdapter;
-
 	Compass mCompass;
 
 	LayoutParams compassFrameParams;
@@ -229,8 +207,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private String mStartLocation, mEndLocation;
 
 	private LocatorSuggestionParameters suggestParams;
-
-	private LocatorFindParameters findParams;
 
 	private final Map<String,Point> suggestMap = new TreeMap<>();
 
@@ -472,6 +448,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// layout
 		mlayoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP);
+		int LEFT_MARGIN_SEARCH = 15;
+		int RIGHT_MARGIN_SEARCH = 15;
+		int BOTTOM_MARGIN_SEARCH = 0;
 		mlayoutParams.setMargins(LEFT_MARGIN_SEARCH, TOP_MARGIN_SEARCH,
 				RIGHT_MARGIN_SEARCH, BOTTOM_MARGIN_SEARCH);
 
@@ -615,11 +594,16 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mCompass = new Compass(mMapView.getContext());
 		mCompass.setAlpha(1f);
 		mCompass.setRotationAngle(45);
+		int HEIGHT = 140;
+		int WIDTH = 140;
 		compassFrameParams = new FrameLayout.LayoutParams(HEIGHT, WIDTH,
 				Gravity.RIGHT);
 
-		TOP_MARGIN_COMPASS = TOP_MARGIN_SEARCH + height + 15;
+		int TOP_MARGIN_COMPASS = TOP_MARGIN_SEARCH + height + 15;
 
+		int LEFT_MARGIN_COMPASS = 0;
+		int BOTTOM_MARGIN_COMPASS = 0;
+		int RIGHT_MARGIN_COMPASS = 0;
 		((MarginLayoutParams) compassFrameParams).setMargins(
 				LEFT_MARGIN_COMPASS, TOP_MARGIN_COMPASS, RIGHT_MARGIN_COMPASS,
 				BOTTOM_MARGIN_COMPASS);
@@ -796,7 +780,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		String[] cols = new String[]{COLUMN_NAME_ADDRESS};
 		int[] to = new int[]{R.id.suggestion_item_address};
 
-		mSuggestionAdapter = new SimpleCursorAdapter(mMapView.getContext(), R.layout.search_suggestion_item, mSuggestionCursor, cols, to, 0);
+		SimpleCursorAdapter mSuggestionAdapter = new SimpleCursorAdapter(mMapView.getContext(), R.layout.search_suggestion_item, mSuggestionCursor, cols, to, 0);
 		mSearchview.setSuggestionsAdapter(mSuggestionAdapter);
 		mSuggestionAdapter.notifyDataSetChanged();
 	}
@@ -891,7 +875,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		if (TYPE.contentEquals(FIND_PLACE)) {
 			// Create find parameters
-			findParams = new LocatorFindParameters(query);
+			LocatorFindParameters findParams = new LocatorFindParameters(query);
 
 			// Use the centre of the current map extent as the location
 			findParams.setLocation(mMapView.getCenter(),
