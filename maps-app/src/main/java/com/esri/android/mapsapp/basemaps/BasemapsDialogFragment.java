@@ -268,7 +268,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
      * Creates a query string to fetch basemap portal items from arcgis.com.
      */
     private String createDefaultQueryString() {
-      String query = null;
+      String query;
 
       String[] mBasemapIds = { "d5e02a0c1f2b4ec399823fdd3c2fdebd", // topographic
           "716b600dbbac433faa4bec9220c76b3a", // imagery with labels

@@ -7,7 +7,7 @@ android {
     defaultConfig {
         applicationId "com.esri.android.mapsapp"
         minSdkVersion 15
-        targetSdkVersion 22
+        targetSdkVersion 23
     }
 
     packagingOptions{
@@ -28,7 +28,7 @@ dependencies {
     // android support libraries
     compile 'com.android.support:support-v4:22.2.0'
     // ArcGIS Android 10.2.5 API
-    compile 'com.esri.arcgis.android:arcgis-android:10.2.6-2'
+    compile 'com.esri.arcgis.android:arcgis-android:10.2.7'
     // square libs
     compile 'com.jakewharton:butterknife:6.1.0'
 }
