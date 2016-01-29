@@ -1458,10 +1458,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			mException = null;
 
 			// Define route objects
-			List<LocatorGeocodeResult> geocodeStartResult = null;
-			List<LocatorGeocodeResult> geocodeEndResult = null;
-			Point startPoint = null;
-			Point endPoint = null;
+			List<LocatorGeocodeResult> geocodeStartResult;
+			List<LocatorGeocodeResult> geocodeEndResult;
+			Point startPoint;
+			Point endPoint;
 
 			// Create a new locator to geocode start/end points;
 			// by default uses ArcGIS online world geocoding service
@@ -1514,7 +1514,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			// Create a new routing task pointing to an ArcGIS Network Analysis
 			// Service
 			RouteTask routeTask;
-			RouteParameters routeParams = null;
+			RouteParameters routeParams;
 			try {
 				routeTask = RouteTask.createOnlineRouteTask(
 						getString(R.string.routingservice_url), null);
