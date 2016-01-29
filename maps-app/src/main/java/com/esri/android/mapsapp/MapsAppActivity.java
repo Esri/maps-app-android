@@ -226,7 +226,7 @@ public class MapsAppActivity extends Activity {
 
 		// remove existing MapFragment explicitly, simply replacing it can cause
 		// the app to freeze when switching basemaps
-		FragmentTransaction transaction = null;
+		FragmentTransaction transaction;
 		FragmentManager fragmentManager = getFragmentManager();
 		Fragment currentMapFragment = fragmentManager
 				.findFragmentByTag(MapFragment.TAG);
@@ -274,7 +274,7 @@ public class MapsAppActivity extends Activity {
 		mDrawerItems.clear();
 
 
-		DrawerItem item = null;
+		DrawerItem item;
 		if (AccountManager.getInstance().isSignedIn()) {
 
 			// user info
