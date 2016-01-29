@@ -142,6 +142,7 @@ public class MapsAppActivity extends Activity {
 		// set up the drawer's list view with items and click listener
 
 		ActionBar actionBar = getActionBar();
+		assert actionBar != null;
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setHomeButtonEnabled(true);
 

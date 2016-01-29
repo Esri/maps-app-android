@@ -1623,7 +1623,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			// NOTE: marker's bounds not set till marker is used to create
 			// destinationSymbol
 			float offsetY = convertPixelsToDp(getActivity(),
-					marker.getBounds().bottom);
+					marker != null ? marker.getBounds().bottom : 0);
 			destinationSymbol.setOffsetY(offsetY);
 			return new Graphic(point, destinationSymbol);
 		}
