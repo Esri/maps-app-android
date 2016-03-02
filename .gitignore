@@ -32,6 +32,9 @@ proguard/
 .idea/
 build/
 
+# StarUML project files
+*.mdj
+
 # SublimeText
 /*.sublime-project
 *.sublime-workspace
