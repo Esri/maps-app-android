@@ -76,7 +76,7 @@ public class Compass extends View implements SensorEventListener {
 		mMatrix = new Matrix();
 		
 		mBitmap = BitmapFactory.decodeResource(getResources(),
-				R.drawable.ic_compass);
+				R.drawable.eaf_compass);
 				
 		sensorManager = (SensorManager) context
 				.getSystemService(Context.SENSOR_SERVICE);
