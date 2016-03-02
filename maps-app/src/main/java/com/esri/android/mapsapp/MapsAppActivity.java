@@ -30,7 +30,6 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -51,12 +50,6 @@ import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.account.SignInActivity;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogListener;
-import com.esri.android.toolkit.analysis.MeasuringTool;
-import com.esri.core.geometry.LinearUnit;
-import com.esri.core.geometry.Unit;
-import com.esri.core.symbol.SimpleFillSymbol;
-import com.esri.core.symbol.SimpleLineSymbol;
-import com.esri.core.symbol.SimpleMarkerSymbol;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -382,55 +375,6 @@ public class MapsAppActivity extends Activity {
 				});
 				 basemapsFrag.show(getFragmentManager(), null);
 				 mDrawerLayout.closeDrawers();
-			}
-		});
-		mDrawerItems.add(item);
-
-		// Adding the Measure item in the Drawer
-		LinearLayout view_measure = (LinearLayout) getLayoutInflater().inflate(
-				R.layout.drawer_item_layout, null);
-		TextView text_drawer_measure = (TextView) view_measure
-				.findViewById(R.id.drawer_item_textview);
-		ImageView icon_drawer_measure = (ImageView) view_measure
-				.findViewById(R.id.drawer_item_icon);
-
-		text_drawer_measure.setText(getString(R.string.action_measure));
-		icon_drawer_measure.setImageResource(android.R.drawable.ic_menu_edit);
-		item = new DrawerItem(view_measure, new DrawerItem.OnClickListener() {
-
-			@Override
-			public void onClick() {
-				 // initialize some resources for the measure tool, optional.
-				 Unit[] linearUnits = new Unit[] {
-				 Unit.create(LinearUnit.Code.CENTIMETER),
-				 Unit.create(LinearUnit.Code.METER),
-				 Unit.create(LinearUnit.Code.KILOMETER),
-				 Unit.create(LinearUnit.Code.INCH),
-				 Unit.create(LinearUnit.Code.FOOT),
-				 Unit.create(LinearUnit.Code.YARD),
-				 Unit.create(LinearUnit.Code.MILE_STATUTE) };
-				 SimpleMarkerSymbol markerSymbol = new SimpleMarkerSymbol(
-				 Color.BLUE, 10,
-				 com.esri.core.symbol.SimpleMarkerSymbol.STYLE.DIAMOND);
-				 SimpleLineSymbol lineSymbol = new SimpleLineSymbol(Color.YELLOW, 3);
-				 SimpleFillSymbol fillSymbol = new SimpleFillSymbol(Color.argb(100,
-				 0, 225, 255));
-				 fillSymbol.setOutline(new SimpleLineSymbol(Color.TRANSPARENT, 0));
-				
-				 // create the tool, required.
-				 MeasuringTool measuringTool = new MeasuringTool(MapFragment.mMapView);
-				 // customize the tool, optional.
-				 measuringTool.setLinearUnits(linearUnits);
-				 measuringTool.setMarkerSymbol(markerSymbol);
-				 measuringTool.setLineSymbol(lineSymbol);
-				 measuringTool.setFillSymbol(fillSymbol);
-				
-				 // fire up the tool, required.
-				 startActionMode(measuringTool);
-				 
-				 
-				 //Close and lock the drawer
-				 mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 			}
 		});
 		mDrawerItems.add(item);
