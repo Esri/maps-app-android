@@ -2,40 +2,17 @@
 <resources>
 
     <!-- material color palette -->
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorPrimaryLight">#C5CAE9</color>
-    <color name="colorAccent">#FF5722</color>
+    <color name="colorPrimary">#607D8B</color>
+    <color name="colorPrimaryDark">#455A64</color>
+    <color name="colorPrimaryLight">#CFD8DC</color>
+    <color name="colorAccent">#448AFF</color>
     <color name="colorText">#FFFFFF</color>
     <color name="colorTextPrimary">#212121</color>
     <color name="colorTextSecondary">#727272</color>
     <color name="colorDivider">#B6B6B6</color>
 
-
-    <color name="esri_white">#FFFFFFFF</color>
-    <color name="esri_off_white">#FFF9F9F9</color>
-    <color name="esri_lightest_gray">#FFEDEDED</color>
-    <color name="esri_lighter_gray">#FFCCCCCC</color>
-    <color name="esri_light_gray">#FFA6A6A6</color>
-    <color name="esri_gray">#FF808080</color>
-    <color name="esri_dark_gray">#FF595959</color>
-    <color name="esri_darker_gray">#FF333333</color>
-    <color name="esri_darkest_gray">#FF1F1F1F</color>
-
-
-    <color name="divider_color">#FFCCCCCC</color>
-    <color name="highlight_color">#BF35AC46</color>
-    <color name="drawer_shadow_background">#7F323232</color>
-    <color name="drawer_header_background">#FFCCCCCC</color>
-    <color name="drawer_header_text_color">@color/esri_dark_gray</color>
-    <color name="drawer_item_background">@color/esri_white</color>
-    <color name="drawer_item_text_color">#FF000000</color>
-    <color name="drawer_item_subtitle_text_color">#FF666666</color>
-    <color name="drawer_current_user_background">@android:color/transparent</color>
-    <color name="drawer_current_user_text_color">@color/esri_dark_gray</color>
-
     <!-- Browse card colors -->
-    <color name="portal_item_background">@color/colorAccent</color>
+    <color name="portal_item_background">@color/colorPrimaryLight</color>
     <color name="app_primary_background">@color/colorPrimary</color>
     <color name="app_secondary_background">@color/colorPrimaryLight</color>
     <color name="app_tertiary_background">@color/colorPrimaryLight</color>
