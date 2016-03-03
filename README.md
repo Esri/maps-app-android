@@ -12,11 +12,11 @@ This repo provides a template app for Android devices called Maps App that can b
 * Route
 * Sign in to ArcGIS account
 
+## App Type Hierarchy
+![Type Hierarchy](TypeHierarchy.jpg)
+
 ## Development Instructions
 This Maps App repo is an Android Studio Project and App Module that can be directly cloned and imported into Android Studio.
-
-## Type Hierarchy
-![Type Hierarchy](TypeHierarchy.jpg)
 
 ### Fork the repo
 **Fork** the [Maps App Android](https://github.com/Esri/maps-app-android/fork) repo
