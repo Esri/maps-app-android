@@ -67,7 +67,7 @@ Anyone and everyone is welcome to [contribute](https://github.com/Esri/maps-app-
 4. Improve documentation
 
 ## Licensing
-Copyright 2014 Esri
+Copyright 2016 Esri
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
