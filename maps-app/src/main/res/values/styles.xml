@@ -4,17 +4,19 @@
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
     -->
-    <style name="AppBaseTheme" parent="android:Theme.Light">
-        <!--
-            Theme customizations available in newer API levels can go in
-            res/values-vXX/styles.xml, while customizations related to
-            backward-compatibility can go here.
-        -->
+    <style name="AppBaseTheme" parent="android:Theme.Material.Light">
+
     </style>
 
     <!-- Application theme. -->
     <style name="AppTheme" parent="AppBaseTheme">
-        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+        <!-- material colors -->
+        <item name="android:colorPrimary">@color/colorPrimary</item>
+        <item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="android:colorAccent">@color/colorAccent</item>
+        <item name="android:textColorPrimary">@color/colorTextPrimary</item>
+        <item name="android:textColor">@color/colorTextSecondary</item>
+        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
     </style>
 
     <!-- ContentBrowserFragment Styles -->
@@ -42,18 +44,18 @@
 
     <style name="drawer_item_fullname_text">
         <item name="android:textSize">17sp</item>
-        <item name="android:textColor">@color/esri_dark_gray</item>
+        <item name="android:textColor">@color/colorTextSecondary</item>
     </style>
 
     <style name="drawer_item_username_text">
         <item name="android:textSize">15sp</item>
-        <item name="android:textColor">@color/esri_dark_gray</item>
+        <item name="android:textColor">@color/colorTextPrimary</item>
     </style>
 
     <!-- callout -->
     <style name="place_callout_title_text">
         <item name="android:textSize">16sp</item>
-        <item name="android:textColor">@color/esri_gray</item>
+        <item name="android:textColor">@color/colorTextSecondary</item>
         <item name="android:maxLines">2</item>
         <item name="android:maxWidth">200dp</item>
         <item name="android:ellipsize">end</item>
