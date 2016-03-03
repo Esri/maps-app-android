@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- material color palette -->
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimaryLight">#C5CAE9</color>
+    <color name="colorAccent">#FF5722</color>
+    <color name="colorText">#FFFFFF</color>
+    <color name="colorTextPrimary">#212121</color>
+    <color name="colorTextSecondary">#727272</color>
+    <color name="colorDivider">#B6B6B6</color>
+
     <color name="esri_white">#FFFFFFFF</color>
     <color name="esri_off_white">#FFF9F9F9</color>
     <color name="esri_lightest_gray">#FFEDEDED</color>
@@ -22,13 +32,13 @@
     <color name="drawer_current_user_text_color">@color/esri_dark_gray</color>
 
     <!-- Browse card colors -->
-    <color name="portal_item_background">@color/esri_white</color>
-    <color name="app_primary_background">@color/esri_lightest_gray</color>
-    <color name="app_secondary_background">#FF999999</color>
+    <color name="portal_item_background">@color/colorAccent</color>
+    <color name="app_primary_background">@color/colorPrimary</color>
+    <color name="app_secondary_background">@color/colorPrimaryLight</color>
     <color name="app_tertiary_background">@color/esri_lighter_gray</color>
-    <color name="title_text_color">@color/esri_white</color>
-    <color name="primary_text_color">@color/esri_darker_gray</color>
-    <color name="secondary_text_color">#FF888888</color>
+    <color name="title_text_color">@color/colorText</color>
+    <color name="primary_text_color">@color/colorTextPrimary</color>
+    <color name="secondary_text_color">@color/colorTextSecondary</color>
     <!-- Should be defined by each app in their own colors.xml -->
     <color name="tertiary_text_color">#FF000000</color>
 

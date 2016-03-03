@@ -31,6 +31,8 @@ import java.util.TreeMap;
 import java.util.concurrent.Callable;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -57,6 +59,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.SearchView;
@@ -73,6 +76,7 @@ import com.esri.android.map.MapView;
 import com.esri.android.map.event.OnPinchListener;
 import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.mapsapp.account.AccountManager;
+import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogListener;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.android.mapsapp.location.DirectionsDialogFragment;
@@ -81,6 +85,7 @@ import com.esri.android.mapsapp.location.RoutingDialogFragment;
 import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogListener;
 import com.esri.android.mapsapp.tools.Compass;
 import com.esri.android.mapsapp.util.TaskExecutor;
+import com.esri.android.toolkit.analysis.MeasuringTool;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.LinearUnit;
@@ -94,8 +99,10 @@ import com.esri.core.portal.BaseMap;
 import com.esri.core.portal.Portal;
 import com.esri.core.portal.WebMap;
 import com.esri.core.symbol.PictureMarkerSymbol;
+import com.esri.core.symbol.SimpleFillSymbol;
 import com.esri.core.symbol.SimpleLineSymbol;
 import com.esri.core.symbol.SimpleLineSymbol.STYLE;
+import com.esri.core.symbol.SimpleMarkerSymbol;
 import com.esri.core.tasks.geocode.Locator;
 import com.esri.core.tasks.geocode.LocatorFindParameters;
 import com.esri.core.tasks.geocode.LocatorGeocodeResult;
@@ -301,6 +308,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	}
 
 	public boolean onOptionsItemSelected(MenuItem item) {
+
+		SimpleFillSymbol fillSymbol;
+
 		switch (item.getItemId()) {
 
 		case R.id.location:
@@ -324,9 +334,93 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			}
 			return true;
+
+			case R.id.action_measure:
+				// enter measure tool mode
+				Unit[] linearUnits = new Unit[] {
+						Unit.create(LinearUnit.Code.CENTIMETER),
+						Unit.create(LinearUnit.Code.METER),
+						Unit.create(LinearUnit.Code.KILOMETER),
+						Unit.create(LinearUnit.Code.INCH),
+						Unit.create(LinearUnit.Code.FOOT),
+						Unit.create(LinearUnit.Code.YARD),
+						Unit.create(LinearUnit.Code.MILE_STATUTE)
+				};
+
+				SimpleMarkerSymbol markerSymbol = new SimpleMarkerSymbol(Color.BLUE, 10, SimpleMarkerSymbol.STYLE.DIAMOND);
+				SimpleLineSymbol lineSymbol = new SimpleLineSymbol(Color.YELLOW, 3);
+				fillSymbol = new SimpleFillSymbol(Color.argb(100, 0, 225, 255));
+				fillSymbol.setOutline(new SimpleLineSymbol(Color.TRANSPARENT, 0));
+				// create the tool, required.
+				MeasuringTool measuringTool = new MeasuringTool(mMapView);
+
+				// customize the tool, optional.
+				measuringTool.setLinearUnits(linearUnits);
+				measuringTool.setMarkerSymbol(markerSymbol);
+				measuringTool.setLineSymbol(lineSymbol);
+				measuringTool.setFillSymbol(fillSymbol);
+
+				// fire up the tool, required.
+				getActivity().startActionMode(measuringTool);
+
+				return true;
+
+			case R.id.action_basemap:
+				// Show BasemapsDialogFragment to offer a choice if basemaps.
+				// This calls back to onBasemapChanged() if one is selected.
+				BasemapsDialogFragment basemapsFrag = new BasemapsDialogFragment();
+				basemapsFrag.setBasemapsDialogListener(new BasemapsDialogListener() {
+
+					@Override
+					public void onBasemapChanged(String itemId) {
+						showMap(null,itemId);
+					}
+				});
+				basemapsFrag.show(getFragmentManager(), null);
+
+//				BaseAdapter adapter = (BaseAdapter) mDrawerList.getAdapter();
+//				if (adapter == null) {
+//					adapter = new DrawerItemListAdapter();
+//					mDrawerList.setAdapter(adapter);
+//				} else {
+//					adapter.notifyDataSetChanged();
+//				}
+
+				return true;
+
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	/**
+	 * Opens the map represented by the specified portal item or if null, opens
+	 * a default map.
+	 */
+	public void showMap(String portalItemId, String basemapPortalItemId) {
+
+		// remove existing MapFragment explicitly, simply replacing it can cause
+		// the app to freeze when switching basemaps
+		FragmentTransaction transaction;
+		FragmentManager fragmentManager = getFragmentManager();
+		Fragment currentMapFragment = fragmentManager
+				.findFragmentByTag(MapFragment.TAG);
+		if (currentMapFragment != null) {
+			transaction = fragmentManager.beginTransaction();
+			transaction.remove(currentMapFragment);
+			transaction.commit();
+		}
+
+		MapFragment mapFragment = MapFragment.newInstance(portalItemId,
+				basemapPortalItemId);
+
+		transaction = fragmentManager.beginTransaction();
+		transaction.replace(R.id.maps_app_activity_content_frame, mapFragment,
+				MapFragment.TAG);
+		transaction.addToBackStack(null);
+		transaction.commit();
+
+		getActivity().invalidateOptionsMenu(); // reload the options menu
 	}
 
 	@Override
