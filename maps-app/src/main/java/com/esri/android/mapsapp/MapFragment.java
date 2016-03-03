@@ -31,6 +31,8 @@ import java.util.TreeMap;
 import java.util.concurrent.Callable;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -57,6 +59,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.SearchView;
@@ -73,6 +76,7 @@ import com.esri.android.map.MapView;
 import com.esri.android.map.event.OnPinchListener;
 import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.mapsapp.account.AccountManager;
+import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogListener;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.android.mapsapp.location.DirectionsDialogFragment;
@@ -361,9 +365,62 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 				return true;
 
+			case R.id.action_basemap:
+				// Show BasemapsDialogFragment to offer a choice if basemaps.
+				// This calls back to onBasemapChanged() if one is selected.
+				BasemapsDialogFragment basemapsFrag = new BasemapsDialogFragment();
+				basemapsFrag.setBasemapsDialogListener(new BasemapsDialogListener() {
+
+					@Override
+					public void onBasemapChanged(String itemId) {
+						showMap(null,itemId);
+					}
+				});
+				basemapsFrag.show(getFragmentManager(), null);
+
+//				BaseAdapter adapter = (BaseAdapter) mDrawerList.getAdapter();
+//				if (adapter == null) {
+//					adapter = new DrawerItemListAdapter();
+//					mDrawerList.setAdapter(adapter);
+//				} else {
+//					adapter.notifyDataSetChanged();
+//				}
+
+				return true;
+
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+
+	/**
+	 * Opens the map represented by the specified portal item or if null, opens
+	 * a default map.
+	 */
+	public void showMap(String portalItemId, String basemapPortalItemId) {
+
+		// remove existing MapFragment explicitly, simply replacing it can cause
+		// the app to freeze when switching basemaps
+		FragmentTransaction transaction;
+		FragmentManager fragmentManager = getFragmentManager();
+		Fragment currentMapFragment = fragmentManager
+				.findFragmentByTag(MapFragment.TAG);
+		if (currentMapFragment != null) {
+			transaction = fragmentManager.beginTransaction();
+			transaction.remove(currentMapFragment);
+			transaction.commit();
+		}
+
+		MapFragment mapFragment = MapFragment.newInstance(portalItemId,
+				basemapPortalItemId);
+
+		transaction = fragmentManager.beginTransaction();
+		transaction.replace(R.id.maps_app_activity_content_frame, mapFragment,
+				MapFragment.TAG);
+		transaction.addToBackStack(null);
+		transaction.commit();
+
+		getActivity().invalidateOptionsMenu(); // reload the options menu
 	}
 
 	@Override
