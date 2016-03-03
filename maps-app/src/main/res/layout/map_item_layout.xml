@@ -4,7 +4,7 @@
     android:id="@+id/map_item_linearlayout"
     android:layout_width="@dimen/map_item_width"
     android:layout_height="@dimen/map_item_height"
-    android:background="@android:color/white"
+    android:background="@color/colorPrimaryLight"
     android:orientation="horizontal" >
 
     <ImageView
