@@ -17,7 +17,7 @@
 
     <item
         android:id="@+id/action_measure"
-        android:icon="@drawable/eaf_measure_draft"
+        android:icon="@drawable/ic_action_ic_measure_length"
         android:orderInCategory="100"
         android:showAsAction="ifRoom"
         android:title="@string/action_measure"/>
