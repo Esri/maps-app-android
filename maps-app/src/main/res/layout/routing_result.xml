@@ -3,7 +3,7 @@
     android:id="@+id/linearSearchResultLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/white"
+    android:background="@color/colorPrimaryLight"
     android:orientation="horizontal"
     android:padding="5dp" >
 
@@ -32,7 +32,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/from"
-                android:textColor="@android:color/darker_gray" />
+                android:textColor="@color/colorTextSecondary" />
 
             <TextView
                 android:id="@+id/tv_from"
@@ -50,7 +50,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/to"
-                android:textColor="@android:color/darker_gray" />
+                android:textColor="@color/colorTextSecondary" />
 
             <TextView
                 android:id="@+id/tv_to"

@@ -17,9 +17,9 @@
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@android:color/darker_gray"
+        android:background="@color/colorPrimary"
         android:choiceMode="singleChoice"
-        android:divider="@color/esri_gray"
+        android:divider="@color/colorDivider"
         android:dividerHeight="1px" />
 
 </android.support.v4.widget.DrawerLayout>

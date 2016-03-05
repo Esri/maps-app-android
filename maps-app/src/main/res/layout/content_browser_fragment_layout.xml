@@ -20,7 +20,7 @@
         android:id="@+id/content_browser_fragment_no_maps_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/android_holo_light_blue_translucent"
+        android:background="@color/colorPrimaryLight"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="visible" >

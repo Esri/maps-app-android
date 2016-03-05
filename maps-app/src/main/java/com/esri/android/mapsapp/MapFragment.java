@@ -378,14 +378,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				});
 				basemapsFrag.show(getFragmentManager(), null);
 
-//				BaseAdapter adapter = (BaseAdapter) mDrawerList.getAdapter();
-//				if (adapter == null) {
-//					adapter = new DrawerItemListAdapter();
-//					mDrawerList.setAdapter(adapter);
-//				} else {
-//					adapter.notifyDataSetChanged();
-//				}
-
 				return true;
 
 		default:

@@ -9,8 +9,8 @@
   <item
     android:state_pressed="true"
     android:state_enabled="true"
-    android:color="@color/esri_white" />
+    android:color="@color/colorPrimaryLight" />
   
-  <item android:color="@color/drawer_item_text_color" />
+  <item android:color="@color/colorTextPrimary" />
 
 </selector>
