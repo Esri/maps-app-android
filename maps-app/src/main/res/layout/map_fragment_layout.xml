@@ -4,4 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:src="@android:drawable/ic_menu_mylocation"
+        android:layout_width="@dimen/fab_size"
+        android:layout_height="@dimen/fab_size"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="@dimen/fab_margin_right"
+        android:layout_marginBottom="@dimen/fab_margin_bottom"
+        android:background="@drawable/fab_ripple"
+        android:elevation="@dimen/button_elevation"
+        android:onClick="onClick"
+        android:contentDescription="@string/imagebutton_content_desc"/>
+
 </FrameLayout>
