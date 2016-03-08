@@ -59,7 +59,6 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.SearchView;
@@ -265,6 +264,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 
+		View view = inflater.inflate(R.layout.map_fragment_layout, container, false);
+
 		mMapContainer = (FrameLayout) inflater.inflate(
 				R.layout.map_fragment_layout, null);
 
@@ -292,6 +293,32 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 				mapView.zoomin();
 
+				android.support.design.widget.FloatingActionButton fab = (android.support.design.widget.FloatingActionButton) mMapContainer.findViewById(R.id.fab);
+				fab.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						Log.d("***", "onClick called with: " + "view = [" + v + "]");
+						// Toggle location tracking on or off
+						if (mIsLocationTracking) {
+//							item.setIcon(R.drawable.ic_action_compass_mode);
+							mMapView.getLocationDisplayManager().setAutoPanMode(
+									AutoPanMode.COMPASS);
+							mCompass.start();
+							mCompass.setVisibility(View.VISIBLE);
+							mIsLocationTracking = false;
+						} else {
+							startLocationTracking();
+//							item.setIcon(android.R.drawable.ic_menu_mylocation);
+							if (mMapView.getRotationAngle() != 0) {
+								mCompass.setVisibility(View.VISIBLE);
+								mCompass.setRotationAngle(mMapView.getRotationAngle());
+							} else {
+								mCompass.setVisibility(View.GONE);
+							}
+						}
+					}
+				});
+
 			}
 		}
 
@@ -312,28 +339,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		SimpleFillSymbol fillSymbol;
 
 		switch (item.getItemId()) {
-
-		case R.id.location:
-			// Toggle location tracking on or off
-			if (mIsLocationTracking) {
-				item.setIcon(R.drawable.ic_action_compass_mode);
-				mMapView.getLocationDisplayManager().setAutoPanMode(
-						AutoPanMode.COMPASS);
-				mCompass.start();
-				mCompass.setVisibility(View.VISIBLE);
-				mIsLocationTracking = false;
-			} else {
-				startLocationTracking();
-				item.setIcon(android.R.drawable.ic_menu_mylocation);
-				if (mMapView.getRotationAngle() != 0) {
-					mCompass.setVisibility(View.VISIBLE);
-					mCompass.setRotationAngle(mMapView.getRotationAngle());
-				} else {
-					mCompass.setVisibility(View.GONE);
-				}
-
-			}
-			return true;
 
 			case R.id.action_measure:
 				// enter measure tool mode

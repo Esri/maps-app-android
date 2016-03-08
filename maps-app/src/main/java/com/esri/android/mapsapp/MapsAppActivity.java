@@ -24,8 +24,6 @@
 
 package com.esri.android.mapsapp;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -35,6 +33,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,7 +58,7 @@ import butterknife.InjectView;
 /**
  * Entry point into the Maps App.
  */
-public class MapsAppActivity extends Activity {
+public class MapsAppActivity extends AppCompatActivity {
 
 	public static DrawerLayout mDrawerLayout;
 	
@@ -133,7 +132,7 @@ public class MapsAppActivity extends Activity {
 				GravityCompat.START);
 		// set up the drawer's list view with items and click listener
 
-		ActionBar actionBar = getActionBar();
+		android.support.v7.app.ActionBar actionBar = getSupportActionBar();
 		actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.colorPrimary)));
 		assert actionBar != null;
 		actionBar.setDisplayHomeAsUpEnabled(true);

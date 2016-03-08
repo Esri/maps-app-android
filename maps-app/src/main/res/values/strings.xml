@@ -86,4 +86,7 @@
     <string name="drawer_time_icon">drawer item icon</string>
     <string name="route_overview_symbol">route overview symbol</string>
 
+    <!-- floating action button -->
+    <string name="imagebutton_content_desc">Turn GPS on/off</string>
+
 </resources>

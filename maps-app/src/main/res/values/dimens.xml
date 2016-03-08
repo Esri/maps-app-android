@@ -66,4 +66,11 @@
     <dimen name="place_callout_max_height">600dp</dimen>
     <dimen name="place_callout_corner_curve">5dp</dimen>
 
+    <!-- floating action button -->
+    <dimen name="fab_size">56dp</dimen>
+    <dimen name="button_elevation">4dp</dimen>
+    <dimen name="button_press_elevation">8dp</dimen>
+    <dimen name="fab_margin_right">16dp</dimen>
+    <dimen name="fab_margin_bottom">16dp</dimen>
+
 </resources>
