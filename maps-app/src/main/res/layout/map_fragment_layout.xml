@@ -14,7 +14,6 @@
         android:layout_marginBottom="@dimen/fab_margin_bottom"
         android:background="@drawable/fab_ripple"
         android:elevation="@dimen/button_elevation"
-        android:onClick="onClick"
         android:contentDescription="@string/imagebutton_content_desc"/>
 
 </FrameLayout>
