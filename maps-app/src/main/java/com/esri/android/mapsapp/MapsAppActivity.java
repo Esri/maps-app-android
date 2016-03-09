@@ -48,6 +48,7 @@ import android.widget.TextView;
 
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.account.SignInActivity;
+import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -327,7 +328,7 @@ public class MapsAppActivity extends AppCompatActivity {
 			mDrawerItems.add(item);
 		} else {
 
-			// Adding the SIgn In item in the drawer
+			// Adding the Sign In item in the drawer
 			LinearLayout view_signIn = (LinearLayout) getLayoutInflater()
 					.inflate(R.layout.drawer_item_layout, null);
 			TextView text_drawer_signIn = (TextView) view_signIn
@@ -347,6 +348,32 @@ public class MapsAppActivity extends AppCompatActivity {
 					});
 			mDrawerItems.add(item);
 		}
+
+		// Adding the basemap item in the drawer
+		LinearLayout view_basemap = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
+		TextView text_drawer_basemap = (TextView) view_basemap.findViewById(R.id.drawer_item_textview);
+		ImageView icon_drawer_basemap = (ImageView) view_basemap.findViewById(R.id.drawer_item_icon);
+		text_drawer_basemap.setText(getString(R.string.menu_basemaps));
+		icon_drawer_basemap.setImageResource(R.drawable.action_basemaps);
+		item = new DrawerItem(view_basemap, new DrawerItem.OnClickListener() {
+
+			@Override
+			public void onClick() {
+				// Show BasemapsDialogFragment to offer a choice if basemaps.
+				// This calls back to onBasemapChanged() if one is selected.
+				BasemapsDialogFragment basemapsFrag = new BasemapsDialogFragment();
+				basemapsFrag.setBasemapsDialogListener(new BasemapsDialogFragment.BasemapsDialogListener() {
+
+					@Override
+					public void onBasemapChanged(String itemId) {
+						showMap(null,itemId);
+					}
+				});
+				basemapsFrag.show(getFragmentManager(), null);
+				mDrawerLayout.closeDrawers();
+			}
+
+		});
 
 		mDrawerItems.add(item);
 
