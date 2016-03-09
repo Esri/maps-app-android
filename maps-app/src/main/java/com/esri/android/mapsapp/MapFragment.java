@@ -336,40 +336,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	public boolean onOptionsItemSelected(MenuItem item) {
 
-		SimpleFillSymbol fillSymbol;
-
 		switch (item.getItemId()) {
-
-			case R.id.action_measure:
-				// enter measure tool mode
-				Unit[] linearUnits = new Unit[] {
-						Unit.create(LinearUnit.Code.CENTIMETER),
-						Unit.create(LinearUnit.Code.METER),
-						Unit.create(LinearUnit.Code.KILOMETER),
-						Unit.create(LinearUnit.Code.INCH),
-						Unit.create(LinearUnit.Code.FOOT),
-						Unit.create(LinearUnit.Code.YARD),
-						Unit.create(LinearUnit.Code.MILE_STATUTE)
-				};
-
-				SimpleMarkerSymbol markerSymbol = new SimpleMarkerSymbol(Color.BLUE, 10, SimpleMarkerSymbol.STYLE.DIAMOND);
-				SimpleLineSymbol lineSymbol = new SimpleLineSymbol(Color.YELLOW, 3);
-				fillSymbol = new SimpleFillSymbol(Color.argb(100, 0, 225, 255));
-				fillSymbol.setOutline(new SimpleLineSymbol(Color.TRANSPARENT, 0));
-				// create the tool, required.
-				MeasuringTool measuringTool = new MeasuringTool(mMapView);
-
-				// customize the tool, optional.
-				measuringTool.setLinearUnits(linearUnits);
-				measuringTool.setMarkerSymbol(markerSymbol);
-				measuringTool.setLineSymbol(lineSymbol);
-				measuringTool.setFillSymbol(fillSymbol);
-
-				// fire up the tool, required.
-				getActivity().startActionMode(measuringTool);
-
-				return true;
-
 			case R.id.action_basemap:
 				// Show BasemapsDialogFragment to offer a choice if basemaps.
 				// This calls back to onBasemapChanged() if one is selected.
