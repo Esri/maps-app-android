@@ -4,14 +4,7 @@
     <item
         android:id="@+id/action_basemap"
         android:icon="@drawable/action_basemaps"
-        android:showAsAction="ifRoom"
+        android:showAsAction="always"
         android:title="@string/menu_basemaps"/>
-
-    <item
-        android:id="@+id/action_measure"
-        android:icon="@drawable/ic_action_ic_measure_length"
-        android:orderInCategory="100"
-        android:showAsAction="ifRoom"
-        android:title="@string/action_measure"/>
     
 </menu>
