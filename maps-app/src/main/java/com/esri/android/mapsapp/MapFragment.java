@@ -75,7 +75,6 @@ import com.esri.android.map.MapView;
 import com.esri.android.map.event.OnPinchListener;
 import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.mapsapp.account.AccountManager;
-import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogListener;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.android.mapsapp.location.DirectionsDialogFragment;
@@ -84,7 +83,6 @@ import com.esri.android.mapsapp.location.RoutingDialogFragment;
 import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogListener;
 import com.esri.android.mapsapp.tools.Compass;
 import com.esri.android.mapsapp.util.TaskExecutor;
-import com.esri.android.toolkit.analysis.MeasuringTool;
 import com.esri.core.geometry.Envelope;
 import com.esri.core.geometry.GeometryEngine;
 import com.esri.core.geometry.LinearUnit;
@@ -98,10 +96,8 @@ import com.esri.core.portal.BaseMap;
 import com.esri.core.portal.Portal;
 import com.esri.core.portal.WebMap;
 import com.esri.core.symbol.PictureMarkerSymbol;
-import com.esri.core.symbol.SimpleFillSymbol;
 import com.esri.core.symbol.SimpleLineSymbol;
 import com.esri.core.symbol.SimpleLineSymbol.STYLE;
-import com.esri.core.symbol.SimpleMarkerSymbol;
 import com.esri.core.tasks.geocode.Locator;
 import com.esri.core.tasks.geocode.LocatorFindParameters;
 import com.esri.core.tasks.geocode.LocatorGeocodeResult;
@@ -157,73 +153,50 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private final static double SEARCH_RADIUS = 10;
 
 	private String mPortalItemId;
-
 	private String mBasemapPortalItemId;
-
 	private FrameLayout mMapContainer;
-
 	public static MapView mMapView;
-
 	private String mMapViewState;
-
 	private SearchView mSearchview;
 
 	// GPS location tracking
 	private boolean mIsLocationTracking;
-
 	private Point mLocation = null;
 
 	// Graphics layer to show geocode and reverse geocode results
 	private GraphicsLayer mLocationLayer;
-
 	private Point mLocationLayerPoint;
-
 	private String mLocationLayerPointString;
 
 	// Graphics layer to show routes
 	private GraphicsLayer mRouteLayer;
-
 	private List<RouteDirection> mRoutingDirections;
 
 	// Spatial references used for projecting points
 	private final SpatialReference mWm = SpatialReference.create(102100);
-
 	private final SpatialReference mEgs = SpatialReference.create(4326);
-
 	private MatrixCursor mSuggestionCursor;
 
 	Compass mCompass;
-
 	LayoutParams compassFrameParams;
-
 	private MotionEvent mLongPressEvent;
 
 	@SuppressWarnings("rawtypes")
 	// - using this only to cancel pending tasks in a generic way
 	private AsyncTask mPendingTask;
-
 	private View mSearchBox;
-
 	private Locator mLocator = Locator.createOnlineLocator();
-
 	private View mSearchResult;
-
 	private LayoutInflater mInflater;
-
 	private String mStartLocation, mEndLocation;
-
 	private LocatorSuggestionParameters suggestParams;
 
 	private final Map<String,Point> suggestMap = new TreeMap<>();
-
 	private static ArrayList<LocatorSuggestionResult> suggestionsList;
 
 	private SpatialReference mapSpatialReference;
-
 	private boolean suggestionClickFlag = false;
-
 	private Point resultEndPoint;
-
 	int width, height;
 
 	LayoutParams gpsFrameParams;
@@ -337,20 +310,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		switch (item.getItemId()) {
-			case R.id.action_basemap:
-				// Show BasemapsDialogFragment to offer a choice if basemaps.
-				// This calls back to onBasemapChanged() if one is selected.
-				BasemapsDialogFragment basemapsFrag = new BasemapsDialogFragment();
-				basemapsFrag.setBasemapsDialogListener(new BasemapsDialogListener() {
-
-					@Override
-					public void onBasemapChanged(String itemId) {
-						showMap(null,itemId);
-					}
-				});
-				basemapsFrag.show(getFragmentManager(), null);
-
-				return true;
 
 		default:
 			return super.onOptionsItemSelected(item);
@@ -753,6 +712,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mSearchview.setQueryHint(SEARCH_HINT);
 
 		applySuggestionCursor();
+
+//		navButton = (Button)mSearchBox.findViewById(R.id.navbutton);
 
 		// Adding the layout to the map conatiner
 		mMapContainer.addView(mSearchBox);
