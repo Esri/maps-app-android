@@ -620,12 +620,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mCompass = new Compass(mMapView.getContext());
 		mCompass.setAlpha(1f);
 		mCompass.setRotationAngle(45);
-		int HEIGHT = 140;
-		int WIDTH = 140;
+		int HEIGHT = 240;
+		int WIDTH = 240;
 		compassFrameParams = new FrameLayout.LayoutParams(WIDTH, HEIGHT,
 				Gravity.RIGHT);
 
-		int TOP_MARGIN_COMPASS = TOP_MARGIN_SEARCH + height + 15;
+		int TOP_MARGIN_COMPASS = TOP_MARGIN_SEARCH + height + 45;
 
 		int LEFT_MARGIN_COMPASS = 0;
 		int BOTTOM_MARGIN_COMPASS = 0;
@@ -706,7 +706,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Inflating the layout from the xml file
 		mSearchBox = mInflater.inflate(R.layout.searchview, null);
-
+	
 		navButton = (ImageButton) mSearchBox.findViewById(R.id.btn_nav_menu);
 		mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.maps_app_activity_drawer_layout);
 		mDrawerList = (ListView) getActivity().findViewById(R.id.maps_app_activity_left_drawer);
@@ -719,15 +719,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			@Override
 			public void onDrawerOpened(View drawerView) {
-//				super.onDrawerClosed(drawerView);
-				Log.d("slide state = ", drawerView.toString());
 				mSlideState=true;//is Opened
 			}
 
 			@Override
 			public void onDrawerClosed(View drawerView) {
-//				super.onDrawerClosed(drawerView);
-				Log.d("slide state = ", drawerView.toString());
 				mSlideState=false;//is Closed
 			}
 
@@ -741,10 +737,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			@Override
 			public void onClick(View v) {
 				if(mSlideState){
-					Log.d("slide state = ", v.toString());
 					mDrawerLayout.closeDrawer(mDrawerList);
 				}else{
-					Log.d("slide state = ", v.toString());
 					mDrawerLayout.openDrawer(mDrawerList);
 				}
 
