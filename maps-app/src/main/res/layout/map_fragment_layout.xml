@@ -4,15 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-
-    <ImageButton
-        android:id="@+id/btn_nav_menu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|left"
-        android:elevation="@dimen/button_elevation"
-        android:src="@drawable/ic_menu_black_24dp" />
-
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:src="@android:drawable/ic_menu_mylocation"

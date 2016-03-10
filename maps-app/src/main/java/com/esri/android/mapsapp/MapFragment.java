@@ -248,50 +248,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		View view = inflater.inflate(R.layout.map_fragment_layout, container, false);
 
-		navButton = (ImageButton) view.findViewById(R.id.btn_nav_menu);
-		mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.maps_app_activity_drawer_layout);
-		mDrawerList = (ListView) getActivity().findViewById(R.id.maps_app_activity_left_drawer);
-
-		mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
-			@Override
-			public void onDrawerSlide(View drawerView, float slideOffset) {
-
-			}
-
-			@Override
-			public void onDrawerOpened(View drawerView) {
-//				super.onDrawerClosed(drawerView);
-				Log.d("slide state = ", drawerView.toString());
-				mSlideState=true;//is Opened
-			}
-
-			@Override
-			public void onDrawerClosed(View drawerView) {
-//				super.onDrawerClosed(drawerView);
-				Log.d("slide state = ", drawerView.toString());
-				mSlideState=false;//is Closed
-			}
-
-			@Override
-			public void onDrawerStateChanged(int newState) {
-
-			}
-		});
-
-		navButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if(mSlideState){
-					Log.d("slide state = ", v.toString());
-					mDrawerLayout.closeDrawer(mDrawerList);
-				}else{
-					Log.d("slide state = ", v.toString());
-					mDrawerLayout.openDrawer(mDrawerList);
-				}
-
-			}
-		});
-
 		mMapContainer = (FrameLayout) inflater.inflate(
 				R.layout.map_fragment_layout, null);
 
@@ -750,6 +706,50 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Inflating the layout from the xml file
 		mSearchBox = mInflater.inflate(R.layout.searchview, null);
+
+		navButton = (ImageButton) mSearchBox.findViewById(R.id.btn_nav_menu);
+		mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.maps_app_activity_drawer_layout);
+		mDrawerList = (ListView) getActivity().findViewById(R.id.maps_app_activity_left_drawer);
+
+		mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
+			@Override
+			public void onDrawerSlide(View drawerView, float slideOffset) {
+
+			}
+
+			@Override
+			public void onDrawerOpened(View drawerView) {
+//				super.onDrawerClosed(drawerView);
+				Log.d("slide state = ", drawerView.toString());
+				mSlideState=true;//is Opened
+			}
+
+			@Override
+			public void onDrawerClosed(View drawerView) {
+//				super.onDrawerClosed(drawerView);
+				Log.d("slide state = ", drawerView.toString());
+				mSlideState=false;//is Closed
+			}
+
+			@Override
+			public void onDrawerStateChanged(int newState) {
+
+			}
+		});
+
+		navButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if(mSlideState){
+					Log.d("slide state = ", v.toString());
+					mDrawerLayout.closeDrawer(mDrawerList);
+				}else{
+					Log.d("slide state = ", v.toString());
+					mDrawerLayout.openDrawer(mDrawerList);
+				}
+
+			}
+		});
 
 		// Setting the layout parameters to the layout
 		mSearchBox.setLayoutParams(mlayoutParams);
