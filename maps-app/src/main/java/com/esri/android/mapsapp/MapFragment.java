@@ -1,4 +1,4 @@
-/* Copyright 1995-2014 Esri
+/* Copyright 2016 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import android.location.LocationListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.BaseColumns;
+import android.support.v4.widget.DrawerLayout;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -59,8 +60,11 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.SimpleCursorAdapter;
@@ -200,6 +204,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	int width, height;
 
 	LayoutParams gpsFrameParams;
+
+	ImageButton navButton;
+	DrawerLayout mDrawerLayout;
+	ListView mDrawerList;
 
 	public static MapFragment newInstance(String portalItemId,
 			String basemapPortalItemId) {
@@ -611,12 +619,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mCompass = new Compass(mMapView.getContext());
 		mCompass.setAlpha(1f);
 		mCompass.setRotationAngle(45);
-		int HEIGHT = 140;
-		int WIDTH = 140;
+		int HEIGHT = 240;
+		int WIDTH = 240;
 		compassFrameParams = new FrameLayout.LayoutParams(WIDTH, HEIGHT,
 				Gravity.RIGHT);
 
-		int TOP_MARGIN_COMPASS = TOP_MARGIN_SEARCH + height + 15;
+		int TOP_MARGIN_COMPASS = TOP_MARGIN_SEARCH + height + 45;
 
 		int LEFT_MARGIN_COMPASS = 0;
 		int BOTTOM_MARGIN_COMPASS = 0;
@@ -697,6 +705,24 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Inflating the layout from the xml file
 		mSearchBox = mInflater.inflate(R.layout.searchview, null);
+		// Inflate navigation drawer button on SearchView
+		navButton = (ImageButton) mSearchBox.findViewById(R.id.btn_nav_menu);
+		// Get the navigation drawer from Activity
+		mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.maps_app_activity_drawer_layout);
+		mDrawerList = (ListView) getActivity().findViewById(R.id.maps_app_activity_left_drawer);
+
+		// Set click listener to open/close drawer
+		navButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if(mDrawerLayout.isDrawerOpen(mDrawerList)){
+					mDrawerLayout.closeDrawer(mDrawerList);
+				}else{
+					mDrawerLayout.openDrawer(mDrawerList);
+				}
+
+			}
+		});
 
 		// Setting the layout parameters to the layout
 		mSearchBox.setLayoutParams(mlayoutParams);
