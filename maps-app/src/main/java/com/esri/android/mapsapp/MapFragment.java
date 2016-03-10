@@ -208,7 +208,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	ImageButton navButton;
 	DrawerLayout mDrawerLayout;
 	ListView mDrawerList;
-	boolean mSlideState = false;
 
 	public static MapFragment newInstance(String portalItemId,
 			String basemapPortalItemId) {
