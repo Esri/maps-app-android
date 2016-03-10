@@ -1,4 +1,4 @@
-/* Copyright 1995-2014 Esri
+/* Copyright 2016 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,10 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -48,6 +45,7 @@ import android.widget.TextView;
 
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.account.SignInActivity;
+import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +78,7 @@ public class MapsAppActivity extends AppCompatActivity {
 	/**
 	 * Helper component that ties the action bar to the navigation drawer.
 	 */
-	private ActionBarDrawerToggle mDrawerToggle;
+//	private ActionBarDrawerToggle mDrawerToggle;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -107,16 +105,6 @@ public class MapsAppActivity extends AppCompatActivity {
 		updateDrawer();
 	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// first check if the drawer toggle button was selected
-		boolean handled = mDrawerToggle.onOptionsItemSelected(item);
-		if (!handled) {
-			handled = super.onOptionsItemSelected(item);
-		}
-		return handled;
-	}
-
 	/**
 	 * Initializes the navigation drawer.
 	 */
@@ -132,44 +120,44 @@ public class MapsAppActivity extends AppCompatActivity {
 				GravityCompat.START);
 		// set up the drawer's list view with items and click listener
 
-		android.support.v7.app.ActionBar actionBar = getSupportActionBar();
-		actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.colorPrimary)));
-		assert actionBar != null;
-		actionBar.setDisplayHomeAsUpEnabled(true);
-		actionBar.setHomeButtonEnabled(true);
+//		android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+//		actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.colorPrimary)));
+//		assert actionBar != null;
+//		actionBar.setDisplayHomeAsUpEnabled(true);
+//		actionBar.setHomeButtonEnabled(true);
 
 		// ActionBarDrawerToggle ties together the the proper interactions
 		// between the navigation drawer and the action bar app icon.
-		mDrawerToggle = new ActionBarDrawerToggle(this, /* host Activity */
-		mDrawerLayout, /* DrawerLayout object */
-		R.drawable.ic_drawer, /* nav drawer image to replace 'Up' caret */
-		R.string.navigation_drawer_open, /* "open drawer" description for accessibility */
-		R.string.navigation_drawer_close /* "close drawer" description for accessibility */
-		) {
-			@Override
-			public void onDrawerClosed(View drawerView) {
-				super.onDrawerClosed(drawerView);
-
-				invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-			}
-
-			@Override
-			public void onDrawerOpened(View drawerView) {
-				super.onDrawerOpened(drawerView);
-
-				invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-			}
-		};
+//		mDrawerToggle = new ActionBarDrawerToggle(this, /* host Activity */
+//		mDrawerLayout, /* DrawerLayout object */
+//		R.drawable.ic_drawer, /* nav drawer image to replace 'Up' caret */
+//		R.string.navigation_drawer_open, /* "open drawer" description for accessibility */
+//		R.string.navigation_drawer_close /* "close drawer" description for accessibility */
+//		) {
+//			@Override
+//			public void onDrawerClosed(View drawerView) {
+//				super.onDrawerClosed(drawerView);
+//
+//				invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+//			}
+//
+//			@Override
+//			public void onDrawerOpened(View drawerView) {
+//				super.onDrawerOpened(drawerView);
+//
+//				invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+//			}
+//		};
 
 		// Defer code dependent on restoration of previous instance state.
-		mDrawerLayout.post(new Runnable() {
-			@Override
-			public void run() {
-				mDrawerToggle.syncState();
-			}
-		});
-
-		mDrawerLayout.setDrawerListener(mDrawerToggle);
+//		mDrawerLayout.post(new Runnable() {
+//			@Override
+//			public void run() {
+//				mDrawerToggle.syncState();
+//			}
+//		});
+//
+//		mDrawerLayout.setDrawerListener(mDrawerToggle);
 
 		updateDrawer();
 	}
@@ -327,7 +315,7 @@ public class MapsAppActivity extends AppCompatActivity {
 			mDrawerItems.add(item);
 		} else {
 
-			// Adding the SIgn In item in the drawer
+			// Adding the Sign In item in the drawer
 			LinearLayout view_signIn = (LinearLayout) getLayoutInflater()
 					.inflate(R.layout.drawer_item_layout, null);
 			TextView text_drawer_signIn = (TextView) view_signIn
@@ -347,6 +335,32 @@ public class MapsAppActivity extends AppCompatActivity {
 					});
 			mDrawerItems.add(item);
 		}
+
+		// Adding the basemap item in the drawer
+		LinearLayout view_basemap = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
+		TextView text_drawer_basemap = (TextView) view_basemap.findViewById(R.id.drawer_item_textview);
+		ImageView icon_drawer_basemap = (ImageView) view_basemap.findViewById(R.id.drawer_item_icon);
+		text_drawer_basemap.setText(getString(R.string.menu_basemaps));
+		icon_drawer_basemap.setImageResource(R.drawable.action_basemaps);
+		item = new DrawerItem(view_basemap, new DrawerItem.OnClickListener() {
+
+			@Override
+			public void onClick() {
+				// Show BasemapsDialogFragment to offer a choice if basemaps.
+				// This calls back to onBasemapChanged() if one is selected.
+				BasemapsDialogFragment basemapsFrag = new BasemapsDialogFragment();
+				basemapsFrag.setBasemapsDialogListener(new BasemapsDialogFragment.BasemapsDialogListener() {
+
+					@Override
+					public void onBasemapChanged(String itemId) {
+						showMap(null,itemId);
+					}
+				});
+				basemapsFrag.show(getFragmentManager(), null);
+				mDrawerLayout.closeDrawers();
+			}
+
+		});
 
 		mDrawerItems.add(item);
 
