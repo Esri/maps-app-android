@@ -706,37 +706,17 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Inflating the layout from the xml file
 		mSearchBox = mInflater.inflate(R.layout.searchview, null);
-	
+		// Inflate navigation drawer button on SearchView
 		navButton = (ImageButton) mSearchBox.findViewById(R.id.btn_nav_menu);
+		// Get the navigation drawer from Activity
 		mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.maps_app_activity_drawer_layout);
 		mDrawerList = (ListView) getActivity().findViewById(R.id.maps_app_activity_left_drawer);
 
-		mDrawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
-			@Override
-			public void onDrawerSlide(View drawerView, float slideOffset) {
-
-			}
-
-			@Override
-			public void onDrawerOpened(View drawerView) {
-				mSlideState=true;//is Opened
-			}
-
-			@Override
-			public void onDrawerClosed(View drawerView) {
-				mSlideState=false;//is Closed
-			}
-
-			@Override
-			public void onDrawerStateChanged(int newState) {
-
-			}
-		});
-
+		// Set click listener to open/close drawer
 		navButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if(mSlideState){
+				if(mDrawerLayout.isDrawerOpen(mDrawerList)){
 					mDrawerLayout.closeDrawer(mDrawerList);
 				}else{
 					mDrawerLayout.openDrawer(mDrawerList);
