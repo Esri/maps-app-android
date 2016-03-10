@@ -32,7 +32,6 @@ import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -104,17 +103,6 @@ public class MapsAppActivity extends AppCompatActivity {
 	protected void onResume() {
 		super.onResume();
 		updateDrawer();
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// first check if the drawer toggle button was selected
-//		boolean handled = mDrawerToggle.onOptionsItemSelected(item);
-//		if (!handled) {
-//			handled = super.onOptionsItemSelected(item);
-//		}
-//		return handled;
-		return true;
 	}
 
 	/**
