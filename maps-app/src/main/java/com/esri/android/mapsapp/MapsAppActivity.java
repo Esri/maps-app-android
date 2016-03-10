@@ -118,46 +118,6 @@ public class MapsAppActivity extends AppCompatActivity {
 		// opens
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow,
 				GravityCompat.START);
-		// set up the drawer's list view with items and click listener
-
-//		android.support.v7.app.ActionBar actionBar = getSupportActionBar();
-//		actionBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.colorPrimary)));
-//		assert actionBar != null;
-//		actionBar.setDisplayHomeAsUpEnabled(true);
-//		actionBar.setHomeButtonEnabled(true);
-
-		// ActionBarDrawerToggle ties together the the proper interactions
-		// between the navigation drawer and the action bar app icon.
-//		mDrawerToggle = new ActionBarDrawerToggle(this, /* host Activity */
-//		mDrawerLayout, /* DrawerLayout object */
-//		R.drawable.ic_drawer, /* nav drawer image to replace 'Up' caret */
-//		R.string.navigation_drawer_open, /* "open drawer" description for accessibility */
-//		R.string.navigation_drawer_close /* "close drawer" description for accessibility */
-//		) {
-//			@Override
-//			public void onDrawerClosed(View drawerView) {
-//				super.onDrawerClosed(drawerView);
-//
-//				invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-//			}
-//
-//			@Override
-//			public void onDrawerOpened(View drawerView) {
-//				super.onDrawerOpened(drawerView);
-//
-//				invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-//			}
-//		};
-
-		// Defer code dependent on restoration of previous instance state.
-//		mDrawerLayout.post(new Runnable() {
-//			@Override
-//			public void run() {
-//				mDrawerToggle.syncState();
-//			}
-//		});
-//
-//		mDrawerLayout.setDrawerListener(mDrawerToggle);
 
 		updateDrawer();
 	}
