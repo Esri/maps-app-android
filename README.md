@@ -2,7 +2,9 @@ maps-app-android
 =======================
 This repo provides a template app for Android devices called Maps App that can be used as as starter for your organizations mapping app built with [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/android/).  You can use the Maps App as is, or extend it as a navigational mapping app using Runtime SDK for Android.
 
-![App](https://raw.githubusercontent.com/Esri/maps-app-android/master/maps-app.png)
+On Start                               | Select Basemaps
+:-------------------------------------:|:-------------------------------------:
+![On Start](maps-app.png)              | ![Basemap](maps-app-basemap.png)
 
 ## Features
 * Dynamically switch basemaps
