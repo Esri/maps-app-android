@@ -36,7 +36,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.view.View;
 
-import com.esri.android.map.MapView;
 import com.esri.android.mapsapp.R;
 
 /**
@@ -47,27 +46,24 @@ import com.esri.android.mapsapp.R;
  */
 public class Compass extends View implements SensorEventListener {
 
-	float mAngle = 0;
-	Paint mPaint;
-	Bitmap mBitmap;
-	Matrix mMatrix;
-	MapView mMapView;
+	private float mAngle = 0;
+	private final Paint mPaint;
+	private final Bitmap mBitmap;
+	private final Matrix mMatrix;
 
 	// Handles the sensors
-	public SensorManager sensorManager;
+	public final SensorManager sensorManager;
 
 	// Sensors for accelerometer and magnetometer
-	public Sensor gsensor;
-	public Sensor msensor;
+	private final Sensor gSensor;
+	private final Sensor mSensor;
 
 	// Used for orientation of the compass
-	private float[] mGravity = new float[3];
-	private float[] mGeomagnetic = new float[3];
+	private final float[] mGravity = new float[3];
+	private final float[] mGeomagnetic = new float[3];
 
 	// To send and receive notification from the sensors.
 	public SensorEventListener sensorEventListener;
-	
-	int width;
 
 	public Compass(Context context) {
 		super(context);
@@ -80,8 +76,8 @@ public class Compass extends View implements SensorEventListener {
 				
 		sensorManager = (SensorManager) context
 				.getSystemService(Context.SENSOR_SERVICE);
-		gsensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-		msensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+		gSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+		mSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 	}
 
 	public void start() {
@@ -89,9 +85,9 @@ public class Compass extends View implements SensorEventListener {
 		sensorEventListener = this;
 
 		// Enable the sensors
-		sensorManager.registerListener(this, gsensor,
+		sensorManager.registerListener(this, gSensor,
 				SensorManager.SENSOR_DELAY_GAME);
-		sensorManager.registerListener(this, msensor,
+		sensorManager.registerListener(this, mSensor,
 				SensorManager.SENSOR_DELAY_GAME);
 	}
 
