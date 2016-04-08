@@ -24,11 +24,15 @@
 
 package com.esri.android.mapsapp;
 
+import android.Manifest;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -56,7 +60,7 @@ import butterknife.InjectView;
 /**
  * Entry point into the Maps App.
  */
-public class MapsAppActivity extends AppCompatActivity {
+public class MapsAppActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback  {
 
 	public static DrawerLayout mDrawerLayout;
 	
@@ -75,6 +79,9 @@ public class MapsAppActivity extends AppCompatActivity {
 
 	private final List<DrawerItem> mDrawerItems = new ArrayList<>();
 
+	private static final int PERMISSION_REQUEST_LOCATION = 0;
+	private View mLayout;
+
 	/**
 	 * Helper component that ties the action bar to the navigation drawer.
 	 */
@@ -92,13 +99,83 @@ public class MapsAppActivity extends AppCompatActivity {
 
 		setContentView(R.layout.maps_app_activity);
 
-        ButterKnife.inject(this);
+		// We need a reference to the containing widget when
+		// managing the Snackbar (used for notifying users about app permissions)
+		mLayout = findViewById(R.id.maps_app_activity_content_frame);
+
+		ButterKnife.inject(this);
 
 		setupDrawer();
 
 		setView();
+
+		// All devices running N and above require explicit permissions
+		// checking when app is first run.
+		requestLocationPermission();
+	}
+	/**
+	 * Requests the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.
+	 * If an additional rationale should be displayed, the user has to launch the request from
+	 * a SnackBar that includes additional information.
+	 */
+
+	private void requestLocationPermission() {
+		// Permission has not been granted and must be requested.
+		if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+				Manifest.permission.ACCESS_FINE_LOCATION)) {
+			// Provide an additional rationale to the user if the permission was not granted
+			// and the user would benefit from additional context for the use of the permission.
+			// Display a SnackBar with a button to request the missing permission.
+			Snackbar.make(mLayout, "Location access is required to display the map.",
+					Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+				@Override
+				public void onClick(View view) {
+					// Request the permission
+					ActivityCompat.requestPermissions(MapsAppActivity.this,
+							new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+							PERMISSION_REQUEST_LOCATION);
+				}
+			}).show();
+
+		} else {
+			Snackbar.make(mLayout,
+					"Permission is not available. Requesting location permission.",
+					Snackbar.LENGTH_SHORT).show();
+			// Request the permission. The result will be received in onRequestPermissionResult().
+			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+					PERMISSION_REQUEST_LOCATION);
+		}
 	}
 
+	/**
+	 * Once the app has prompted for permission to access location, the response
+	 * from the user is handled here.
+	 * @param requestCode int: The request code passed into requestPermissions
+	 * @param permissions String: The requested permission(s).
+	 * @param grantResults int: The grant results for the permission(s).  This will be
+	 *                     either PERMISSION_GRANTED or PERMISSION_DENIED
+	 */
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String[] permissions,
+										   int[] grantResults) {
+
+		if (requestCode == PERMISSION_REQUEST_LOCATION) {
+			// Request for camera permission.
+			if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+				// Permission has been granted. Start camera preview Activity.
+				Snackbar.make(mLayout, "Location permission was granted. Showing map...",
+						Snackbar.LENGTH_SHORT)
+						.show();
+				setView();
+			} else {
+				// Permission request was denied.
+				Snackbar.make(mLayout, "Location permission request was denied.",
+						Snackbar.LENGTH_SHORT)
+						.show();
+			}
+		}
+
+	}
 	@Override
 	protected void onResume() {
 		super.onResume();
