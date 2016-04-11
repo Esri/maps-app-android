@@ -45,6 +45,7 @@ import android.location.LocationListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.BaseColumns;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.DrawerLayout;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -251,12 +252,14 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			// load the WebMap
 			loadWebMapIntoMapView(mPortalItemId, mBasemapPortalItemId,
 					AccountManager.getInstance().getPortal());
+
 		} else {
 			if (mBasemapPortalItemId != null) {
 				// show a map with the basemap represented by
 				// mBasemapPortalItemId
 				loadWebMapIntoMapView(mBasemapPortalItemId, null,
 						AccountManager.getInstance().getAGOLPortal());
+
 			} else {
 				MapView mapView = (MapView) mMapContainer.findViewById(R.id.map);
 
@@ -267,36 +270,37 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				setMapView(mapView);
 				mapView.zoomin();
 
-				final FloatingActionButton fab = (FloatingActionButton) mMapContainer.findViewById(R.id.fab);
-				fab.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						Log.d("***", "onClick called with: " + "view = [" + v + "]");
-						// Toggle location tracking on or off
-						if (mIsLocationTracking) {
-							fab.setImageResource(R.drawable.ic_action_compass_mode);
-							mMapView.getLocationDisplayManager().setAutoPanMode(
-									AutoPanMode.COMPASS);
-							mCompass.start();
-							mCompass.setVisibility(View.VISIBLE);
-							mIsLocationTracking = false;
-						} else {
-							startLocationTracking();
-							fab.setImageResource(android.R.drawable.ic_menu_mylocation);
-							if (mMapView.getRotationAngle() != 0) {
-								mCompass.setVisibility(View.VISIBLE);
-								mCompass.setRotationAngle(mMapView.getRotationAngle());
-							} else {
-								mCompass.setVisibility(View.GONE);
-							}
-						}
-					}
-				});
-
 			}
 		}
 
 		return mMapContainer;
+	}
+	private void attachFloatingActionButton(){
+		FloatingActionButton fab = (FloatingActionButton) mMapContainer.findViewById(R.id.fab);
+		fab.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Log.d("***", "onClick called with: " + "view = [" + v + "]");
+				// Toggle location tracking on or off
+				if (mIsLocationTracking) {
+//							item.setIcon(R.drawable.ic_action_compass_mode);
+					mMapView.getLocationDisplayManager().setAutoPanMode(
+							AutoPanMode.COMPASS);
+					mCompass.start();
+					mCompass.setVisibility(View.VISIBLE);
+					mIsLocationTracking = false;
+				} else {
+					startLocationTracking();
+//							item.setIcon(android.R.drawable.ic_menu_mylocation);
+					if (mMapView.getRotationAngle() != 0) {
+						mCompass.setVisibility(View.VISIBLE);
+						mCompass.setRotationAngle(mMapView.getRotationAngle());
+					} else {
+						mCompass.setVisibility(View.GONE);
+					}
+				}
+			}
+		});
 	}
 
 	@Override
@@ -432,6 +436,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 							// mapView.setAllowRotationByPinch(true);
 
 							setMapView(mapView);
+							attachFloatingActionButton();
 							mapView.zoomin();
 
 						}
@@ -472,6 +477,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mlayoutParams.setMargins(LEFT_MARGIN_SEARCH, TOP_MARGIN_SEARCH,
 				RIGHT_MARGIN_SEARCH, BOTTOM_MARGIN_SEARCH);
 
+
+		// Set up floating action button
+		attachFloatingActionButton();
 
 		// Displaying the searchbox layout
 		showSearchBoxLayout();
