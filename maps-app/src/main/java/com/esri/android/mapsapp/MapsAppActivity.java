@@ -50,6 +50,7 @@ import android.widget.TextView;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.account.SignInActivity;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
+import com.esri.android.runtime.ArcGISRuntime;
 
 import java.util.ArrayList;
 import java.util.List;

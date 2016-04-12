@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/map_fragment_map_container_frame_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.esri.android.map.MapView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        mapoptions.MapType="Topo"
+        android:id="@+id/map">
+    </com.esri.android.map.MapView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
@@ -12,9 +18,6 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="@dimen/fab_margin_right"
         android:layout_marginBottom="@dimen/fab_margin_bottom"
-        android:background="@drawable/fab_ripple"
         android:elevation="@dimen/button_elevation"
         android:contentDescription="@string/imagebutton_content_desc"/>
-
-
 </FrameLayout>
