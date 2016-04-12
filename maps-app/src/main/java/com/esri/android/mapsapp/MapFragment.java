@@ -270,6 +270,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				setMapView(mapView);
 				mapView.zoomin();
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> Esri/master
 			}
 		}
 
@@ -477,6 +481,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mlayoutParams.setMargins(LEFT_MARGIN_SEARCH, TOP_MARGIN_SEARCH,
 				RIGHT_MARGIN_SEARCH, BOTTOM_MARGIN_SEARCH);
 
+
+		// Set up floating action button
+		attachFloatingActionButton();
 
 		// Set up floating action button
 		attachFloatingActionButton();
