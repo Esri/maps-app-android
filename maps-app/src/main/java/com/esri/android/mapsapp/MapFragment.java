@@ -269,11 +269,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 				setMapView(mapView);
 				mapView.zoomin();
-
-<<<<<<< HEAD
-=======
-
->>>>>>> Esri/master
 			}
 		}
 
