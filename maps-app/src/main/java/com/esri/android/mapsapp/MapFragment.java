@@ -61,7 +61,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
+import android.support.design.widget.FloatingActionButton;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -246,10 +246,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 
-		View view = inflater.inflate(R.layout.map_fragment_layout, container, false);
-
-		mMapContainer = (FrameLayout) inflater.inflate(
-				R.layout.map_fragment_layout, null);
+		mMapContainer= (FrameLayout)inflater.inflate(R.layout.map_fragment_layout, container, false);
 
 		if (mPortalItemId != null) {
 			// load the WebMap
@@ -264,20 +261,14 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 						AccountManager.getInstance().getAGOLPortal());
 
 			} else {
-				// show the default map
-				String defaultBaseMapURL = getString(R.string.default_basemap_url);
-				MapView mapView = new MapView(getActivity(), defaultBaseMapURL,
-						"", "");
+				MapView mapView = (MapView) mMapContainer.findViewById(R.id.map);
 
 				// Set the MapView to allow the user to rotate the map when as
 				// part of a pinch gesture.
-				// mapView.setAllowRotationByPinch(true);
+				mapView.setAllowRotationByPinch(true);
 
 				setMapView(mapView);
-
 				mapView.zoomin();
-
-
 			}
 		}
 
@@ -485,8 +476,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mlayoutParams.setMargins(LEFT_MARGIN_SEARCH, TOP_MARGIN_SEARCH,
 				RIGHT_MARGIN_SEARCH, BOTTOM_MARGIN_SEARCH);
 
-		// set MapView into the activity layout
-		mMapContainer.addView(mMapView);
+
+		// Set up floating action button
+		attachFloatingActionButton();
 
 		// Set up floating action button
 		attachFloatingActionButton();
