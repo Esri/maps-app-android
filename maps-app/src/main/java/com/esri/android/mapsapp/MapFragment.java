@@ -284,7 +284,6 @@ public class MapFragment extends Fragment  {
 				// mapView.zoomin();
 
 				// TODO: Does this need to run on runOnUiThread?
-				//addGraphicLayers();
 
 				// Set up click listener on floating action button
 				setUpFab(mapView);
@@ -378,35 +377,6 @@ public class MapFragment extends Fragment  {
 		}
 	}
 
-	/**
-	 * Opens the map represented by the specified portal item or if null, opens
-	 * a default map.
-	 */
-	public void showMap(String portalItemId, String basemapPortalItemId) {
-
-		// remove existing MapFragment explicitly, simply replacing it can cause
-		// the app to freeze when switching basemaps
-		FragmentTransaction transaction;
-		FragmentManager fragmentManager = getFragmentManager();
-		Fragment currentMapFragment = fragmentManager
-				.findFragmentByTag(MapFragment.TAG);
-		if (currentMapFragment != null) {
-			transaction = fragmentManager.beginTransaction();
-			transaction.remove(currentMapFragment);
-			transaction.commit();
-		}
-
-		MapFragment mapFragment = MapFragment.newInstance(portalItemId,
-				basemapPortalItemId);
-
-		transaction = fragmentManager.beginTransaction();
-		transaction.replace(R.id.maps_app_activity_content_frame, mapFragment,
-				MapFragment.TAG);
-		transaction.addToBackStack(null);
-		transaction.commit();
-
-		getActivity().invalidateOptionsMenu(); // reload the options menu
-	}
 
 	@Override
 	public void onPause() {
@@ -500,9 +470,6 @@ public class MapFragment extends Fragment  {
 							addGraphicLayers();
 						}
 					});
-
-
-
 
 				} else {
 					throw new Exception("Failed to load web map.");
@@ -1121,8 +1088,8 @@ public class MapFragment extends Fragment  {
          */
 	void resetGraphicsLayers() {
 		//TODO: Is clearSelection the same as GraphicsLayer removeAll
-		mLocationLayer.clearSelection();
-		mRouteLayer.clearSelection();
+		mLocationLayer.getGraphics().clear();
+		mRouteLayer.getGraphics().clear();
 		mLocationLayerPoint = null;
 		mLocationLayerPointString = null;
 		mRoutingDirections = null;
@@ -1138,7 +1105,6 @@ public class MapFragment extends Fragment  {
 		}
 
 		mMapView.getGraphicsOverlays().add(mLocationLayer);
-		//mMapView.addLayer(mLocationLayer);
 
 		// Add the route graphic layer
 		if (mRouteLayer == null) {
@@ -1206,7 +1172,7 @@ public class MapFragment extends Fragment  {
 		hideKeyboard();
 
 		// Remove any previous graphics and routes
-		//resetGraphicsLayers();
+		resetGraphicsLayers();
 		// TODO: Un comment once Locator task is working
 		executeLocatorTask(address);
 	}
@@ -1247,10 +1213,7 @@ public class MapFragment extends Fragment  {
 		double yMin = mapExtent.getYMin() - height;
 
 		geoParameters.setSearchArea(new Envelope(new Point(xMax,yMax, sR), new Point(xMin, yMin, sR)));
-
-
-
-
+		
 		// Execute async task to find the address
 		final LocatorTask locatorTask = new LocatorTask("http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer");
 		locatorTask.addDoneLoadingListener(new Runnable() {
