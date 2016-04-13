@@ -36,6 +36,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -50,11 +51,9 @@ import android.widget.TextView;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.account.SignInActivity;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
-<<<<<<< HEAD
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
-=======
-import com.esri.android.runtime.ArcGISRuntime;
->>>>>>> master
+import com.esri.arcgisruntime.mapping.Map;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,9 +70,12 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	
 	ContentBrowserFragment mBrowseFragment;
 
+	private final List<DrawerItem> mDrawerItems = new ArrayList<>();
+
 	private static final int PERMISSION_REQUEST_LOCATION = 0;
 	private View mLayout;
 
+	private static final String TAG = MapsAppActivity.class.getSimpleName();
 	/**
 	 * The FrameLayout that hosts the main content of the activity, such as the
 	 * MapView
@@ -85,10 +87,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	 */
 	@InjectView(R.id.maps_app_activity_left_drawer) ListView mDrawerList;
 
-	private final List<DrawerItem> mDrawerItems = new ArrayList<>();
 
-	private static final int PERMISSION_REQUEST_LOCATION = 0;
-	private View mLayout;
 
 	/**
 	 * Helper component that ties the action bar to the navigation drawer.
@@ -116,37 +115,24 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 
 		setupDrawer();
 
-<<<<<<< HEAD
-=======
-		setView();
 
 		// All devices running N and above require explicit permissions
 		// checking when app is first run.
->>>>>>> master
+
 		requestLocationPermission();
 	}
+
 	/**
 	 * Requests the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.
 	 * If an additional rationale should be displayed, the user has to launch the request from
 	 * a SnackBar that includes additional information.
 	 */
 
-<<<<<<< HEAD
-	/**
-	 * Requests the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION} permission.
-	 * If an additional rationale should be displayed, the user has to launch the request from
-	 * a SnackBar that includes additional information.
-	 */
-	private void requestLocationPermission() {
-		// Permission has not been granted and must be requested.
-		if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-				Manifest.permission.ACCESS_COARSE_LOCATION)) {
-=======
 	private void requestLocationPermission() {
 		// Permission has not been granted and must be requested.
 		if (ActivityCompat.shouldShowRequestPermissionRationale(this,
 				Manifest.permission.ACCESS_FINE_LOCATION)) {
->>>>>>> master
+
 			// Provide an additional rationale to the user if the permission was not granted
 			// and the user would benefit from additional context for the use of the permission.
 			// Display a SnackBar with a button to request the missing permission.
@@ -156,11 +142,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 				public void onClick(View view) {
 					// Request the permission
 					ActivityCompat.requestPermissions(MapsAppActivity.this,
-<<<<<<< HEAD
-							new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-=======
 							new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
->>>>>>> master
 							PERMISSION_REQUEST_LOCATION);
 				}
 			}).show();
@@ -170,20 +152,11 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 					"Permission is not available. Requesting location permission.",
 					Snackbar.LENGTH_SHORT).show();
 			// Request the permission. The result will be received in onRequestPermissionResult().
-<<<<<<< HEAD
-			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-					PERMISSION_REQUEST_LOCATION);
-		}
-	}
-	@Override
-	public void onRequestPermissionsResult(int requestCode, String[] permissions,
-										   int[] grantResults) {
-		// BEGIN_INCLUDE(onRequestPermissionsResult)
-=======
 			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
 					PERMISSION_REQUEST_LOCATION);
 		}
 	}
+
 
 	/**
 	 * Once the app has prompted for permission to access location, the response
@@ -197,14 +170,10 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	public void onRequestPermissionsResult(int requestCode, String[] permissions,
 										   int[] grantResults) {
 
->>>>>>> master
 		if (requestCode == PERMISSION_REQUEST_LOCATION) {
 			// Request for camera permission.
 			if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-				// Permission has been granted. Start camera preview Activity.
-				Snackbar.make(mLayout, "Location permission was granted. Showing map...",
-						Snackbar.LENGTH_SHORT)
-						.show();
+				// Permission has been granted, go ahead and show the map
 				setView();
 			} else {
 				// Permission request was denied.
@@ -213,11 +182,9 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 						.show();
 			}
 		}
-<<<<<<< HEAD
-		// END_INCLUDE(onRequestPermissionsResult)
-=======
 
->>>>>>> master
+		// END_INCLUDE(onRequestPermissionsResult)
+
 	}
 	@Override
 	protected void onResume() {
@@ -283,7 +250,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	 * a default map.
 	 */
 	public void showMap(String portalItemId, String basemapPortalItemId) {
-
+		Log.i(TAG, "Show map called...");
 		// remove existing MapFragment explicitly, simply replacing it can cause
 		// the app to freeze when switching basemaps
 		FragmentTransaction transaction;
@@ -432,6 +399,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 
 					@Override
 					public void onBasemapChanged(String itemId) {
+						Log.i(TAG, "Basemap changed and noted from DrawerItem.");
 						showMap(null,itemId);
 					}
 				});

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/map_fragment_map_container_frame_layout"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.esri.android.map.MapView
+    <com.esri.arcgisruntime.mapping.view.MapView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        mapoptions.MapType="Topo"
         android:id="@+id/map">
-    </com.esri.android.map.MapView>
+    </com.esri.arcgisruntime.mapping.view.MapView>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

@@ -3,5 +3,5 @@
 
     <!-- TODO: add your OAuth Client ID here-->
     <string name="client_id"> STV3sRWfJQxqvspH</string>
-
+    <string name="redirectURI">“my-maps-app://auth</string>
 </resources>

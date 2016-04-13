@@ -66,6 +66,10 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 
   private List<PortalItem> mMaps;
 
+  private static final String TAG_FETCH_MAPS_PROGRESS_DIALOG = "TAG_FETCH_MAPS_PROGRESS_DIALOG";
+
+  private ProgressDialogFragment mProgressDialog;
+
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.content_browser_fragment_layout, null);
@@ -108,7 +112,48 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
    * Fetches the user's maps from the portal.
    */
   private void fetchMyMaps() {
-    new FetchMapsTask().execute();
+    mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.fetching_maps));
+    mProgressDialog.show(getActivity().getFragmentManager(), TAG_FETCH_MAPS_PROGRESS_DIALOG);
+    //new FetchMapsTask().execute();
+
+    final List<PortalItem> webMapItems = new ArrayList<>();
+    try {
+      // fetch the user's maps from the portal
+      Portal portal = AccountManager.getInstance().getPortal();
+      if (portal != null) {
+        PortalUser portalUser = portal.getPortalUser();
+        final ListenableFuture<PortalUserContent> contentFuture = portalUser.fetchContentAsync();
+        contentFuture.addDoneListener(new Runnable() {
+
+          @Override
+          public void run() {
+            try{
+              final PortalUserContent content = contentFuture.get();
+              List<PortalItem> rootItems = content != null ? content.getItems() : null;
+              if (rootItems != null) {
+                // only select items of type WEBMAP
+                for (PortalItem item : rootItems) {
+                  if (item.getType() == PortalItemType.WEBMAP) {
+                    webMapItems.add(item);
+                  }
+                }
+              }
+              mMaps = webMapItems;
+              refreshView();
+
+              mProgressDialog.dismiss();
+            }catch (Exception e){
+              e.printStackTrace();
+            }
+          }
+        });
+
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+
+    }
+
   }
 
   /**
@@ -132,73 +177,6 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
     }
   }
 
-  /**
-   * Fetches the maps from the user's root folder asynchronously.
-   */
-  private class FetchMapsTask extends AsyncTask<Void, Void, List<PortalItem>> {
-
-    private static final String TAG_FETCH_MAPS_PROGRESS_DIALOG = "TAG_FETCH_MAPS_PROGRESS_DIALOG";
-
-    private ProgressDialogFragment mProgressDialog;
-
-    @Override
-    protected void onPreExecute() {
-      super.onPreExecute();
-
-      mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.fetching_maps));
-      mProgressDialog.show(getActivity().getFragmentManager(), TAG_FETCH_MAPS_PROGRESS_DIALOG);
-    }
-
-    @Override
-    protected List<PortalItem> doInBackground(Void... params) {
-
-      final List<PortalItem> webMapItems = new ArrayList<>();
-      try {
-        // fetch the user's maps from the portal
-        Portal portal = AccountManager.getInstance().getPortal();
-        if (portal != null) {
-          PortalUser portalUser = portal.getPortalUser();
-          final ListenableFuture<PortalUserContent> contentFuture = portalUser.fetchContentAsync();
-          contentFuture.addDoneListener(new Runnable() {
-
-            @Override
-            public void run() {
-              try{
-                final PortalUserContent content = contentFuture.get();
-                List<PortalItem> rootItems = content != null ? content.getItems() : null;
-                if (rootItems != null) {
-                  // only select items of type WEBMAP
-                  for (PortalItem item : rootItems) {
-                    if (item.getType() == PortalItemType.WEBMAP) {
-                      webMapItems.add(item);
-                    }
-                  }
-                }
-              }catch (Exception e){
-                e.printStackTrace();
-              }
-            }
-          });
-
-        }
-      } catch (Exception e) {
-          e.printStackTrace();
-
-      }
-
-      return webMapItems;
-    }
-
-    @Override
-    protected void onPostExecute(List<PortalItem> items) {
-      super.onPostExecute(items);
-
-      mMaps = items;
-      refreshView();
-
-      mProgressDialog.dismiss();
-    }
-  }
 
   /**
    * Populates the ContentBrowserFragment's GridView with the user's maps.

@@ -55,6 +55,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -104,6 +105,7 @@ import com.esri.arcgisruntime.tasks.route.DirectionManeuver;
 
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
+
 /**
  * Implements the view that shows the map.
  */
@@ -147,6 +149,7 @@ public class MapFragment extends Fragment  {
 
 	private String mPortalItemId;
 	private String mBasemapPortalItemId;
+	private PortalItem mPortalItem;
 	private FrameLayout mMapContainer;
 	public static MapView mMapView;
 	private String mMapViewState;
@@ -201,7 +204,7 @@ public class MapFragment extends Fragment  {
 	ListView mDrawerList;
 
 	public static MapFragment newInstance(String portalItemId,
-			String basemapPortalItemId) {
+										  String basemapPortalItemId) {
 		MapFragment mapFragment = new MapFragment();
 
 		Bundle args = new Bundle();
@@ -234,75 +237,67 @@ public class MapFragment extends Fragment  {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+							 Bundle savedInstanceState) {
 		// inflate MapView from layout
 
-		mMapContainer= (FrameLayout)inflater.inflate(R.layout.map_fragment_layout, container, false);
+		mMapContainer = (FrameLayout) inflater.inflate(
+				R.layout.map_fragment_layout, null);
 
 		if (mPortalItemId != null) {
 			// load the WebMap
 			loadWebMapIntoMapView(mPortalItemId, mBasemapPortalItemId,
 					AccountManager.getInstance().getPortal());
-
 		} else {
 			if (mBasemapPortalItemId != null) {
 				// show a map with the basemap represented by
 				// mBasemapPortalItemId
 				loadWebMapIntoMapView(mBasemapPortalItemId, null,
 						AccountManager.getInstance().getAGOLPortal());
-
 			} else {
-
 				// show the default map
 				String defaultBaseMapURL = getString(R.string.default_basemap_url);
 				Basemap basemap = new Basemap(defaultBaseMapURL);
 				com.esri.arcgisruntime.mapping.Map map = new com.esri.arcgisruntime.mapping.Map(basemap);
 
-				MapView mapView = (MapView) mMapContainer.findViewById(R.id.map);
+				final MapView mapView =  (MapView) mMapContainer.findViewById(R.id.map);
 				mapView.setMap(map);
 				// Set the MapView to allow the user to rotate the map when as
 				// part of a pinch gesture.
 				//TODO: Modified for Quartz
 				// mapView.setAllowRotationByPinch(true);
 
+				setMapView(mapView);
 
 				// TODO: Is this needed in Quartz?
 				// mapView.zoomin();
 
+				// TODO: Does this need to run on runOnUiThread?
+				//addGraphicLayers();
+
 				// Set up click listener on floating action button
 				setUpFab(mapView);
 
+				// Get an initial location on start up
+				mLocationDisplay = mapView.getLocationDisplay();
+				mLocationDisplay.addLocationChangedListener(new LocationDisplay.LocationChangedListener() {
+					@Override
+					public void onLocationChanged(LocationDisplay.LocationChangedEvent locationChangedEvent) {
+
+						Point point = locationChangedEvent.getLocation().getPosition();
+						if (point !=null){
+							mLocationDisplay.removeLocationChangedListener(this);
+							Log.i(TAG, "I have a location " + point.getX() + " , " + point.getY());
+							showMyLocation(point);
+						}
+
+
+					}
+				});
+				mLocationDisplay.startAsync();
 			}
 		}
 
 		return mMapContainer;
-	}
-	private void attachFloatingActionButton(){
-		FloatingActionButton fab = (FloatingActionButton) mMapContainer.findViewById(R.id.fab);
-		fab.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Log.d("***", "onClick called with: " + "view = [" + v + "]");
-				// Toggle location tracking on or off
-				if (mIsLocationTracking) {
-//							item.setIcon(R.drawable.ic_action_compass_mode);
-					mMapView.getLocationDisplayManager().setAutoPanMode(
-							AutoPanMode.COMPASS);
-					mCompass.start();
-					mCompass.setVisibility(View.VISIBLE);
-					mIsLocationTracking = false;
-				} else {
-					startLocationTracking();
-//							item.setIcon(android.R.drawable.ic_menu_mylocation);
-					if (mMapView.getRotationAngle() != 0) {
-						mCompass.setVisibility(View.VISIBLE);
-						mCompass.setRotationAngle(mMapView.getRotationAngle());
-					} else {
-						mCompass.setVisibility(View.GONE);
-					}
-				}
-			}
-		});
 	}
 
 	/**
@@ -313,24 +308,22 @@ public class MapFragment extends Fragment  {
 	 * @param mapView
 	 */
 	private void setUpFab(final MapView mapView){
-		FloatingActionButton fab = (FloatingActionButton) mMapContainer.findViewById(R.id.fab);
+		final FloatingActionButton fab = (FloatingActionButton) mMapContainer.findViewById(R.id.fab);
 		fab.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				LocationDisplay mLocationDisplay = mapView.getLocationDisplay();
+				mLocationDisplay = mapView.getLocationDisplay();
 
-				Log.d("***", "onClick called with: " + "view = [" + v + "]");
 				// Toggle location tracking on or off
-				Log.i(TAG, "Map rotation =" +  Double.toString(mapView.getMapRotation()));
 				if (mIsLocationTracking) {
-
-					//Point currentLocationPoint = mLocationDisplay.getMapLocation();
-					//mapView.setViewpointCenterAsync(currentLocationPoint);
+					fab.setImageResource(R.drawable.ic_action_compass_mode);
 					mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.COMPASS);
 					mCompass.start();
 					mCompass.setVisibility(View.VISIBLE);
+					Log.i(TAG, "Location tracking on, compass should be visible");
 					mIsLocationTracking = false;
 				} else {
+					fab.setImageResource(android.R.drawable.ic_menu_mylocation);
 					mLocationDisplay.startAsync();
 					mLocationDisplay.addLocationChangedListener(new LocationDisplay.LocationChangedListener() {
 						@Override
@@ -341,8 +334,10 @@ public class MapFragment extends Fragment  {
 					if (mMapView.getMapRotation() != 0) {
 						mCompass.setVisibility(View.VISIBLE);
 						mCompass.setRotationAngle(mMapView.getMapRotation());
+						Log.i(TAG, "No location tracking, map not pointed north, compass should be visible");
 					} else {
 						mCompass.setVisibility(View.GONE);
+						Log.i(TAG, "No location tracking, map is pointed north, compass should not be visible");
 					}
 					mIsLocationTracking = true;
 				}
@@ -363,8 +358,8 @@ public class MapFragment extends Fragment  {
 
 		switch (item.getItemId()) {
 
-		default:
-			return super.onOptionsItemSelected(item);
+			default:
+				return super.onOptionsItemSelected(item);
 		}
 	}
 
@@ -448,7 +443,7 @@ public class MapFragment extends Fragment  {
 	/**
 	 * Loads a WebMap and creates a MapView from it which is set into the
 	 * fragment's layout.
-	 * 
+	 *
 	 * @param portalItemId
 	 *            The portal item id that represents the web map.
 	 * @param basemapPortalItemId
@@ -457,7 +452,7 @@ public class MapFragment extends Fragment  {
 	 *             if WebMap loading failed.
 	 */
 	private void loadWebMapIntoMapView(final String portalItemId,
-			final String basemapPortalItemId, final Portal portal) {
+									   final String basemapPortalItemId, final Portal portal) {
 
 		TaskExecutor.getInstance().getThreadPool().submit(new Callable<Void>() {
 
@@ -470,36 +465,29 @@ public class MapFragment extends Fragment  {
 
 				// load the WebMap that represents the basemap if one was
 				// specified
-				com.esri.arcgisruntime.mapping.Map basemapWebMap = null;
+
 				if (basemapPortalItemId != null
 						&& !basemapPortalItemId.isEmpty()) {
 					PortalItem webPortalItem = new PortalItem(portal, basemapPortalItemId);
-					basemapWebMap = new com.esri.arcgisruntime.mapping.Map(webPortalItem);
+					Basemap basemapWebMap = new Basemap(webPortalItem);
+					webmap.setBasemap(basemapWebMap);
 				}
-				final Basemap basemap = basemapWebMap != null ? basemapWebMap
-						.getBasemap() : null;
 
 				if (webmap != null) {
-					// DO WE NEED RunOnUiThread IN QUARTZ?
-					/*getActivity().runOnUiThread(new Runnable() {
+					// TODO: DO WE NEED to run this on RunOnUiThread IN QUARTZ?
+					getActivity().runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							MapView mapView = new MapView(getActivity());
-							mapView.setMap(basemapWebMap);
-							//MapView mapView = new MapView(getActivity(),
-							//		webmap, basemap, null, null);
-
-							// mapView.setAllowRotationByPinch(true);
-
+							final MapView mapView =  (MapView) mMapContainer.findViewById(R.id.map);
+							mapView.setMap(webmap);
 							setMapView(mapView);
-							attachFloatingActionButton();
-							mapView.zoomin();
-
+							setUpFab(mapView);
+							addGraphicLayers();
 						}
-					});*/
-					final MapView mapView = new MapView(getActivity());
-					setUpFab(mapView);
-					mapView.setMap(basemapWebMap);
+					});
+
+
+
 
 				} else {
 					throw new Exception("Failed to load web map.");
@@ -513,7 +501,7 @@ public class MapFragment extends Fragment  {
 	 * Takes a MapView that has already been instantiated to show a WebMap,
 	 * completes its setup by setting various listeners and attributes, and sets
 	 * it as the activity's content view.
-	 * 
+	 *
 	 * @param mapView
 	 */
 	private void setMapView(final MapView mapView) {
@@ -539,12 +527,8 @@ public class MapFragment extends Fragment  {
 		mlayoutParams.setMargins(LEFT_MARGIN_SEARCH, TOP_MARGIN_SEARCH,
 				RIGHT_MARGIN_SEARCH, BOTTOM_MARGIN_SEARCH);
 
-
-		// Set up floating action button
-		attachFloatingActionButton();
-
-		// Set up floating action button
-		attachFloatingActionButton();
+		// set MapView into the activity layout
+		//mMapContainer.addView(mMapView);
 
 		// Displaying the searchbox layout
 		showSearchBoxLayout();
@@ -598,7 +582,7 @@ public class MapFragment extends Fragment  {
 */
 		// Setup listener for map initialized
 
-		//TODO: Port to Quartz
+		//TODO: Port to Quartz?
 		/*mMapView.setOnStatusChangedListener(new OnStatusChangedListener() {
 
 			private static final long serialVersionUID = 1L;
@@ -625,12 +609,111 @@ public class MapFragment extends Fragment  {
 */
 		// TODO: Port to Quartz
 		// Setup use of magnifier on a long press on the map
-		/*mMapView.setShowMagnifierOnLongPress(true);
+		mMapView.setMagnifierEnabled(true);
 		mLongPressEvent = null;
 
 		// Setup OnTouchListener to detect and act on long-press
-		mMapView.setOnTouchListener(new MapOnTouchListener(getActivity(),
-				mMapView) {
+		mMapView.setOnTouchListener(new MapView.OnTouchListener() {
+			@Override
+			public boolean onTwoFingerTap(MotionEvent motionEvent) {
+				return false;
+			}
+
+			@Override
+			public boolean onDoubleTouchDrag(MotionEvent motionEvent) {
+				return false;
+			}
+
+			@Override
+			public boolean onUp(MotionEvent motionEvent) {
+				if (mLongPressEvent != null) {
+					// This is the end of a long-press that will have displayed
+					// the
+					// magnifier.
+					// Perform reverse-geocoding of the point that was pressed
+					android.graphics.Point mapPoint = new android.graphics.Point((int) motionEvent.getX(), (int) motionEvent.getY());
+					//Point mapPoint = mMapView.toMapPoint(to.getX(), to.getY());
+					//TODO: Turn this back on when ReverseGeocoding is working
+					//	ReverseGeocodingAsyncTask reverseGeocodeTask = new ReverseGeocodingAsyncTask();
+					//	reverseGeocodeTask.execute(mapPoint);
+					//	mPendingTask = reverseGeocodeTask;
+
+					mLongPressEvent = null;
+					// Remove any previous graphics
+					resetGraphicsLayers();
+				}
+				//TODO: Anything else to do here?
+				return true;
+			}
+
+			@Override
+			public boolean onRotate(MotionEvent motionEvent, double v) {
+				return false;
+			}
+
+			@Override
+			public boolean onSingleTapConfirmed(MotionEvent e) {
+				return false;
+			}
+
+			@Override
+			public boolean onDoubleTap(MotionEvent e) {
+				return false;
+			}
+
+			@Override
+			public boolean onDoubleTapEvent(MotionEvent e) {
+				return false;
+			}
+
+			@Override
+			public boolean onDown(MotionEvent e) {
+				return false;
+			}
+
+			@Override
+			public void onShowPress(MotionEvent e) {
+
+			}
+
+			@Override
+			public boolean onSingleTapUp(MotionEvent e) {
+				return false;
+			}
+
+			@Override
+			public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+				return false;
+			}
+
+			@Override
+			public void onLongPress(MotionEvent e) {
+				// Set mLongPressEvent to indicate we are processing a
+				// long-press
+				mLongPressEvent = e;
+				//TODO: Anything else to do here?
+			}
+
+			@Override
+			public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+				return false;
+			}
+
+			@Override
+			public boolean onScale(ScaleGestureDetector detector) {
+				return false;
+			}
+
+			@Override
+			public boolean onScaleBegin(ScaleGestureDetector detector) {
+				return false;
+			}
+
+			@Override
+			public void onScaleEnd(ScaleGestureDetector detector) {
+
+			}
+
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
@@ -638,45 +721,16 @@ public class MapFragment extends Fragment  {
 					// cleared.
 					mLongPressEvent = null;
 				}
-				return super.onTouch(v, event);
+				//TODO: Anything else to do here?
+				return true;
 			}
-
-			@Override
-			public void onLongPress(MotionEvent point) {
-				// Set mLongPressEvent to indicate we are processing a
-				// long-press
-				mLongPressEvent = point;
-				super.onLongPress(point);
-
-			}
-
-			@Override
-			public boolean onDragPointerUp(MotionEvent from,
-										   final MotionEvent to) {
-				if (mLongPressEvent != null) {
-					// This is the end of a long-press that will have displayed
-					// the
-					// magnifier.
-					// Perform reverse-geocoding of the point that was pressed
-					Point mapPoint = mMapView.toMapPoint(to.getX(), to.getY());
-					ReverseGeocodingAsyncTask reverseGeocodeTask = new ReverseGeocodingAsyncTask();
-					reverseGeocodeTask.execute(mapPoint);
-					mPendingTask = reverseGeocodeTask;
-
-					mLongPressEvent = null;
-					// Remove any previous graphics
-					resetGraphicsLayers();
-				}
-				return super.onDragPointerUp(from, to);
-			}
-
 		});
-*/
+
 	}
 
 	/**
 	 * Adds the compass as per the height of the layout
-	 * 
+	 *
 	 * @param height
 	 */
 	private void addCompass(int height) {
@@ -722,7 +776,7 @@ public class MapFragment extends Fragment  {
 	}
 
 	/**
-	 * 
+	 *
 	 * Displays the Dialog Fragment which allows users to route
 	 */
 	private void showRoutingDialogFragment() {
@@ -777,7 +831,7 @@ public class MapFragment extends Fragment  {
 
 	/**
 	 * Displays the search view layout
-	 * 
+	 *
 	 */
 	private void showSearchBoxLayout() {
 
@@ -1087,34 +1141,34 @@ public class MapFragment extends Fragment  {
 		InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		inputManager.hideSoftInputFromWindow(mSearchview.getWindowToken(), 0);
 	}
-/*
-	private void displaySearchResult(Point resultPoint, String address) {
+	/*
+        private void displaySearchResult(Point resultPoint, String address) {
 
-		// create marker symbol to represent location
-		Drawable drawable = getActivity().getResources().getDrawable(
-				R.drawable.pin_circle_red);
-		PictureMarkerSymbol resultSymbol = new PictureMarkerSymbol(
-				getActivity(), drawable);
-		// create graphic object for resulting location
-		Graphic resultLocGraphic = new Graphic(resultPoint,
-				resultSymbol);
-		// add graphic to location layer
-		mLocationLayer.addGraphic(resultLocGraphic);
+            // create marker symbol to represent location
+            Drawable drawable = getActivity().getResources().getDrawable(
+                    R.drawable.pin_circle_red);
+            PictureMarkerSymbol resultSymbol = new PictureMarkerSymbol(
+                    getActivity(), drawable);
+            // create graphic object for resulting location
+            Graphic resultLocGraphic = new Graphic(resultPoint,
+                    resultSymbol);
+            // add graphic to location layer
+            mLocationLayer.addGraphic(resultLocGraphic);
 
-		mLocationLayerPoint = resultPoint;
+            mLocationLayerPoint = resultPoint;
 
-		mLocationLayerPointString = address;
+            mLocationLayerPointString = address;
 
-		// Zoom map to geocode result location
-		mMapView.zoomToResolution(resultPoint, 2);
-		showSearchResultLayout(address);
-	}
+            // Zoom map to geocode result location
+            mMapView.zoomToResolution(resultPoint, 2);
+            showSearchResultLayout(address);
+        }
 
 
 
-	/**
-	 * Clears all graphics out of the location layer and the route layer.
-	 */
+        /**
+         * Clears all graphics out of the location layer and the route layer.
+         */
 	void resetGraphicsLayers() {
 		//TODO: Is clearSelection the same as GraphicsLayer removeAll
 		mLocationLayer.clearSelection();
@@ -1147,8 +1201,7 @@ public class MapFragment extends Fragment  {
 	 * Starts tracking GPS location.
 	 */
 	void startLocationTracking(LocationDisplay.LocationChangedEvent locationChangedEvent) {
-		LocationDisplay locDispMgr = mMapView
-				.getLocationDisplay();
+
 		mCompass.start();
 		// Enabling the line below causes the map to not zoom in on my location
 		//locDispMgr.setAutoPanMode(LocationDisplay.AutoPanMode.DEFAULT);
@@ -1158,10 +1211,18 @@ public class MapFragment extends Fragment  {
 
 		boolean locationChanged = false;
 		Point wgsPoint = locationChangedEvent.getLocation().getPosition();
-		mLocation = (Point) GeometryEngine.project(wgsPoint,
-				mMapView.getSpatialReference());
+
 		if (!locationChanged) {
 			locationChanged = true;
+			showMyLocation(wgsPoint);
+		}
+		mIsLocationTracking = true;
+	}
+
+	private void showMyLocation(Point wgsPoint){
+		if (mMapView.getSpatialReference() != null){
+			mLocation = (Point) GeometryEngine.project(wgsPoint,
+					mMapView.getSpatialReference());
 			LinearUnit mapUnit = (LinearUnit) mMapView.getSpatialReference().getUnit();
 			LinearUnit mile = new LinearUnit(LinearUnitId.MILES);
 
@@ -1171,27 +1232,22 @@ public class MapFragment extends Fragment  {
 
 			Point envPoint = new Point(mLocation.getX()-width, mLocation.getY()-height, mMapView.getSpatialReference());
 			Point envPointB = new Point(mLocation.getX()+width, mLocation.getY()+height, mMapView.getSpatialReference());
-			//double zoomWidth = Unit.convertUnits(SEARCH_RADIUS, Unit.create(LinearUnit.Code.MILE_US), mapUnit);
-			//Envelope zoomExtent = new Envelope(mLocation,
-			//		zoomWidth / 10, zoomWidth / 10);
+
 			Envelope zoomExtent = new Envelope(envPoint, envPointB);
 			mMapView.setViewpointGeometryAsync(zoomExtent);
 		}
 
-
-
-		mIsLocationTracking = true;
 	}
 
 	//@Override
-	public void onBasemapChanged(String basemapPortalItemId) {
+	/*public void onBasemapChanged(String basemapPortalItemId) {
 		((MapsAppActivity) getActivity()).showMap(mPortalItemId,
 				basemapPortalItemId);
 	}
 
 	/**
 	 * Called from search_layout.xml when user presses Search button.
-	 * 
+	 *
 	 * @param address
 	 */
 	public void onSearchButtonClicked(String address) {
@@ -1207,7 +1263,7 @@ public class MapFragment extends Fragment  {
 
 	/**
 	 * Set up the search parameters and execute the Locator task.
-	 * 
+	 *
 	 * @param address
 	 */
 /*	private void executeLocatorTask(String address) {
@@ -1241,7 +1297,7 @@ public class MapFragment extends Fragment  {
 */
 	/**
 	 * Called by RoutingDialogFragment when user presses Get Route button.
-	 * 
+	 *
 	 * @param startPoint
 	 *            String entered by user to define start point.
 	 * @param endPoint
@@ -1271,7 +1327,7 @@ public class MapFragment extends Fragment  {
 
 	/**
 	 * Set up Route Parameters to execute RouteTask
-	 * 
+	 *
 	 * @param start
 	 * @param end
 	 */
@@ -1306,7 +1362,7 @@ public class MapFragment extends Fragment  {
 	/**
 	 * Shows the search result in the layout after successful geocoding and
 	 * reverse geocoding
-	 * 
+	 *
 	 */
 
 	private void showSearchResultLayout(String address) {
@@ -1375,10 +1431,10 @@ public class MapFragment extends Fragment  {
 
 	/**
 	 * Shows the Routing result layout after successful routing
-	 * 
+	 *
 	 * @param time
 	 * @param distance
-	 * 
+	 *
 	 */
 
 	private void showRoutingResultLayout(double distance, double time) {
@@ -1845,7 +1901,7 @@ public class MapFragment extends Fragment  {
 
 	/**
 	 * Converts device specific pixels to density independent pixels.
-	 * 
+	 *
 	 * @param context
 	 * @param px
 	 *            number of device specific pixels
@@ -1855,4 +1911,9 @@ public class MapFragment extends Fragment  {
 		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 		return px / (metrics.densityDpi / 160f);
 	}
+
+	public void setPortalItem(PortalItem item) {
+		mPortalItem = item;
+	}
 }
+
