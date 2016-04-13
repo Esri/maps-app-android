@@ -26,7 +26,8 @@ package com.esri.android.mapsapp.basemaps;
 
 import android.graphics.Bitmap;
 
-import com.esri.core.portal.PortalItem;
+import com.esri.arcgisruntime.portal.PortalItem;
+
 
 public class BasemapItem {
 

@@ -45,6 +45,7 @@ import android.location.LocationListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.BaseColumns;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.DrawerLayout;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -60,7 +61,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
+import android.support.design.widget.FloatingActionButton;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -71,13 +72,6 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.esri.android.map.GraphicsLayer;
-import com.esri.android.map.LocationDisplayManager;
-import com.esri.android.map.LocationDisplayManager.AutoPanMode;
-import com.esri.android.map.MapOnTouchListener;
-import com.esri.android.map.MapView;
-import com.esri.android.map.event.OnPinchListener;
-import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogListener;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
@@ -87,41 +81,36 @@ import com.esri.android.mapsapp.location.RoutingDialogFragment;
 import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogListener;
 import com.esri.android.mapsapp.tools.Compass;
 import com.esri.android.mapsapp.util.TaskExecutor;
-import com.esri.core.geometry.Envelope;
-import com.esri.core.geometry.GeometryEngine;
-import com.esri.core.geometry.LinearUnit;
-import com.esri.core.geometry.Point;
-import com.esri.core.geometry.Polyline;
-import com.esri.core.geometry.SpatialReference;
-import com.esri.core.geometry.Unit;
-import com.esri.core.map.CallbackListener;
-import com.esri.core.map.Graphic;
-import com.esri.core.portal.BaseMap;
-import com.esri.core.portal.Portal;
-import com.esri.core.portal.WebMap;
-import com.esri.core.symbol.PictureMarkerSymbol;
-import com.esri.core.symbol.SimpleLineSymbol;
-import com.esri.core.symbol.SimpleLineSymbol.STYLE;
-import com.esri.core.tasks.geocode.Locator;
-import com.esri.core.tasks.geocode.LocatorFindParameters;
-import com.esri.core.tasks.geocode.LocatorGeocodeResult;
-import com.esri.core.tasks.geocode.LocatorReverseGeocodeResult;
-import com.esri.core.tasks.geocode.LocatorSuggestionParameters;
-import com.esri.core.tasks.geocode.LocatorSuggestionResult;
-import com.esri.core.tasks.na.NAFeaturesAsFeature;
-import com.esri.core.tasks.na.Route;
-import com.esri.core.tasks.na.RouteDirection;
-import com.esri.core.tasks.na.RouteParameters;
-import com.esri.core.tasks.na.RouteResult;
-import com.esri.core.tasks.na.RouteTask;
-import com.esri.core.tasks.na.StopGraphic;
+import com.esri.arcgisruntime.geometry.AreaUnit;
+import com.esri.arcgisruntime.geometry.Envelope;
+import com.esri.arcgisruntime.geometry.GeometryEngine;
+import com.esri.arcgisruntime.geometry.LinearUnit;
+import com.esri.arcgisruntime.geometry.LinearUnitId;
+import com.esri.arcgisruntime.geometry.Point;
+import com.esri.arcgisruntime.geometry.SpatialReference;
+import com.esri.arcgisruntime.geometry.Unit;
+import com.esri.arcgisruntime.mapping.Basemap;
+import com.esri.arcgisruntime.mapping.Viewpoint;
+import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
+import com.esri.arcgisruntime.mapping.view.LocationDisplay;
+import com.esri.arcgisruntime.mapping.view.MapView;
+import com.esri.arcgisruntime.mapping.view.WrapAroundMode;
+import com.esri.arcgisruntime.portal.Portal;
+import com.esri.arcgisruntime.portal.PortalItem;
+import com.esri.arcgisruntime.tasks.geocode.LocatorTask;
+import com.esri.arcgisruntime.tasks.geocode.SuggestParameters;
+import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
+import com.esri.arcgisruntime.tasks.route.DirectionManeuver;
+
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
 /**
  * Implements the view that shows the map.
  */
-public class MapFragment extends Fragment implements BasemapsDialogListener,
-		RoutingDialogListener, OnCancelListener {
+/*public class MapFragment extends Fragment implements BasemapsDialogListener,
+		RoutingDialogListener, OnCancelListener {*/
+public class MapFragment extends Fragment  {
+
 	public static final String TAG = MapFragment.class.getSimpleName();
 
 	private static final String KEY_PORTAL_ITEM_ID = "KEY_PORTAL_ITEM_ID";
@@ -164,17 +153,18 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private SearchView mSearchview;
 
 	// GPS location tracking
+	private LocationDisplay mLocationDisplay;
 	private boolean mIsLocationTracking;
 	private Point mLocation = null;
 
 	// Graphics layer to show geocode and reverse geocode results
-	private GraphicsLayer mLocationLayer;
+	private GraphicsOverlay mLocationLayer;
 	private Point mLocationLayerPoint;
 	private String mLocationLayerPointString;
 
 	// Graphics layer to show routes
-	private GraphicsLayer mRouteLayer;
-	private List<RouteDirection> mRoutingDirections;
+	private GraphicsOverlay mRouteLayer;
+	private List<DirectionManeuver> mRoutingDirections;
 
 	// Spatial references used for projecting points
 	private final SpatialReference mWm = SpatialReference.create(102100);
@@ -189,14 +179,15 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	// - using this only to cancel pending tasks in a generic way
 	private AsyncTask mPendingTask;
 	private View mSearchBox;
-	private Locator mLocator = Locator.createOnlineLocator();
+	private LocatorTask mLocator;
 	private View mSearchResult;
 	private LayoutInflater mInflater;
 	private String mStartLocation, mEndLocation;
-	private LocatorSuggestionParameters suggestParams;
+	private SuggestParameters suggestParams;
 
-	private final Map<String,Point> suggestMap = new TreeMap<>();
-	private static ArrayList<LocatorSuggestionResult> suggestionsList;
+
+	private final java.util.Map<String,Point> suggestMap = new TreeMap<>();
+	private static ArrayList<SuggestResult> suggestionsList;
 
 	private SpatialReference mapSpatialReference;
 	private boolean suggestionClickFlag = false;
@@ -244,66 +235,119 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		// inflate MapView from layout
 
-		View view = inflater.inflate(R.layout.map_fragment_layout, container, false);
-
-		mMapContainer = (FrameLayout) inflater.inflate(
-				R.layout.map_fragment_layout, null);
+		mMapContainer= (FrameLayout)inflater.inflate(R.layout.map_fragment_layout, container, false);
 
 		if (mPortalItemId != null) {
 			// load the WebMap
 			loadWebMapIntoMapView(mPortalItemId, mBasemapPortalItemId,
 					AccountManager.getInstance().getPortal());
+
 		} else {
 			if (mBasemapPortalItemId != null) {
 				// show a map with the basemap represented by
 				// mBasemapPortalItemId
 				loadWebMapIntoMapView(mBasemapPortalItemId, null,
 						AccountManager.getInstance().getAGOLPortal());
+
 			} else {
+
 				// show the default map
 				String defaultBaseMapURL = getString(R.string.default_basemap_url);
-				MapView mapView = new MapView(getActivity(), defaultBaseMapURL,
-						"", "");
+				Basemap basemap = new Basemap(defaultBaseMapURL);
+				com.esri.arcgisruntime.mapping.Map map = new com.esri.arcgisruntime.mapping.Map(basemap);
 
+				MapView mapView = (MapView) mMapContainer.findViewById(R.id.map);
+				mapView.setMap(map);
 				// Set the MapView to allow the user to rotate the map when as
 				// part of a pinch gesture.
+				//TODO: Modified for Quartz
 				// mapView.setAllowRotationByPinch(true);
 
-				setMapView(mapView);
 
-				mapView.zoomin();
+				// TODO: Is this needed in Quartz?
+				// mapView.zoomin();
 
-				android.support.design.widget.FloatingActionButton fab = (android.support.design.widget.FloatingActionButton) mMapContainer.findViewById(R.id.fab);
-				fab.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						Log.d("***", "onClick called with: " + "view = [" + v + "]");
-						// Toggle location tracking on or off
-						if (mIsLocationTracking) {
-//							item.setIcon(R.drawable.ic_action_compass_mode);
-							mMapView.getLocationDisplayManager().setAutoPanMode(
-									AutoPanMode.COMPASS);
-							mCompass.start();
-							mCompass.setVisibility(View.VISIBLE);
-							mIsLocationTracking = false;
-						} else {
-							startLocationTracking();
-//							item.setIcon(android.R.drawable.ic_menu_mylocation);
-							if (mMapView.getRotationAngle() != 0) {
-								mCompass.setVisibility(View.VISIBLE);
-								mCompass.setRotationAngle(mMapView.getRotationAngle());
-							} else {
-								mCompass.setVisibility(View.GONE);
-							}
-						}
-					}
-				});
+				// Set up click listener on floating action button
+				setUpFab(mapView);
 
 			}
 		}
 
 		return mMapContainer;
+	}
+	private void attachFloatingActionButton(){
+		FloatingActionButton fab = (FloatingActionButton) mMapContainer.findViewById(R.id.fab);
+		fab.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Log.d("***", "onClick called with: " + "view = [" + v + "]");
+				// Toggle location tracking on or off
+				if (mIsLocationTracking) {
+//							item.setIcon(R.drawable.ic_action_compass_mode);
+					mMapView.getLocationDisplayManager().setAutoPanMode(
+							AutoPanMode.COMPASS);
+					mCompass.start();
+					mCompass.setVisibility(View.VISIBLE);
+					mIsLocationTracking = false;
+				} else {
+					startLocationTracking();
+//							item.setIcon(android.R.drawable.ic_menu_mylocation);
+					if (mMapView.getRotationAngle() != 0) {
+						mCompass.setVisibility(View.VISIBLE);
+						mCompass.setRotationAngle(mMapView.getRotationAngle());
+					} else {
+						mCompass.setVisibility(View.GONE);
+					}
+				}
+			}
+		});
+	}
+
+	/**
+	 * The floating action button toggles location tracking.  When location
+	 * tracking is on, the compass is shown in the upper right of the map view.
+	 * When location tracking is off, the compass is shown if the map is not oriented
+	 * north (0 degrees).
+	 * @param mapView
+	 */
+	private void setUpFab(final MapView mapView){
+		FloatingActionButton fab = (FloatingActionButton) mMapContainer.findViewById(R.id.fab);
+		fab.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				LocationDisplay mLocationDisplay = mapView.getLocationDisplay();
+
+				Log.d("***", "onClick called with: " + "view = [" + v + "]");
+				// Toggle location tracking on or off
+				Log.i(TAG, "Map rotation =" +  Double.toString(mapView.getMapRotation()));
+				if (mIsLocationTracking) {
+
+					//Point currentLocationPoint = mLocationDisplay.getMapLocation();
+					//mapView.setViewpointCenterAsync(currentLocationPoint);
+					mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.COMPASS);
+					mCompass.start();
+					mCompass.setVisibility(View.VISIBLE);
+					mIsLocationTracking = false;
+				} else {
+					mLocationDisplay.startAsync();
+					mLocationDisplay.addLocationChangedListener(new LocationDisplay.LocationChangedListener() {
+						@Override
+						public void onLocationChanged(LocationDisplay.LocationChangedEvent locationChangedEvent) {
+							startLocationTracking(locationChangedEvent);
+						}
+					});
+					if (mMapView.getMapRotation() != 0) {
+						mCompass.setVisibility(View.VISIBLE);
+						mCompass.setRotationAngle(mMapView.getMapRotation());
+					} else {
+						mCompass.setVisibility(View.GONE);
+					}
+					mIsLocationTracking = true;
+				}
+			}
+		});
 	}
 
 	@Override
@@ -360,12 +404,14 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Pause the MapView and stop the LocationDisplayManager to save battery
 		if (mMapView != null) {
+			//TODO: Needed for Quartz?
+			/*
 			if (mIsLocationTracking) {
-				mMapView.getLocationDisplayManager().stop();
+				mMapView.getLocationDisplay().
 				mCompass.stop();
 			}
 			mMapViewState = mMapView.retainState();
-
+			*/
 			mMapView.pause();
 		}
 	}
@@ -377,13 +423,16 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Start the MapView and LocationDisplayManager running again
 		if (mMapView != null) {
 			// mCompass.start();
-			mMapView.unpause();
+			mMapView.resume();
+			// TODO: Need for Quartz?
+			/*
 			if (mMapViewState != null) {
 				mMapView.restoreState(mMapViewState);
 			}
 			if (mIsLocationTracking) {
 				mMapView.getLocationDisplayManager().start();
 			}
+			*/
 		}
 	}
 
@@ -416,33 +465,42 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			public Void call() throws Exception {
 
 				// load a WebMap instance from the portal item
-				final WebMap webmap = WebMap.newInstance(portalItemId, portal);
+				PortalItem portalItem = new PortalItem(portal, portalItemId);
+				final com.esri.arcgisruntime.mapping.Map webmap = new com.esri.arcgisruntime.mapping.Map(portalItem);
 
 				// load the WebMap that represents the basemap if one was
 				// specified
-				WebMap basemapWebMap = null;
+				com.esri.arcgisruntime.mapping.Map basemapWebMap = null;
 				if (basemapPortalItemId != null
 						&& !basemapPortalItemId.isEmpty()) {
-					basemapWebMap = WebMap.newInstance(basemapPortalItemId,
-							portal);
+					PortalItem webPortalItem = new PortalItem(portal, basemapPortalItemId);
+					basemapWebMap = new com.esri.arcgisruntime.mapping.Map(webPortalItem);
 				}
-				final BaseMap basemap = basemapWebMap != null ? basemapWebMap
-						.getBaseMap() : null;
+				final Basemap basemap = basemapWebMap != null ? basemapWebMap
+						.getBasemap() : null;
 
 				if (webmap != null) {
-					getActivity().runOnUiThread(new Runnable() {
+					// DO WE NEED RunOnUiThread IN QUARTZ?
+					/*getActivity().runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							MapView mapView = new MapView(getActivity(),
-									webmap, basemap, null, null);
+							MapView mapView = new MapView(getActivity());
+							mapView.setMap(basemapWebMap);
+							//MapView mapView = new MapView(getActivity(),
+							//		webmap, basemap, null, null);
 
 							// mapView.setAllowRotationByPinch(true);
 
 							setMapView(mapView);
+							attachFloatingActionButton();
 							mapView.zoomin();
 
 						}
-					});
+					});*/
+					final MapView mapView = new MapView(getActivity());
+					setUpFab(mapView);
+					mapView.setMap(basemapWebMap);
+
 				} else {
 					throw new Exception("Failed to load web map.");
 				}
@@ -461,9 +519,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private void setMapView(final MapView mapView) {
 
 		mMapView = mapView;
-		mMapView.setEsriLogoVisible(true);
-		mMapView.enableWrapAround(true);
-		mapView.setAllowRotationByPinch(true);
+		mMapView.setLogoVisible(true);
+		mMapView.setWrapAroundMode(WrapAroundMode.ENABLE_WHEN_SUPPORTED);
+
+		//TODO: Is this needed in Quartz?
+		//mapView.setAllowRotationByPinch(true);
 
 		// Creating an inflater
 		mInflater = (LayoutInflater) getActivity().getSystemService(
@@ -479,17 +539,23 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mlayoutParams.setMargins(LEFT_MARGIN_SEARCH, TOP_MARGIN_SEARCH,
 				RIGHT_MARGIN_SEARCH, BOTTOM_MARGIN_SEARCH);
 
-		// set MapView into the activity layout
-		mMapContainer.addView(mMapView);
+
+		// Set up floating action button
+		attachFloatingActionButton();
+
+		// Set up floating action button
+		attachFloatingActionButton();
 
 		// Displaying the searchbox layout
 		showSearchBoxLayout();
 
-		mMapView.setOnPinchListener(new OnPinchListener() {
+		// TODO:Is this needed in Quartz?
+		/*mMapView.setOnPinchListener(new OnPinchListener() {
 
 			/**
 			 * Default value
 			 */
+		/*
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -529,9 +595,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 
 		});
-
+*/
 		// Setup listener for map initialized
-		mMapView.setOnStatusChangedListener(new OnStatusChangedListener() {
+
+		//TODO: Port to Quartz
+		/*mMapView.setOnStatusChangedListener(new OnStatusChangedListener() {
 
 			private static final long serialVersionUID = 1L;
 
@@ -554,9 +622,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				}
 			}
 		});
-
+*/
+		// TODO: Port to Quartz
 		// Setup use of magnifier on a long press on the map
-		mMapView.setShowMagnifierOnLongPress(true);
+		/*mMapView.setShowMagnifierOnLongPress(true);
 		mLongPressEvent = null;
 
 		// Setup OnTouchListener to detect and act on long-press
@@ -602,7 +671,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 
 		});
-
+*/
 	}
 
 	/**
@@ -642,7 +711,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			@Override
 			public void onClick(View v) {
 				mCompass.setVisibility(View.GONE);
-				mMapView.setRotationAngle(0);
+				mMapView.setRotation(0f);
+				mMapView.setRotation(0f);
 			}
 		});
 
@@ -661,7 +731,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Show RoutingDialogFragment to get routing start and end points.
 		// This calls back to onGetRoute() to do the routing.
 		RoutingDialogFragment routingFrag = new RoutingDialogFragment();
-		routingFrag.setRoutingDialogListener(this);
+		routingFrag.setRoutingDialogListener(new RoutingDialogListener() {
+			@Override
+			public boolean onGetRoute(String startPoint, String endPoint) {
+				return false;
+			}
+		});
 		Bundle arguments = new Bundle();
 		if (mLocationLayerPoint != null) {
 			arguments.putString(RoutingDialogFragment.ARG_END_POINT_DEFAULT,
@@ -687,9 +762,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 						// dismiss the dialog and
 						// zoom to the selected direction
 						frag.dismiss();
-						RouteDirection direction = mRoutingDirections
+						DirectionManeuver direction = mRoutingDirections
 								.get(position);
-						mMapView.setExtent(direction.getGeometry());
+
+						// create a viewpoint from envelope
+						Viewpoint vp = new Viewpoint(direction.getGeometry().getExtent());
+						mMapView.setViewpoint(vp);
 					}
 
 				});
@@ -800,7 +878,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 				suggestionClickFlag = true;
 				// Find the Location of the suggestion
-				new FindLocationTask(address).execute(address);
+				// TODO: Uncomment when Find Location task is working
+				//new FindLocationTask(address).execute(address);
 
 				cursor.close();
 
@@ -837,6 +916,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * @param query String typed so far by the user to fetch the suggestions
 	 */
 	private void getSuggestions(String query) {
+		//TODO: Uncomment this when suggestion stuff is figured out
+		/*
 		final CallbackListener<List<LocatorSuggestionResult>> suggestCallback = new CallbackListener<List<LocatorSuggestionResult>>() {
 			@Override
 			public void onCallback(List<LocatorSuggestionResult> locatorSuggestionResults) {
@@ -887,6 +968,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			Log.e(MapFragment.class.getSimpleName(),"No Results found");
 			Log.e(MapFragment.class.getSimpleName(),e.getMessage());
 		}
+		*/
 	}
 
 	/**
@@ -895,6 +977,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * @param TYPE A String determining thr type of parameters to be initialized
 	 * @param query The string for which the locator parameters are to be initialized
 	 */
+	/*
 	private void locatorParams(String TYPE, String query) {
 		if(TYPE.contentEquals(SUGGEST_PLACE)) {
 			// Create suggestion parameters
@@ -938,9 +1021,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			findParams.setOutSR(mMapView.getSpatialReference());
 		}
 	}
-
+*/
 	//Fetch the Location from the suggestMap and display it
-	private class FindLocationTask extends AsyncTask<String,Void,Point> {
+/*	private class FindLocationTask extends AsyncTask<String,Void,Point> {
 		private Point resultPoint = null;
 		private String resultAddress;
 		private static final String TAG_LOCATOR_PROGRESS_DIALOG = "TAG_LOCATOR_PROGRESS_DIALOG";
@@ -996,7 +1079,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		}
 
 	}
-
+*/
 	protected void hideKeyboard() {
 
 		// Hide soft keyboard
@@ -1004,7 +1087,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		inputManager.hideSoftInputFromWindow(mSearchview.getWindowToken(), 0);
 	}
-
+/*
 	private void displaySearchResult(Point resultPoint, String address) {
 
 		// create marker symbol to represent location
@@ -1033,8 +1116,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * Clears all graphics out of the location layer and the route layer.
 	 */
 	void resetGraphicsLayers() {
-		mLocationLayer.removeAll();
-		mRouteLayer.removeAll();
+		//TODO: Is clearSelection the same as GraphicsLayer removeAll
+		mLocationLayer.clearSelection();
+		mRouteLayer.clearSelection();
 		mLocationLayerPoint = null;
 		mLocationLayerPointString = null;
 		mRoutingDirections = null;
@@ -1046,68 +1130,60 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	void addGraphicLayers() {
 		// Add location layer
 		if (mLocationLayer == null) {
-			mLocationLayer = new GraphicsLayer();
+			mLocationLayer = new GraphicsOverlay();
 		}
-		mMapView.addLayer(mLocationLayer);
+
+		mMapView.getGraphicsOverlays().add(mLocationLayer);
+		//mMapView.addLayer(mLocationLayer);
 
 		// Add the route graphic layer
 		if (mRouteLayer == null) {
-			mRouteLayer = new GraphicsLayer();
+			mRouteLayer =  new GraphicsOverlay();
 		}
-		mMapView.addLayer(mRouteLayer);
+		mMapView.getGraphicsOverlays().add(mRouteLayer);
 	}
 
 	/**
 	 * Starts tracking GPS location.
 	 */
-	void startLocationTracking() {
-		LocationDisplayManager locDispMgr = mMapView
-				.getLocationDisplayManager();
+	void startLocationTracking(LocationDisplay.LocationChangedEvent locationChangedEvent) {
+		LocationDisplay locDispMgr = mMapView
+				.getLocationDisplay();
 		mCompass.start();
-		locDispMgr.setAutoPanMode(AutoPanMode.LOCATION);
-		locDispMgr.setAllowNetworkLocation(true);
+		// Enabling the line below causes the map to not zoom in on my location
+		//locDispMgr.setAutoPanMode(LocationDisplay.AutoPanMode.DEFAULT);
+		//TODO: How to in Quartz?
+		//locDispMgr.setAllowNetworkLocation(true);
 
-		locDispMgr.setLocationListener(new LocationListener() {
 
-			boolean locationChanged = false;
+		boolean locationChanged = false;
+		Point wgsPoint = locationChangedEvent.getLocation().getPosition();
+		mLocation = (Point) GeometryEngine.project(wgsPoint,
+				mMapView.getSpatialReference());
+		if (!locationChanged) {
+			locationChanged = true;
+			LinearUnit mapUnit = (LinearUnit) mMapView.getSpatialReference().getUnit();
+			LinearUnit mile = new LinearUnit(LinearUnitId.MILES);
 
-			// Zooms to the current location when first GPS fix arrives
-			@Override
-			public void onLocationChanged(Location loc) {
-				double locy = loc.getLatitude();
-				double locx = loc.getLongitude();
-				Point wgspoint = new Point(locx, locy);
-				mLocation = (Point) GeometryEngine.project(wgspoint,
-						SpatialReference.create(4326),
-						mMapView.getSpatialReference());
-				if (!locationChanged) {
-					locationChanged = true;
-					Unit mapUnit = mMapView.getSpatialReference().getUnit();
-					double zoomWidth = Unit.convertUnits(SEARCH_RADIUS,
-							Unit.create(LinearUnit.Code.MILE_US), mapUnit);
-					Envelope zoomExtent = new Envelope(mLocation,
-							zoomWidth / 10, zoomWidth / 10);
-					mMapView.setExtent(zoomExtent);
-				}
-			}
+			double zoomWidth = mile.convertTo(mapUnit,SEARCH_RADIUS);
+			double width = zoomWidth/10 ;
+			double height = zoomWidth/10;
 
-			@Override
-			public void onProviderDisabled(String arg0) {
-			}
+			Point envPoint = new Point(mLocation.getX()-width, mLocation.getY()-height, mMapView.getSpatialReference());
+			Point envPointB = new Point(mLocation.getX()+width, mLocation.getY()+height, mMapView.getSpatialReference());
+			//double zoomWidth = Unit.convertUnits(SEARCH_RADIUS, Unit.create(LinearUnit.Code.MILE_US), mapUnit);
+			//Envelope zoomExtent = new Envelope(mLocation,
+			//		zoomWidth / 10, zoomWidth / 10);
+			Envelope zoomExtent = new Envelope(envPoint, envPointB);
+			mMapView.setViewpointGeometryAsync(zoomExtent);
+		}
 
-			@Override
-			public void onProviderEnabled(String arg0) {
-			}
 
-			@Override
-			public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
-			}
-		});
-		locDispMgr.start();
+
 		mIsLocationTracking = true;
 	}
 
-	@Override
+	//@Override
 	public void onBasemapChanged(String basemapPortalItemId) {
 		((MapsAppActivity) getActivity()).showMap(mPortalItemId,
 				basemapPortalItemId);
@@ -1125,8 +1201,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Remove any previous graphics and routes
 		resetGraphicsLayers();
-
-		executeLocatorTask(address);
+		// TODO: Un comment once Locator task is working
+		//executeLocatorTask(address);
 	}
 
 	/**
@@ -1134,7 +1210,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * 
 	 * @param address
 	 */
-	private void executeLocatorTask(String address) {
+/*	private void executeLocatorTask(String address) {
 		// Create Locator parameters from single line address string
 		LocatorFindParameters findParams = new LocatorFindParameters(address);
 
@@ -1162,7 +1238,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		mLocationLayerPointString = address;
 	}
-
+*/
 	/**
 	 * Called by RoutingDialogFragment when user presses Get Route button.
 	 * 
@@ -1174,7 +1250,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 *         this method rejects the parameters it must display an explanatory
 	 *         Toast to the user before returning.
 	 */
-	@Override
+	//@Override
 	public boolean onGetRoute(String startPoint, String endPoint) {
 		// Check if we need a location fix
 		if (startPoint.equals(getString(R.string.my_location))
@@ -1188,7 +1264,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		resetGraphicsLayers();
 
 		// Do the routing
-		executeRoutingTask(startPoint, endPoint);
+		// TODO: Uncomment when routing task is working
+		//executeRoutingTask(startPoint, endPoint);
 		return true;
 	}
 
@@ -1198,6 +1275,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * @param start
 	 * @param end
 	 */
+/*
 	@SuppressWarnings("unchecked")
 	private void executeRoutingTask(String start, String end) {
 		resetGraphicsLayers();
@@ -1216,8 +1294,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		routeTask.execute(routeParams);
 		mPendingTask = routeTask;
 	}
-
-	@Override
+*/
+	//@Override
 	public void onCancel(DialogInterface dialog) {
 		// a pending task needs to be canceled
 		if (mPendingTask != null) {
@@ -1393,7 +1471,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * background thread and displays the first result on the map on the UI
 	 * thread.
 	 */
-	private class LocatorAsyncTask extends
+/*	private class LocatorAsyncTask extends
 			AsyncTask<LocatorFindParameters, Void, List<LocatorGeocodeResult>> {
 		private static final String TAG_LOCATOR_PROGRESS_DIALOG = "TAG_LOCATOR_PROGRESS_DIALOG";
 
@@ -1474,7 +1552,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * background thread and displays the resultant route on the map on the UI
 	 * thread.
 	 */
-	private class RouteAsyncTask extends
+/*	private class RouteAsyncTask extends
 			AsyncTask<List<LocatorFindParameters>, Void, RouteResult> {
 		private static final String TAG_ROUTE_SEARCH_PROGRESS_DIALOG = "TAG_ROUTE_SEARCH_PROGRESS_DIALOG";
 
@@ -1679,7 +1757,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * request on a background thread and displays the resultant point on the
 	 * map on the UI thread.
 	 */
-	public class ReverseGeocodingAsyncTask extends
+/*	public class ReverseGeocodingAsyncTask extends
 			AsyncTask<Point, Void, LocatorReverseGeocodeResult> {
 		private static final String TAG_REVERSE_GEOCODING_PROGRESS_DIALOG = "TAG_REVERSE_GEOCODING_PROGRESS_DIALOG";
 

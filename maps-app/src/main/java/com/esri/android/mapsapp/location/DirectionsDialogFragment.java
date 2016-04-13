@@ -42,8 +42,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.esri.android.mapsapp.R;
-import com.esri.core.tasks.na.RouteDirection;
-import com.esri.core.tasks.na.RouteManeuverType;
+import com.esri.arcgisruntime.tasks.route.DirectionManeuver;
+import com.esri.arcgisruntime.tasks.route.DirectionManeuverType;
 
 import java.util.List;
 
@@ -66,7 +66,7 @@ public class DirectionsDialogFragment extends DialogFragment {
 
   DirectionsDialogListener mDirectionsDialogListener;
 
-  List<RouteDirection> mRoutingDirections;
+  List<DirectionManeuver> mRoutingDirections;
 
   /**
    * Mandatory empty constructor for the fragment manager to instantiate the fragment.
@@ -74,7 +74,7 @@ public class DirectionsDialogFragment extends DialogFragment {
   public DirectionsDialogFragment() {
   }
 
-  public void setRoutingDirections(List<RouteDirection> routingDirections, DirectionsDialogListener listener) {
+  public void setRoutingDirections(List<DirectionManeuver> routingDirections, DirectionsDialogListener listener) {
     mRoutingDirections = routingDirections;
     mDirectionsDialogListener = listener;
   }
@@ -123,8 +123,8 @@ public class DirectionsDialogFragment extends DialogFragment {
   /**
    * List adapter for the list of route directions.
    */
-  private class DirectionsListAdapter extends ArrayAdapter<RouteDirection> {
-    public DirectionsListAdapter(List<RouteDirection> directions) {
+  private class DirectionsListAdapter extends ArrayAdapter<DirectionManeuver> {
+    public DirectionsListAdapter(List<DirectionManeuver> directions) {
       super(getActivity(), 0, directions);
     }
 
@@ -137,21 +137,21 @@ public class DirectionsDialogFragment extends DialogFragment {
       }
 
       // Configure the view for this item
-      RouteDirection direction = getItem(position);
+      DirectionManeuver direction = getItem(position);
       ImageView imageView = (ImageView) v.findViewById(R.id.directions_maneuver_imageview);
-      Drawable drawable = getRoutingIcon(direction.getManeuver());
+      Drawable drawable = getRoutingIcon(direction.getManeuverType());
       if (drawable != null) {
         imageView.setImageDrawable(drawable);
       }
       TextView textView = (TextView) v.findViewById(R.id.directions_text_textview);
-      textView.setText(direction.getText());
+      textView.setText(direction.getDirectionText());
       textView = (TextView) v.findViewById(R.id.directions_length_textview);
       String lengthString = String.format("%.1f mi", direction.getLength());
       textView.setText(lengthString);
       return v;
     }
 
-    private Drawable getRoutingIcon(RouteManeuverType maneuver) {
+    private Drawable getRoutingIcon(DirectionManeuverType maneuver) {
       Context context = getActivity();
       int id;
       switch (maneuver) {

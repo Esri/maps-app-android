@@ -42,15 +42,19 @@ import com.esri.android.mapsapp.R;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.basemaps.BasemapsAdapter.BasemapsAdapterClickListener;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
-import com.esri.core.portal.Portal;
-import com.esri.core.portal.PortalGroup;
-import com.esri.core.portal.PortalInfo;
-import com.esri.core.portal.PortalItem;
-import com.esri.core.portal.PortalQueryParams;
-import com.esri.core.portal.PortalQueryParams.PortalQuerySortOrder;
-import com.esri.core.portal.PortalQueryResultSet;
+import com.esri.arcgisruntime.concurrent.ListenableFuture;
+import com.esri.arcgisruntime.portal.Portal;
+import com.esri.arcgisruntime.portal.PortalGroup;
+import com.esri.arcgisruntime.portal.PortalInfo;
+import com.esri.arcgisruntime.portal.PortalItem;
+import com.esri.arcgisruntime.portal.PortalQueryParams;
+import com.esri.arcgisruntime.portal.PortalQueryResultSet;
+import com.esri.arcgisruntime.portal.PortalUserContent;
+
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Implements the dialog that provides a collection of basemaps to the user.
@@ -134,7 +138,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
   public void onBasemapItemClicked(int position) {
     dismiss();
 
-    String itemId = mBasemapItemList.get(position).item.getItemId();
+    String itemId = mBasemapItemList.get(position).item.getId();
     mBasemapsDialogListener.onBasemapChanged(itemId);
   }
 
@@ -208,11 +212,11 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
      */
     private void fetchBasemapItems() throws Exception {
 
-      PortalQueryResultSet<PortalItem> basemapResult = null;
+      final List<PortalItem> basemapResult = new ArrayList<PortalItem>();
 
       if (AccountManager.getInstance().isSignedIn()) {
         // we are signed in - fetch the basemaps of the user's portal
-        Portal portal = AccountManager.getInstance().getPortal();
+        final Portal portal = AccountManager.getInstance().getPortal();
         PortalInfo portalInfo = AccountManager.getInstance().getPortalInfo();
 
         PortalQueryParams queryParams = new PortalQueryParams();
@@ -220,38 +224,78 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
         // get the query string to fetch the portal group that defines the portal's basemaps
         queryParams.setQuery(portalInfo.getBasemapGalleryGroupQuery());
 
-        PortalQueryResultSet<PortalGroup> basemapGroupResult = portal.findGroups(queryParams);
-        if (basemapGroupResult != null && basemapGroupResult.getResults() != null
-            && !basemapGroupResult.getResults().isEmpty()) {
+        // Use a listenable future for retrieving search results from portal
+        final ListenableFuture<PortalQueryResultSet<PortalGroup>> groupFuture = portal.findGroupsAsync(queryParams);
+        groupFuture.addDoneListener(new Runnable() {
+          @Override
 
-          PortalGroup group = basemapGroupResult.getResults().get(0);
+          public void run() {
 
-          PortalQueryParams basemapQueryParams = new PortalQueryParams();
-          basemapQueryParams.setQueryForItemsInGroup(group.getGroupId());
+            try {
+              PortalQueryResultSet<PortalGroup> basemapGroupResult = groupFuture.get();
+              if (basemapGroupResult != null && basemapGroupResult.getResults() != null
+                      && !basemapGroupResult.getResults().isEmpty()) {
 
-          basemapResult = portal.findItems(basemapQueryParams);
-        }
+                PortalGroup group = basemapGroupResult.getResults().get(0);
+
+                PortalQueryParams basemapQueryParams = new PortalQueryParams();
+                basemapQueryParams.setQueryForItemsInGroup(group.getId());
+
+                final ListenableFuture<PortalQueryResultSet<PortalItem>> contentFuture = portal.findItemsAsync(basemapQueryParams);
+                contentFuture.addDoneListener(new Runnable() {
+                  @Override
+                  public void run() {
+                    try {
+                      PortalQueryResultSet<PortalItem> items = contentFuture.get();
+                      basemapResult.addAll(items.getResults());
+
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+                  }
+                });
+              }
+            }catch (Exception ie){
+              ie.printStackTrace();
+            }
+          }
+        });
+
+
       } else {
         // we are not signed in - fetch a selection of basemaps from arcgis.com
         Portal portal = AccountManager.getInstance().getAGOLPortal();
 
         // Create a PortalQueryParams to query for items in basemap group
         PortalQueryParams queryParams = new PortalQueryParams();
-        queryParams.setSortField("name").setSortOrder(PortalQuerySortOrder.ASCENDING);
+        queryParams.setSortField("name").setSortOrder(PortalQueryParams.SortOrder.ASCENDING);
         queryParams.setQuery(createDefaultQueryString());
 
         // Find items that match the query
-        basemapResult = portal.findItems(queryParams);
+        final ListenableFuture<PortalQueryResultSet<PortalItem>> itemFuture = portal.findItemsAsync(queryParams);
+        itemFuture.addDoneListener(new Runnable() {
+          @Override
+          public void run() {
+            try{
+              PortalQueryResultSet<PortalItem> baseMapItems = itemFuture.get();
+              basemapResult.addAll(baseMapItems.getResults());
+            }catch(Exception itemE){
+              itemE.printStackTrace();
+            }
+          }
+        });
       }
 
-      if (isCancelled() || basemapResult == null || basemapResult.getResults() == null) {
+     // if (isCancelled() || basemapResult == null || basemapResult.getResults() == null) {
+      if (isCancelled() || basemapResult.isEmpty()){
         return;
       }
 
       // Loop through query results
-      for (PortalItem item : basemapResult.getResults()) {
+      for (PortalItem item : basemapResult) {
         // Fetch item thumbnail from server
-        byte[] data = item.fetchThumbnail();
+        byte[] data = item.getThumbnailData();
         if (isCancelled()) {
           return;
         }
@@ -270,7 +314,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
     private String createDefaultQueryString() {
       String query;
 
-      String[] mBasemapIds = { "d5e02a0c1f2b4ec399823fdd3c2fdebd", // topographic
+      String[] mBasemapIds = {"d5e02a0c1f2b4ec399823fdd3c2fdebd", // topographic
           "716b600dbbac433faa4bec9220c76b3a", // imagery with labels
           "b834a68d7a484c5fb473d4ba90d35e71", // open street map
           "8bf7167d20924cbf8e25e7b11c7c502c", // streets

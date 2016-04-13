@@ -41,11 +41,12 @@ import android.widget.TextView;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.android.mapsapp.util.TaskExecutor;
-import com.esri.core.portal.Portal;
-import com.esri.core.portal.PortalItem;
-import com.esri.core.portal.PortalItemType;
-import com.esri.core.portal.PortalUser;
-import com.esri.core.portal.PortalUserContent;
+import com.esri.arcgisruntime.concurrent.ListenableFuture;
+import com.esri.arcgisruntime.portal.Portal;
+import com.esri.arcgisruntime.portal.PortalItem;
+import com.esri.arcgisruntime.portal.PortalItemType;
+import com.esri.arcgisruntime.portal.PortalUser;
+import com.esri.arcgisruntime.portal.PortalUserContent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +95,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
       case R.id.map_item_linearlayout:
         // a map item has been clicked - open it
         ViewHolder viewHolder = (ViewHolder) view.getTag();
-        ((MapsAppActivity) getActivity()).showMap(viewHolder.portalItem.getItemId(), null);
+        ((MapsAppActivity) getActivity()).showMap(viewHolder.portalItem.getId(), null);
         break;
       case R.id.content_browser_fragment_refresh_button:
         // re-fetch maps
@@ -156,20 +157,33 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
         // fetch the user's maps from the portal
         Portal portal = AccountManager.getInstance().getPortal();
         if (portal != null) {
-          PortalUser portalUser = portal.fetchUser();
-          PortalUserContent content = portalUser != null ? portalUser.fetchContent() : null;
-          List<PortalItem> rootItems = content != null ? content.getItems() : null;
-          if (rootItems != null) {
-            // only select items of type WEBMAP
-            for (PortalItem item : rootItems) {
-              if (item.getType() == PortalItemType.WEBMAP) {
-                webMapItems.add(item);
+          PortalUser portalUser = portal.getPortalUser();
+          final ListenableFuture<PortalUserContent> contentFuture = portalUser.fetchContentAsync();
+          contentFuture.addDoneListener(new Runnable() {
+
+            @Override
+            public void run() {
+              try{
+                final PortalUserContent content = contentFuture.get();
+                List<PortalItem> rootItems = content != null ? content.getItems() : null;
+                if (rootItems != null) {
+                  // only select items of type WEBMAP
+                  for (PortalItem item : rootItems) {
+                    if (item.getType() == PortalItemType.WEBMAP) {
+                      webMapItems.add(item);
+                    }
+                  }
+                }
+              }catch (Exception e){
+                e.printStackTrace();
               }
             }
-          }
+          });
+
         }
       } catch (Exception e) {
-        // fetching content failed
+          e.printStackTrace();
+
       }
 
       return webMapItems;
@@ -280,7 +294,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
       }
 
       if (mViewHolder != null) {
-        thumbnailBytes = mViewHolder.portalItem.fetchThumbnail();
+        thumbnailBytes = mViewHolder.portalItem.getThumbnailData();
       }
 
       // check if task has been cancelled

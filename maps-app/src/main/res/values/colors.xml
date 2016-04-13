@@ -42,4 +42,5 @@
     <!-- callout -->
     <color name="place_callout_frame_color">@color/colorPrimaryLight</color>
 
+
 </resources>

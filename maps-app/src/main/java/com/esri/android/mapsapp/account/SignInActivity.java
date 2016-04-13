@@ -38,13 +38,10 @@ import android.widget.Toast;
 import com.esri.android.mapsapp.R;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.android.mapsapp.util.StringUtils;
-import com.esri.android.oauth.OAuthView;
-import com.esri.android.runtime.ArcGISRuntime;
-import com.esri.core.io.EsriSecurityException;
-import com.esri.core.io.UserCredentials;
-import com.esri.core.map.CallbackListener;
-import com.esri.core.portal.Portal;
-import com.esri.core.portal.PortalInfo;
+import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
+import com.esri.arcgisruntime.portal.Portal;
+import com.esri.arcgisruntime.portal.PortalInfo;
+import com.esri.arcgisruntime.security.UserCredential;
 
 /**
  * Implements the sign in UX to ArcGIS portal accounts. Handles sign in to OAuth and non-OAuth secured portals.
@@ -82,6 +79,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 
     View cancelButton = findViewById(R.id.sign_in_activity_cancel_button);
     cancelButton.setOnClickListener(this);
+    mPortalUrl = mPortalUrlEditText.getText().toString().trim();
   }
 
   @Override
@@ -137,21 +135,21 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
       Toast.makeText(this, MSG_OBTAIN_CLIENT_ID, Toast.LENGTH_SHORT).show();
       return;
     }
-
+/*
     // create an OAuthView and show it
     OAuthView oAuthView = new OAuthView(this, mPortalUrl, clientId, OAUTH_EXPIRATION_NEVER,
-        new CallbackListener<UserCredentials>() {
+        new CallbackListener<UserCredential>() {
 
           @Override
-          public void onCallback(final UserCredentials credentials) {
+          public void onCallback(final UserCredential credentials) {
             if (credentials != null) {
               Portal portal = new Portal(mPortalUrl, credentials);
               PortalInfo portalInfo = null;
 
               try {
                 // fetch the portal info and user details, they will be cached in the Portal instance
-                portalInfo = portal.fetchPortalInfo();
-                portal.fetchUser();
+                portalInfo = portal.getPortalInfo();
+                portal.getPortalUser();
               } catch (Exception e) {
                 onError(e);
               }
@@ -161,7 +159,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 
               // enable standard license level
               if (portalInfo != null) {
-                ArcGISRuntime.License.setLicense(portalInfo.getLicenseInfo());
+                ArcGISRuntimeEnvironment.License.setLicense(portalInfo.getLicenseInfo());
               }
 
               // we are done signing in
@@ -177,6 +175,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
         });
 
     setContentView(oAuthView);
+    */
   }
 
   /**
@@ -205,7 +204,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
     protected Integer doInBackground(Void... params) {
       int authType = TYPE_UNDEFINED;
       try {
-        mPortalUrl = mPortalUrlEditText.getText().toString().trim();
+
         if (!mPortalUrl.startsWith(HTTP)) {
           mPortalUrl = HTTP + mPortalUrl;
         }
@@ -213,16 +212,16 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
         Log.d(TAG, mPortalUrl);
 
         Portal portal = new Portal(mPortalUrl, null);
-        PortalInfo portalInfo = portal.fetchPortalInfo();
+        PortalInfo portalInfo = portal.getPortalInfo();
 
         if (portalInfo != null) {
           authType = portalInfo.isSupportsOAuth() ? TYPE_OAUTH : TYPE_GENERATE_TOKEN;
         }
-      } catch (EsriSecurityException ese) {
+      /*} catch (EsriSecurityException ese) {
         // Enterprise Windows auth throws this exception - assume it's not OAuth.
         if (ese.getCode() == EsriSecurityException.AUTHENTICATION_FAILED) {
           authType = TYPE_GENERATE_TOKEN;
-        }
+        }*/
       } catch (Exception e) {
         authType = TYPE_UNDEFINED;
       }

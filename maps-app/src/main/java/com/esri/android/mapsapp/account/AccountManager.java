@@ -24,9 +24,10 @@
 
 package com.esri.android.mapsapp.account;
 
-import com.esri.core.portal.Portal;
-import com.esri.core.portal.PortalInfo;
-import com.esri.core.portal.PortalUser;
+
+import com.esri.arcgisruntime.portal.PortalInfo;
+import com.esri.arcgisruntime.portal.Portal;
+import com.esri.arcgisruntime.portal.PortalUser;
 
 
 /**
@@ -73,8 +74,8 @@ public class AccountManager {
     mPortal = portal;
     
     try {
-      mPortalUser = mPortal != null ? mPortal.fetchUser() : null;
-      mPortalInfo = mPortal != null ? mPortal.fetchPortalInfo() : null;
+      mPortalUser = mPortal != null ? mPortal.getPortalUser() : null;
+      mPortalInfo = mPortal != null ? mPortal.getPortalInfo() : null;
     } catch (Exception e) {
       e.printStackTrace();
     }
