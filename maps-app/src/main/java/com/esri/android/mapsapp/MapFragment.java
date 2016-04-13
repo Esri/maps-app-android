@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -37,8 +38,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.database.MatrixCursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
@@ -82,22 +86,30 @@ import com.esri.android.mapsapp.location.RoutingDialogFragment;
 import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogListener;
 import com.esri.android.mapsapp.tools.Compass;
 import com.esri.android.mapsapp.util.TaskExecutor;
+import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
+import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.geometry.AreaUnit;
 import com.esri.arcgisruntime.geometry.Envelope;
 import com.esri.arcgisruntime.geometry.GeometryEngine;
 import com.esri.arcgisruntime.geometry.LinearUnit;
 import com.esri.arcgisruntime.geometry.LinearUnitId;
 import com.esri.arcgisruntime.geometry.Point;
+import com.esri.arcgisruntime.geometry.Polygon;
 import com.esri.arcgisruntime.geometry.SpatialReference;
 import com.esri.arcgisruntime.geometry.Unit;
+import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.Basemap;
 import com.esri.arcgisruntime.mapping.Viewpoint;
+import com.esri.arcgisruntime.mapping.view.Graphic;
 import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.LocationDisplay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.mapping.view.WrapAroundMode;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
+import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
+import com.esri.arcgisruntime.tasks.geocode.GeocodeParameters;
+import com.esri.arcgisruntime.tasks.geocode.GeocodeResult;
 import com.esri.arcgisruntime.tasks.geocode.LocatorTask;
 import com.esri.arcgisruntime.tasks.geocode.SuggestParameters;
 import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
@@ -294,6 +306,9 @@ public class MapFragment extends Fragment  {
 					}
 				});
 				mLocationDisplay.startAsync();
+
+				//add graphics layer
+				addGraphicLayers();
 			}
 		}
 
@@ -527,86 +542,22 @@ public class MapFragment extends Fragment  {
 		mlayoutParams.setMargins(LEFT_MARGIN_SEARCH, TOP_MARGIN_SEARCH,
 				RIGHT_MARGIN_SEARCH, BOTTOM_MARGIN_SEARCH);
 
-		// set MapView into the activity layout
-		//mMapContainer.addView(mMapView);
 
 		// Displaying the searchbox layout
 		showSearchBoxLayout();
 
-		// TODO:Is this needed in Quartz?
-		/*mMapView.setOnPinchListener(new OnPinchListener() {
 
-			/**
-			 * Default value
-			 */
-		/*
-			private static final long serialVersionUID = 1L;
-
+		// Set up location tracking
+		mLocationDisplay = mapView.getLocationDisplay();
+		mLocationDisplay.addLocationChangedListener(new LocationDisplay.LocationChangedListener() {
 			@Override
-			public void postPointersDown(float x1, float y1, float x2,
-										 float y2, double factor) {
-			}
-
-			@Override
-			public void postPointersMove(float x1, float y1, float x2,
-										 float y2, double factor) {
-			}
-
-			@Override
-			public void postPointersUp(float x1, float y1, float x2, float y2,
-									   double factor) {
-			}
-
-			@Override
-			public void prePointersDown(float x1, float y1, float x2, float y2,
-										double factor) {
-			}
-
-			@Override
-			public void prePointersMove(float x1, float y1, float x2, float y2,
-										double factor) {
-				if (mMapView.getRotationAngle() > 5
-						|| mMapView.getRotationAngle() < -5) {
-					mCompass.setVisibility(View.VISIBLE);
-					mCompass.sensorManager.unregisterListener(mCompass.sensorEventListener);
-					mCompass.setRotationAngle(mMapView.getRotationAngle());
-				}
-			}
-
-			@Override
-			public void prePointersUp(float x1, float y1, float x2, float y2,
-									  double factor) {
-			}
-
-		});
-*/
-		// Setup listener for map initialized
-
-		//TODO: Port to Quartz?
-		/*mMapView.setOnStatusChangedListener(new OnStatusChangedListener() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void onStatusChanged(Object source, STATUS status) {
-
-				if (source == mMapView && status == STATUS.INITIALIZED) {
-
-					mapSpatialReference = mMapView.getSpatialReference();
-
-					if (mMapViewState == null) {
-						// Starting location tracking will cause zoom to My
-						// Location
-						startLocationTracking();
-					} else {
-						mMapView.restoreState(mMapViewState);
-					}
-					// add search and routing layers
-					addGraphicLayers();
-				}
+			public void onLocationChanged(LocationDisplay.LocationChangedEvent locationChangedEvent) {
+				startLocationTracking(locationChangedEvent);
 			}
 		});
-*/
+		mLocationDisplay.startAsync();
+
+
 		// TODO: Port to Quartz
 		// Setup use of magnifier on a long press on the map
 		mMapView.setMagnifierEnabled(true);
@@ -1141,29 +1092,28 @@ public class MapFragment extends Fragment  {
 		InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 		inputManager.hideSoftInputFromWindow(mSearchview.getWindowToken(), 0);
 	}
-	/*
-        private void displaySearchResult(Point resultPoint, String address) {
 
-            // create marker symbol to represent location
-            Drawable drawable = getActivity().getResources().getDrawable(
-                    R.drawable.pin_circle_red);
-            PictureMarkerSymbol resultSymbol = new PictureMarkerSymbol(
-                    getActivity(), drawable);
-            // create graphic object for resulting location
-            Graphic resultLocGraphic = new Graphic(resultPoint,
+	private void displaySearchResult(Point resultPoint, String address) {
+
+		// create marker symbol to represent location
+		Bitmap icon = BitmapFactory.decodeResource(getActivity().getResources(), R.drawable.pin_circle_red);
+		BitmapDrawable drawable = new BitmapDrawable(getActivity().getResources(), icon);
+		PictureMarkerSymbol resultSymbol = new PictureMarkerSymbol(drawable);
+		// create graphic object for resulting location
+		Graphic resultLocGraphic = new Graphic(resultPoint,
                     resultSymbol);
-            // add graphic to location layer
-            mLocationLayer.addGraphic(resultLocGraphic);
+		// add graphic to location layer
+		mLocationLayer.getGraphics().add(resultLocGraphic);
 
-            mLocationLayerPoint = resultPoint;
+		mLocationLayerPoint = resultPoint;
 
-            mLocationLayerPointString = address;
+		mLocationLayerPointString = address;
 
-            // Zoom map to geocode result location
-            mMapView.zoomToResolution(resultPoint, 2);
-            showSearchResultLayout(address);
-        }
+		// Zoom map to geocode result location
 
+		//mMapView.zoomToResolution(resultPoint, 2);
+		showSearchResultLayout(address);
+	}
 
 
         /**
@@ -1250,15 +1200,15 @@ public class MapFragment extends Fragment  {
 	 *
 	 * @param address
 	 */
-	public void onSearchButtonClicked(String address) {
+	public void onSearchButtonClicked(final String address) {
 
 		// Hide virtual keyboard
 		hideKeyboard();
 
 		// Remove any previous graphics and routes
-		resetGraphicsLayers();
+		//resetGraphicsLayers();
 		// TODO: Un comment once Locator task is working
-		//executeLocatorTask(address);
+		executeLocatorTask(address);
 	}
 
 	/**
@@ -1266,35 +1216,82 @@ public class MapFragment extends Fragment  {
 	 *
 	 * @param address
 	 */
-/*	private void executeLocatorTask(String address) {
+	private void executeLocatorTask(final String address) {
+		ArcGISRuntimeEnvironment.License.setLicense(getString(R.string.license));
 		// Create Locator parameters from single line address string
-		LocatorFindParameters findParams = new LocatorFindParameters(address);
+		final GeocodeParameters geoParameters = new GeocodeParameters();
+		geoParameters.setMaxResults(2);
 
 		// Use the centre of the current map extent as the find location point
-		findParams.setLocation(mMapView.getCenter(),
-				mMapView.getSpatialReference());
-
-		// Calculate distance for find operation
-		Envelope mapExtent = new Envelope();
-		mMapView.getExtent().queryEnvelope(mapExtent);
-		// assume map is in metres, other units wont work, double current
-		// envelope
-		double distance = (mapExtent.getWidth() > 0) ? mapExtent
-				.getWidth() * 2 : 10000;
-		findParams.setDistance(distance);
-		findParams.setMaxLocations(2);
+		if (mLocation != null){
+			geoParameters.setPreferredSearchLocation(mLocation);
+		}
 
 		// Set address spatial reference to match map
-		findParams.setOutSR(mMapView.getSpatialReference());
+		SpatialReference sR = mMapView.getSpatialReference();
+		geoParameters.setOutputSpatialReference(sR);
+
+		Polygon polygon = mMapView.getVisibleArea();
+		Envelope mapExtent = polygon.getExtent();
+		// Calculate distance for find operation
+
+		// assume map is in metres, other units wont work, double current
+		// envelope
+		double width = (mapExtent.getWidth() > 0) ? mapExtent
+				.getWidth() * 2 : 10000;
+		double height = (mapExtent.getHeight() > 0) ? mapExtent
+				.getHeight() * 2 : 10000;
+		double xMax = mapExtent.getXMax() + width;
+		double xMin = mapExtent.getXMin() - width;
+		double yMax = mapExtent.getYMax() + height;
+		double yMin = mapExtent.getYMin() - height;
+
+		geoParameters.setSearchArea(new Envelope(new Point(xMax,yMax, sR), new Point(xMin, yMin, sR)));
+
+
+
 
 		// Execute async task to find the address
-		LocatorAsyncTask locatorTask = new LocatorAsyncTask();
-		locatorTask.execute(findParams);
-		mPendingTask = locatorTask;
+		final LocatorTask locatorTask = new LocatorTask("http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer");
+		locatorTask.addDoneLoadingListener(new Runnable() {
+			@Override
+			public void run() {
+				if (locatorTask.getLoadStatus() == LoadStatus.LOADED){
+					// Call geocodeAsync passing in an address
+					final ListenableFuture<List<GeocodeResult>> geocodeFuture = locatorTask.geocodeAsync(address, geoParameters);
+					geocodeFuture.addDoneListener(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								// Get the results of the async operation
+								List<GeocodeResult> geocodeResults = geocodeFuture.get();
 
-		mLocationLayerPointString = address;
+								if (geocodeResults.size() > 0) {
+									// Use the first result - for example display on the map
+									GeocodeResult topResult = geocodeResults.get(0);
+									displaySearchResult(topResult.getDisplayLocation(),address);
+
+									Log.i(TAG, topResult.getDisplayLocation().getX() + " " + topResult.getDisplayLocation().getY());
+
+
+								}
+							} catch (InterruptedException e) {
+								// Deal with exception...
+								e.printStackTrace();
+							} catch (ExecutionException e) {
+								// Deal with exception...
+								e.printStackTrace();
+							}
+						}
+					});
+				}else{
+					Log.i(TAG, "Locator task error");
+				}
+			}
+		});
+		locatorTask.loadAsync();
 	}
-*/
+
 	/**
 	 * Called by RoutingDialogFragment when user presses Get Route button.
 	 *
