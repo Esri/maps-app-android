@@ -61,7 +61,6 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.inputmethod.InputMethodManager;
-import android.support.design.widget.FloatingActionButton;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -261,28 +260,28 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 						AccountManager.getInstance().getAGOLPortal());
 
 			} else {
-				MapView mapView = (MapView) mMapContainer.findViewById(R.id.map);
+				String defaultBaseMapURL = getString(R.string.default_basemap_url);
+				MapView mapView = new MapView(getActivity(), defaultBaseMapURL,
+						"", "");
 
-				// Set the MapView to allow the user to rotate the map when as
-				// part of a pinch gesture.
-				mapView.setAllowRotationByPinch(true);
-
+				// Finish wiring up map view
 				setMapView(mapView);
+				// Then zoom to location
 				mapView.zoomin();
 			}
 		}
 
 		return mMapContainer;
 	}
-	private void attachFloatingActionButton(){
-		FloatingActionButton fab = (FloatingActionButton) mMapContainer.findViewById(R.id.fab);
+	private void setClickListenerForFloatingActionButton(){
+		final FloatingActionButton fab = (FloatingActionButton) mMapContainer.findViewById(R.id.fab);
 		fab.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				Log.d("***", "onClick called with: " + "view = [" + v + "]");
 				// Toggle location tracking on or off
 				if (mIsLocationTracking) {
-//							item.setIcon(R.drawable.ic_action_compass_mode);
+					fab.setImageResource(R.drawable.ic_action_compass_mode);
 					mMapView.getLocationDisplayManager().setAutoPanMode(
 							AutoPanMode.COMPASS);
 					mCompass.start();
@@ -290,7 +289,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 					mIsLocationTracking = false;
 				} else {
 					startLocationTracking();
-//							item.setIcon(android.R.drawable.ic_menu_mylocation);
+					fab.setImageResource(android.R.drawable.ic_menu_mylocation);
 					if (mMapView.getRotationAngle() != 0) {
 						mCompass.setVisibility(View.VISIBLE);
 						mCompass.setRotationAngle(mMapView.getRotationAngle());
@@ -435,7 +434,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 							// mapView.setAllowRotationByPinch(true);
 
 							setMapView(mapView);
-							attachFloatingActionButton();
+							setClickListenerForFloatingActionButton();
 							mapView.zoomin();
 
 						}
@@ -476,12 +475,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mlayoutParams.setMargins(LEFT_MARGIN_SEARCH, TOP_MARGIN_SEARCH,
 				RIGHT_MARGIN_SEARCH, BOTTOM_MARGIN_SEARCH);
 
+		// Add the map to the layout
+		mMapContainer.addView(mMapView,0);
 
 		// Set up floating action button
-		attachFloatingActionButton();
+		setClickListenerForFloatingActionButton();
 
-		// Set up floating action button
-		attachFloatingActionButton();
 
 		// Displaying the searchbox layout
 		showSearchBoxLayout();

@@ -3,13 +3,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.esri.android.map.MapView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        mapoptions.MapType="Topo"
-        android:id="@+id/map">
-    </com.esri.android.map.MapView>
-
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:src="@android:drawable/ic_menu_mylocation"
