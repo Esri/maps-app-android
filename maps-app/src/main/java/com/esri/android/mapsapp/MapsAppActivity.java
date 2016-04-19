@@ -53,6 +53,8 @@ import com.esri.android.mapsapp.account.SignInActivity;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
 import com.esri.arcgisruntime.mapping.Map;
+import com.esri.arcgisruntime.security.AuthenticationManager;
+import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
 
 
 import java.util.ArrayList;
@@ -103,6 +105,13 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 		 * id can be obtained on https://developers.arcgis.com
 		 */
 		ArcGISRuntimeEnvironment.setClientId(getString(R.string.client_id));
+
+		// Set up an authentication handler
+		// to be used when loading remote
+		// resources or services.
+		DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(this);
+		AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
+
 
 		setContentView(R.layout.maps_app_activity);
 		mLayout = findViewById(R.id.maps_app_activity_content_frame);
