@@ -99,6 +99,8 @@ import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.mapping.view.WrapAroundMode;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
+import com.esri.arcgisruntime.security.AuthenticationManager;
+import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
 import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.tasks.geocode.GeocodeParameters;
@@ -289,12 +291,14 @@ public class MapFragment extends Fragment  {
 
 				final MapView mapView =  (MapView) mMapContainer.findViewById(R.id.map);
 				mapView.setMap(map);
+				mapView.setMagnifierEnabled(true);
 				// Set the MapView to allow the user to rotate the map when as
 				// part of a pinch gesture.
 				//TODO: Modified for Quartz
 				// mapView.setAllowRotationByPinch(true);
 
 				setMapView(mapView);
+
 
 				// TODO: Is this needed in Quartz?
 				// mapView.zoomin();
@@ -1371,7 +1375,7 @@ public class MapFragment extends Fragment  {
 				mStartLocation = getString(R.string.my_location);
 
 				// We have start location, now get the destination location
-
+				Log.i(TAG, "Geocoding address: " + destination);
 				final ListenableFuture<List<GeocodeResult>> geoFutureEnd = mLocator.geocodeAsync(destination, mGeocodeParams);
 				geoFutureEnd.addDoneListener(new Runnable() {
 					@Override
@@ -1380,19 +1384,29 @@ public class MapFragment extends Fragment  {
 							List<GeocodeResult> results = geoFutureEnd.get();
 							if (results != null && results.size() > 0) {
 								Point endPoint = results.get(0).getDisplayLocation();
+								mEndLocation = destination;
+								// Set spatial reference
+								final SpatialReference ESPG_3857 = SpatialReference.create(102100);
 
 								// We have the start and end, now get route
 
-								final Stop start = new Stop(new Point(32.8725884,-117.2835913, mMapView.getSpatialReference() ));
-								final Stop end = new Stop(new Point(32.8681446,-117.252512, mMapView.getSpatialReference() ));
+								//final Stop start = new Stop(new Point(-13041036.0527, 32.8725884));
+								//final Stop end = new Stop(new Point(-117.252512, 32.8681446 ));
 
+								final Stop start = new Stop(new Point(-1.3018598562659847E7,
+										3863191.8817135547, ESPG_3857));
+								final Stop end = new Stop(new Point(-1.3036911787723785E7, 3839935.706521739,
+										ESPG_3857));
 
+								SpatialReference sr = mMapView.getSpatialReference();
+								Log.i(TAG, "Spatial reference = " + sr.getWKID());
 								mRouteTask.addDoneLoadingListener(new Runnable() {
 									@Override
 									public void run() {
 										LoadStatus status = mRouteTask.getLoadStatus();
 										Log.i(TAG, status.name());
 										if (status == LoadStatus.FAILED_TO_LOAD){
+
 											Log.i(TAG,mRouteTask.getLoadError().getMessage());
 											mRouteTask.retryLoadAsync();
 										}else{
@@ -1402,14 +1416,14 @@ public class MapFragment extends Fragment  {
 												@Override
 												public void run() {
 													try {
-
+														Log.i(TAG, "Task loaded, getting route paramters");
 														RouteParameters routeParameters = routeTaskFuture.get();
 														routeParameters.getStops().add(start);
 														routeParameters.getStops().add(end);
 														routeParameters.setReturnDirections(true);
 														routeParameters.setReturnRoutes(true);
 														routeParameters.setDirectionsDistanceTextUnits(DirectionDistanceTextUnits.IMPERIAL);
-														routeParameters.setOutputSpatialReference(mMapView.getSpatialReference());
+														routeParameters.setOutputSpatialReference(ESPG_3857);
 
 														final ListenableFuture<RouteResult> routeResFuture = mRouteTask.solveAsync(routeParameters);
 														routeResFuture.addDoneListener(new Runnable() {
@@ -1417,11 +1431,6 @@ public class MapFragment extends Fragment  {
 															public void run() {
 																try {
 																	RouteResult routeResult = routeResFuture.get();
-																	if(routeResult.getRoutes()!= null && routeResult.getRoutes().size() > 0){
-																		for ( Route route : routeResult.getRoutes()){
-																			Log.i(TAG, route.getRouteName());
-																		}
-																	}
 																	// Show route results
 																	showRoute(routeResult);
 
@@ -1453,6 +1462,8 @@ public class MapFragment extends Fragment  {
 								});
 								mRouteTask.loadAsync();
 
+							}else{
+								Log.i(TAG, "Geocoding failed to return results for this address: " + destination);
 							}
 						} catch (InterruptedException e) {
 							e.printStackTrace();
@@ -1916,9 +1927,6 @@ public class MapFragment extends Fragment  {
 			// Show the result on the search result layout
 			showSearchResultLayout(mLocationLayerPointString);
 		}
-
-
-
 	}
 
 	/**
@@ -1934,9 +1942,6 @@ public class MapFragment extends Fragment  {
 		return px / (metrics.densityDpi / 160f);
 	}
 
-	public void setPortalItem(PortalItem item) {
-		mPortalItem = item;
-	}
 
 	private class MapTouchListener extends DefaultMapViewOnTouchListener{
 		/**
@@ -1953,27 +1958,27 @@ public class MapFragment extends Fragment  {
 		public boolean onUp(MotionEvent motionEvent) {
 			if (mLongPressEvent != null) {
 				// This is the end of a long-press that will have displayed
-				// the
-				// magnifier.
+				// the magnifier.
 				// Perform reverse-geocoding of the point that was pressed
+
 				android.graphics.Point mapPoint = new android.graphics.Point((int) motionEvent.getX(), (int) motionEvent.getY());
 				Point point = mMapView.screenToLocation(mapPoint);
-				//TODO: Turn this back on when ReverseGeocoding is working
 				reverseGeocode(point);
 
 				mLongPressEvent = null;
+
 				// Remove any previous graphics
 				resetGraphicsLayers();
 			}
-			//TODO: Anything else to do here?
 			return true;
 		}
 
 
 		@Override
 		public void onLongPress(MotionEvent e) {
-			// Set mLongPressEvent to indicate we are processing a
-			// long-press
+			super.onLongPress(e);
+			// Set mLongPressEvent to indicate
+			// we are processing a long-press
 			mLongPressEvent = e;
 		}
 	}
