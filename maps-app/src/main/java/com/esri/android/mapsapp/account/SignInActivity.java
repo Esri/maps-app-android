@@ -47,6 +47,8 @@ import com.esri.arcgisruntime.portal.PortalUser;
 import com.esri.arcgisruntime.security.AuthenticationManager;
 import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
 import com.esri.arcgisruntime.security.OAuthConfiguration;
+import com.esri.arcgisruntime.security.OAuthTokenCredential;
+import com.esri.arcgisruntime.security.OAuthTokenCredentialRequest;
 
 import java.net.MalformedURLException;
 
@@ -62,8 +64,6 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
   private static final String HTTPS = "https://";
 
   private static final String HTTP = "http://";
-
-  private static final int OAUTH_EXPIRATION_NEVER = -1;
 
   private EditText mPortalUrlEditText;
 
@@ -89,6 +89,13 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
     View cancelButton = findViewById(R.id.sign_in_activity_cancel_button);
     cancelButton.setOnClickListener(this);
     mPortalUrl = mPortalUrlEditText.getText().toString().trim();
+
+    // Set up an authentication handler
+    // to be used when loading remote
+    // resources or services.
+    DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(this);
+    AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
+
   }
 
   @Override
@@ -141,13 +148,6 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
   }
 
   /**
-   * Signs into the portal using the generateToken REST endpoint.
-   */
-  private void signInWithGenerateToken() {
-    Toast.makeText(this, "GenerateToken-based sign in not implemented yet", Toast.LENGTH_SHORT).show();
-  }
-
-  /**
    * Signs into the portal using OAuth2.
    */
   private void signInWithOAuth() {
@@ -158,10 +158,10 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 
     // Are we already signed in?
     if (AccountManager.getInstance().getPortal() != null) {
-      Log.i(TAG,"Already signed into to Portal");
+      Log.i(TAG,"Already signed into to Portal.");
       return;
     }
-    Log.i(TAG, "Signing in with OAuth");
+    Log.i(TAG, "Signing in with OAuth...");
     final ProgressDialogFragment mProgressDialog;
     String clientId = getString(R.string.client_id);
     String redirectUri = getString(R.string.redirectURI);
@@ -170,8 +170,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
       return;
     }
     // default handler
-    DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(this);
-    AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
+
     final Portal portal = new Portal(mPortalUrl, true);
     mProgressDialog = ProgressDialogFragment.newInstance(getString(R.string.verifying_portal));
     mProgressDialog.show(getFragmentManager(), TAG_PROGRESS_DIALOG);
@@ -193,5 +192,6 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
     portal.loadAsync();
 
   }
+
 
 }
