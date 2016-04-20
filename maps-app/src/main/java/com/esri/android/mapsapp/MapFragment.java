@@ -86,7 +86,6 @@ import com.esri.arcgisruntime.geometry.GeometryEngine;
 import com.esri.arcgisruntime.geometry.LinearUnit;
 import com.esri.arcgisruntime.geometry.LinearUnitId;
 import com.esri.arcgisruntime.geometry.Point;
-import com.esri.arcgisruntime.geometry.Polyline;
 import com.esri.arcgisruntime.geometry.SpatialReference;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.Basemap;
@@ -99,8 +98,6 @@ import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.mapping.view.WrapAroundMode;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
-import com.esri.arcgisruntime.security.AuthenticationManager;
-import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
 import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.tasks.geocode.GeocodeParameters;
@@ -115,7 +112,6 @@ import com.esri.arcgisruntime.tasks.route.Route;
 import com.esri.arcgisruntime.tasks.route.RouteParameters;
 import com.esri.arcgisruntime.tasks.route.RouteResult;
 import com.esri.arcgisruntime.tasks.route.RouteTask;
-import com.esri.arcgisruntime.tasks.route.RouteTaskInfo;
 import com.esri.arcgisruntime.tasks.route.Stop;
 
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
@@ -124,8 +120,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 /**
  * Implements the view that shows the map.
  */
-/*public class MapFragment extends Fragment implements BasemapsDialogListener,
-		RoutingDialogListener, OnCancelListener {*/
+
 public class MapFragment extends Fragment  {
 
 	public static final String TAG = MapFragment.class.getSimpleName();
@@ -261,7 +256,7 @@ public class MapFragment extends Fragment  {
 		}
 
 		ArcGISRuntimeEnvironment.License.setLicense(getString(R.string.license));
-		mLocator =  new LocatorTask("http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer");
+		mLocator =  new LocatorTask(getString(R.string.geocode_url));
 
 	}
 
@@ -291,11 +286,6 @@ public class MapFragment extends Fragment  {
 
 				final MapView mapView =  (MapView) mMapContainer.findViewById(R.id.map);
 				mapView.setMap(map);
-				mapView.setMagnifierEnabled(true);
-				// Set the MapView to allow the user to rotate the map when as
-				// part of a pinch gesture.
-				//TODO: Modified for Quartz
-				// mapView.setAllowRotationByPinch(true);
 
 				setMapView(mapView);
 
@@ -315,10 +305,12 @@ public class MapFragment extends Fragment  {
 					public void onLocationChanged(LocationDisplay.LocationChangedEvent locationChangedEvent) {
 
 						Point point = locationChangedEvent.getLocation().getPosition();
+
 						if (point !=null){
-							mLocationDisplay.removeLocationChangedListener(this);
+							mLocation = point;
 							Log.i(TAG, "I have a location " + point.getX() + " , " + point.getY());
 							showMyLocation(point);
+							mLocationDisplay.removeLocationChangedListener(this);
 						}
 
 
@@ -329,7 +321,6 @@ public class MapFragment extends Fragment  {
 				//add graphics layer
 				addGraphicLayers();
 
-				Log.i(TAG, "Map is magnifier enabled " + mapView.isMagnifierEnabled());
 			}
 		}
 
@@ -481,7 +472,6 @@ public class MapFragment extends Fragment  {
 				}
 
 				if (webmap != null) {
-					// TODO: DO WE NEED to run this on RunOnUiThread IN QUARTZ?
 					getActivity().runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
@@ -514,8 +504,6 @@ public class MapFragment extends Fragment  {
 		mMapView.setLogoVisible(true);
 		mMapView.setWrapAroundMode(WrapAroundMode.ENABLE_WHEN_SUPPORTED);
 
-		//TODO: Is this needed in Quartz?
-		//mapView.setAllowRotationByPinch(true);
 
 		// Creating an inflater
 		mInflater = (LayoutInflater) getActivity().getSystemService(
@@ -546,8 +534,6 @@ public class MapFragment extends Fragment  {
 		});
 		mLocationDisplay.startAsync();
 
-
-		// TODO: Port to Quartz
 		// Setup use of magnifier on a long press on the map
 		mMapView.setMagnifierEnabled(true);
 		mLongPressEvent = null;
@@ -997,8 +983,12 @@ public class MapFragment extends Fragment  {
 		mIsLocationTracking = true;
 	}
 
+	/**
+	 * Zoom the map to the current location, if set.
+	 * @param wgsPoint - Point representing current location
+     */
 	private void showMyLocation(Point wgsPoint){
-		if (mMapView.getSpatialReference() != null){
+		if ((mMapView.getSpatialReference() != null) && (mLocation != null)){
 			mLocation = (Point) GeometryEngine.project(wgsPoint,
 					mMapView.getSpatialReference());
 			LinearUnit mapUnit = (LinearUnit) mMapView.getSpatialReference().getUnit();
