@@ -88,5 +88,10 @@
 
     <!-- floating action button -->
     <string name="imagebutton_content_desc">Turn GPS on/off</string>
+    
+    <!-- Alert dialog strings-->
+    <string name="location_tracking_off">Location tracking is required for this app.  Do you want modify the location options?</string>
+    <string name="wireless_off">An internet connection is needed for this app. Do you want to modify the wireless settings?</string>
+    <string name="open_location_options">Yes</string>
 
 </resources>
