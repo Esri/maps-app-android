@@ -11,7 +11,6 @@ On Start                               | Select Basemaps
 * Place search
 * Geocode addresses
 * Reverse geocode
-* Route
 * Sign in to ArcGIS account
 
 ## App Type Hierarchy
