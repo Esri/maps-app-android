@@ -24,84 +24,84 @@
 
 package com.esri.android.mapsapp.account;
 
-
-import com.esri.arcgisruntime.portal.PortalInfo;
 import com.esri.arcgisruntime.portal.Portal;
+import com.esri.arcgisruntime.portal.PortalInfo;
 import com.esri.arcgisruntime.portal.PortalUser;
 
-
 /**
- * Singleton used to provide access to, and helper methods around, a com.esri.core.portal.Portal object.
+ * Singleton used to provide access to, and helper methods around, a
+ * com.esri.core.portal.Portal object.
  */
 public class AccountManager {
 
-  private static final String AGOL_PORTAL_URL = "http://www.arcgis.com";
+	private static final String AGOL_PORTAL_URL = "http://www.arcgis.com";
 
-  private static AccountManager sAccountManager;
+	private static AccountManager sAccountManager;
 
-  private Portal mPortal;
+	private Portal mPortal;
 
-  private Portal mAGOLPortal;
+	private Portal mAGOLPortal;
 
-  private PortalUser mPortalUser;
+	private PortalUser mPortalUser;
 
-  private PortalInfo mPortalInfo;
+	private PortalInfo mPortalInfo;
 
-  private AccountManager() {
-  }
+	private AccountManager() {
+	}
 
-  public static AccountManager getInstance() {
-    if (sAccountManager == null) {
-      sAccountManager = new AccountManager();
-    }
-    return sAccountManager;
-  }
+	public static AccountManager getInstance() {
+		if (sAccountManager == null) {
+			sAccountManager = new AccountManager();
+		}
+		return sAccountManager;
+	}
 
-  /**
-   * Gets the Portal instance the app is currently signed into. Returns null if the user hasn't signed in to a portal.
-   */
-  public Portal getPortal() {
-    return mPortal;
-  }
+	/**
+	 * Gets the Portal instance the app is currently signed into. Returns null
+	 * if the user hasn't signed in to a portal.
+	 */
+	public Portal getPortal() {
+		return mPortal;
+	}
 
-  /**
-   * Sets the portal the app is currently signed in to.
-   */
-  public void setPortal(Portal portal) {
-    mPortalUser = null;
-    mPortalInfo = null;
-    
-    mPortal = portal;
-    
-    try {
-      mPortalUser = mPortal != null ? mPortal.getPortalUser() : null;
-      mPortalInfo = mPortal != null ? mPortal.getPortalInfo() : null;
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
+	/**
+	 * Sets the portal the app is currently signed in to.
+	 */
+	public void setPortal(Portal portal) {
+		mPortalUser = null;
+		mPortalInfo = null;
 
-  /**
-   * Gets the ArcGIS Online portal instance (http://www.arcgis.com).
-   * 
-   * @return the ArcGIS Online portal instance
-   */
-  public Portal getAGOLPortal() {
-    if (mAGOLPortal == null) {
-      mAGOLPortal = new Portal(AGOL_PORTAL_URL, null);
-    }
-    return mAGOLPortal;
-  }
+		mPortal = portal;
 
-  public boolean isSignedIn() {
-    return mPortal != null;
-  }
+		try {
+			mPortalUser = mPortal != null ? mPortal.getPortalUser() : null;
+			mPortalInfo = mPortal != null ? mPortal.getPortalInfo() : null;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
-  public PortalUser getPortalUser() {
-    return mPortalUser;
-  }
+	/**
+	 * Gets the ArcGIS Online portal instance (http://www.arcgis.com).
+	 * 
+	 * @return the ArcGIS Online portal instance
+	 */
+	public Portal getAGOLPortal() {
+		if (mAGOLPortal == null) {
+			mAGOLPortal = new Portal(AGOL_PORTAL_URL, null);
+		}
+		return mAGOLPortal;
+	}
 
-  public PortalInfo getPortalInfo() {
-    return mPortalInfo;
-  }
+	public boolean isSignedIn() {
+		return mPortal != null;
+	}
+
+	public PortalUser getPortalUser() {
+		return mPortalUser;
+	}
+
+	public PortalInfo getPortalInfo() {
+		return mPortalInfo;
+	}
 }

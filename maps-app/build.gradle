@@ -10,7 +10,7 @@ android {
         targetSdkVersion 23
     }
 
-    packagingOptions{
+    packagingOptions {
         exclude 'META-INF/LGPL2.1'
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/NOTICE'

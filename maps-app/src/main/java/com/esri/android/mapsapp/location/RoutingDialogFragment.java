@@ -54,25 +54,6 @@ public class RoutingDialogFragment extends DialogFragment {
 
 	private RoutingDialogListener mRoutingDialogListener;
 
-	/**
-	 * A callback interface that all activities containing this fragment must
-	 * implement, to receive a routing request from this fragment.
-	 */
-	public interface RoutingDialogListener {
-		/**
-		 * Callback for when the Get Route button is pressed.
-		 * 
-		 * @param startPoint
-		 *            String entered by user to define start point.
-		 * @param endPoint
-		 *            String entered by user to define end point.
-		 * @return true if routing task executed, false if parameters rejected.
-		 *         If this method rejects the parameters it must display an
-		 *         explanatory Toast to the user before returning.
-		 */
-		boolean onGetRoute(String startPoint, String endPoint);
-	}
-
 	// Mandatory empty constructor for fragment manager to recreate fragment
 	// after it's destroyed.
 	public RoutingDialogFragment() {
@@ -80,7 +61,7 @@ public class RoutingDialogFragment extends DialogFragment {
 
 	/**
 	 * Sets listener for click on Get Route button.
-	 * 
+	 *
 	 * @param listener
 	 */
 	public void setRoutingDialogListener(RoutingDialogListener listener) {
@@ -100,8 +81,7 @@ public class RoutingDialogFragment extends DialogFragment {
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.routing_layout, container, false);
 		getDialog().setTitle(R.string.title_routing_dialog);
 		// Initialize searchviews
@@ -116,13 +96,12 @@ public class RoutingDialogFragment extends DialogFragment {
 		mEndText.setQueryHint(SEARCH_TO);
 
 		// Change default search icons for the search view
-		int startIconId = mStartText.getContext().getResources()
-				.getIdentifier("android:id/search_mag_icon", null, null);
+		int startIconId = mStartText.getContext().getResources().getIdentifier("android:id/search_mag_icon", null,
+				null);
 		ImageView start_icon = (ImageView) mStartText.findViewById(startIconId);
 		start_icon.setImageResource(R.drawable.pin_circle_red);
 
-		int endIconId = mEndText.getContext().getResources()
-				.getIdentifier("android:id/search_mag_icon", null, null);
+		int endIconId = mEndText.getContext().getResources().getIdentifier("android:id/search_mag_icon", null, null);
 		ImageView end_icon = (ImageView) mEndText.findViewById(endIconId);
 		end_icon.setImageResource(R.drawable.pin_circle_blue);
 
@@ -135,7 +114,7 @@ public class RoutingDialogFragment extends DialogFragment {
 		ImageView swap = (ImageView) view.findViewById(R.id.iv_interchange);
 
 		Button routeButton = (Button) view.findViewById(R.id.getRouteButton);
-		//Set up onClick listener for the "Get Route" button
+		// Set up onClick listener for the "Get Route" button
 		routeButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
@@ -149,7 +128,7 @@ public class RoutingDialogFragment extends DialogFragment {
 
 		});
 
-		//Interchange the text in the searchviews
+		// Interchange the text in the searchviews
 		swap.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -162,7 +141,8 @@ public class RoutingDialogFragment extends DialogFragment {
 			}
 		});
 
-		//Setup listener when the search button is clicked n the keyboard for the searchviews
+		// Setup listener when the search button is clicked n the keyboard for
+		// the searchviews
 		mEndText.setOnQueryTextListener(new OnQueryTextListener() {
 
 			@Override
@@ -173,9 +153,8 @@ public class RoutingDialogFragment extends DialogFragment {
 					if (mRoutingDialogListener.onGetRoute(startPoint, endPoint)) {
 						dismiss();
 					}
-				}
-				else{
-					//"From" text is null
+				} else {
+					// "From" text is null
 					mEndText.clearFocus();
 					mStartText.requestFocus();
 				}
@@ -187,7 +166,7 @@ public class RoutingDialogFragment extends DialogFragment {
 				return false;
 			}
 		});
-		
+
 		mStartText.setOnQueryTextListener(new OnQueryTextListener() {
 
 			@Override
@@ -198,9 +177,8 @@ public class RoutingDialogFragment extends DialogFragment {
 					if (mRoutingDialogListener.onGetRoute(startPoint, endPoint)) {
 						dismiss();
 					}
-				}
-				else{
-					//"To" text is null
+				} else {
+					// "To" text is null
 					mStartText.clearFocus();
 					mEndText.requestFocus();
 				}
@@ -214,6 +192,25 @@ public class RoutingDialogFragment extends DialogFragment {
 		});
 
 		return view;
+	}
+
+	/**
+	 * A callback interface that all activities containing this fragment must
+	 * implement, to receive a routing request from this fragment.
+	 */
+	public interface RoutingDialogListener {
+		/**
+		 * Callback for when the Get Route button is pressed.
+		 *
+		 * @param startPoint
+		 *            String entered by user to define start point.
+		 * @param endPoint
+		 *            String entered by user to define end point.
+		 * @return true if routing task executed, false if parameters rejected.
+		 *         If this method rejects the parameters it must display an
+		 *         explanatory Toast to the user before returning.
+		 */
+		boolean onGetRoute(String startPoint, String endPoint);
 	}
 
 }

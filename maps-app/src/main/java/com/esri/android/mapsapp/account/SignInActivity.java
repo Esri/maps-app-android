@@ -25,10 +25,7 @@
 package com.esri.android.mapsapp.account;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -46,152 +43,148 @@ import com.esri.arcgisruntime.portal.PortalInfo;
 import com.esri.arcgisruntime.portal.PortalUser;
 import com.esri.arcgisruntime.security.AuthenticationManager;
 import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
-import com.esri.arcgisruntime.security.OAuthConfiguration;
-import com.esri.arcgisruntime.security.OAuthTokenCredential;
-import com.esri.arcgisruntime.security.OAuthTokenCredentialRequest;
-
-import java.net.MalformedURLException;
 
 /**
- * Implements the sign in UX to ArcGIS portal accounts. Handles sign in to OAuth and non-OAuth secured portals.
+ * Implements the sign in UX to ArcGIS portal accounts. Handles sign in to OAuth
+ * and non-OAuth secured portals.
  */
 public class SignInActivity extends Activity implements OnClickListener, TextWatcher {
 
-  public static final String TAG = SignInActivity.class.getSimpleName();
+	public static final String TAG = SignInActivity.class.getSimpleName();
 
-  private static final String MSG_OBTAIN_CLIENT_ID = "You have to provide a client id in order to do OAuth sign in. You can obtain a client id by registering the application on https://developers.arcgis.com.";
+	private static final String MSG_OBTAIN_CLIENT_ID = "You have to provide a client id in order to do OAuth sign in. You can obtain a client id by registering the application on https://developers.arcgis.com.";
 
-  private static final String HTTPS = "https://";
+	private static final String HTTPS = "https://";
 
-  private static final String HTTP = "http://";
+	private static final String HTTP = "http://";
+	private static final String TAG_PROGRESS_DIALOG = "TAG_PROGRESS_DIALOG";
+	private EditText mPortalUrlEditText;
+	private View mContinueButton;
+	private String mPortalUrl;
 
-  private EditText mPortalUrlEditText;
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-  private View mContinueButton;
+		setContentView(R.layout.sign_in_activity_portal_url_layout);
 
-  private String mPortalUrl;
+		mPortalUrlEditText = (EditText) findViewById(R.id.sign_in_activity_portal_url_edittext);
+		mPortalUrlEditText.addTextChangedListener(this);
 
-  private static final String TAG_PROGRESS_DIALOG = "TAG_PROGRESS_DIALOG";
+		mContinueButton = findViewById(R.id.sign_in_activity_continue_button);
+		mContinueButton.setOnClickListener(this);
+		mContinueButton.setEnabled(!mPortalUrlEditText.getText().toString().trim().isEmpty());
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+		View cancelButton = findViewById(R.id.sign_in_activity_cancel_button);
+		cancelButton.setOnClickListener(this);
+		mPortalUrl = mPortalUrlEditText.getText().toString().trim();
 
-    setContentView(R.layout.sign_in_activity_portal_url_layout);
+		// Set up an authentication handler
+		// to be used when loading remote
+		// resources or services.
+		// TODO: Explain more about how this works.
+		DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(
+				this);
+		AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
 
-    mPortalUrlEditText = (EditText) findViewById(R.id.sign_in_activity_portal_url_edittext);
-    mPortalUrlEditText.addTextChangedListener(this);
+	}
 
-    mContinueButton = findViewById(R.id.sign_in_activity_continue_button);
-    mContinueButton.setOnClickListener(this);
-    mContinueButton.setEnabled(!mPortalUrlEditText.getText().toString().trim().isEmpty());
+	@Override
+	public void onClick(View view) {
+		switch (view.getId()) {
+			case R.id.sign_in_activity_continue_button :
+				// determine what type of authentication is required to sign in
+				// to the specified portal
+				mPortalUrl = mPortalUrlEditText.getText().toString().trim();
+				if (!mPortalUrl.startsWith(HTTP)) {
+					mPortalUrl = HTTP + mPortalUrl;
+				}
+				final Portal portal = new Portal(mPortalUrl);
+				portal.addDoneLoadingListener(new Runnable() {
+					@Override
+					public void run() {
+						if (portal.getLoadStatus() == LoadStatus.LOADED) {
+							PortalInfo portalInformation = portal.getPortalInfo();
+							if (portalInformation.isSupportsOAuth()) {
+								signInWithOAuth();
+							}
+						}
+					}
+				});
+				portal.loadAsync();
+				Log.i(TAG, "Finished handling CONTINUE click in SignIn Activity");
+				break;
+			case R.id.sign_in_activity_cancel_button :
+				finish();
+				break;
+		}
+	}
 
-    View cancelButton = findViewById(R.id.sign_in_activity_cancel_button);
-    cancelButton.setOnClickListener(this);
-    mPortalUrl = mPortalUrlEditText.getText().toString().trim();
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+	}
 
-    // Set up an authentication handler
-    // to be used when loading remote
-    // resources or services.
-    DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(this);
-    AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+	}
 
-  }
+	@Override
+	public void afterTextChanged(Editable s) {
+		if (s == null) {
+			return;
+		}
 
-  @Override
-  public void onClick(View view) {
-    switch (view.getId()) {
-      case R.id.sign_in_activity_continue_button:
-        // determine what type of authentication is required to sign in to the specified portal
-        mPortalUrl = mPortalUrlEditText.getText().toString().trim();
-        if (!mPortalUrl.startsWith(HTTP)) {
-          mPortalUrl = HTTP + mPortalUrl;
-        }
-        final Portal portal = new Portal(mPortalUrl);
-        portal.addDoneLoadingListener(new Runnable() {
-          @Override
-          public void run() {
-            if (portal.getLoadStatus() == LoadStatus.LOADED) {
-              PortalInfo portalInformation = portal.getPortalInfo();
-              if (portalInformation.isSupportsOAuth()){
-                signInWithOAuth();
-              }
-            }
-          }
-        });
-        portal.loadAsync();
-        Log.i(TAG,"Finished handling CONTINUE click in SignIn Activity");
-        break;
-      case R.id.sign_in_activity_cancel_button:
-        finish();
-        break;
-    }
-  }
+		// update the enabled state of the Continue button
+		String url = s.toString().trim();
+		mContinueButton.setEnabled(StringUtils.isNotEmpty(url));
+	}
 
-  @Override
-  public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-  }
+	/**
+	 * Signs into the portal using OAuth2.
+	 */
+	private void signInWithOAuth() {
 
-  @Override
-  public void onTextChanged(CharSequence s, int start, int before, int count) {
-  }
+		if (mPortalUrl.startsWith(HTTP)) {
+			mPortalUrl = mPortalUrl.replace(HTTP, HTTPS);
+		}
 
-  @Override
-  public void afterTextChanged(Editable s) {
-    if (s == null) {
-      return;
-    }
+		// Are we already signed in?
+		if (AccountManager.getInstance().getPortal() != null) {
+			Log.i(TAG, "Already signed into to Portal.");
+			return;
+		}
+		Log.i(TAG, "Signing in with OAuth...");
+		final ProgressDialogFragment mProgressDialog;
+		String clientId = getString(R.string.client_id);
 
-    // update the enabled state of the Continue button
-    String url = s.toString().trim();
-    mContinueButton.setEnabled(StringUtils.isNotEmpty(url));
-  }
+		if (StringUtils.isEmpty(clientId)) {
+			Toast.makeText(this, MSG_OBTAIN_CLIENT_ID, Toast.LENGTH_SHORT).show();
+			return;
+		}
+		// default handler
 
-  /**
-   * Signs into the portal using OAuth2.
-   */
-  private void signInWithOAuth() {
+		final Portal portal = new Portal(mPortalUrl, true);
+		mProgressDialog = ProgressDialogFragment.newInstance(getString(R.string.verifying_portal));
+		mProgressDialog.show(getFragmentManager(), TAG_PROGRESS_DIALOG);
+		portal.addDoneLoadingListener(new Runnable() {
+			@Override
+			public void run() {
+				if (portal.getLoadStatus() == LoadStatus.LOADED) {
+					PortalInfo portalInformation = portal.getPortalInfo();
+					String portalName = portalInformation.getPortalName(); // Returns
+																			// 'ArcGIS
+																			// Online'
+					PortalUser user = portal.getPortalUser();
+					Log.i(TAG, portalName + " , user = " + user.getUserName());
+					mProgressDialog.dismiss();
+					AccountManager.getInstance().setPortal(portal);
+					Log.i(TAG, "Portal has been set in 'SignInActivity'");
+					finish();
+				}
+			}
+		});
+		portal.loadAsync();
 
-    if (mPortalUrl.startsWith(HTTP)) {
-      mPortalUrl = mPortalUrl.replace(HTTP, HTTPS);
-    }
-
-    // Are we already signed in?
-    if (AccountManager.getInstance().getPortal() != null) {
-      Log.i(TAG,"Already signed into to Portal.");
-      return;
-    }
-    Log.i(TAG, "Signing in with OAuth...");
-    final ProgressDialogFragment mProgressDialog;
-    String clientId = getString(R.string.client_id);
-    String redirectUri = getString(R.string.redirectURI);
-    if (StringUtils.isEmpty(clientId)) {
-      Toast.makeText(this, MSG_OBTAIN_CLIENT_ID, Toast.LENGTH_SHORT).show();
-      return;
-    }
-    // default handler
-
-    final Portal portal = new Portal(mPortalUrl, true);
-    mProgressDialog = ProgressDialogFragment.newInstance(getString(R.string.verifying_portal));
-    mProgressDialog.show(getFragmentManager(), TAG_PROGRESS_DIALOG);
-    portal.addDoneLoadingListener(new Runnable() {
-        @Override
-        public void run() {
-          if (portal.getLoadStatus() == LoadStatus.LOADED) {
-            PortalInfo portalInformation = portal.getPortalInfo();
-            String portalName = portalInformation.getPortalName(); // Returns 'ArcGIS Online'
-            PortalUser user = portal.getPortalUser();
-            Log.i(TAG, portalName + " , user = " + user.getUserName());
-            mProgressDialog.dismiss();
-            AccountManager.getInstance().setPortal(portal);
-            Log.i(TAG,"Portal has been set in 'SignInActivity'");
-            finish();
-          }
-        }
-      });
-    portal.loadAsync();
-
-  }
-
+	}
 
 }

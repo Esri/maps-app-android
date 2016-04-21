@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_margin="10dp"
-    android:gravity="center"
-    android:orientation="vertical" >
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_margin="10dp"
+              android:gravity="center"
+              android:orientation="vertical">
 
     <TextView
         android:id="@+id/sign_in_activity_portal_url_textview"
@@ -13,7 +13,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="20dp"
         android:text="@string/specify_portal_url"
-        android:textSize="17sp" />
+        android:textSize="17sp"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -27,29 +27,30 @@
             android:ems="10"
             android:hint="@string/portal_url_hint"
             android:inputType="textUri"
-            android:minWidth="300dp" >
+            android:minWidth="300dp">
 
-            <requestFocus />
+            <requestFocus/>
         </EditText>
 
         <LinearLayout
             style="?android:attr/buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="right" >
+            android:gravity="right">
+
             <Button
                 android:id="@+id/sign_in_activity_cancel_button"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/cancel" />
+                android:text="@string/cancel"/>
 
             <Button
                 android:id="@+id/sign_in_activity_continue_button"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/continue_label" />
+                android:text="@string/continue_label"/>
 
         </LinearLayout>
     </LinearLayout>

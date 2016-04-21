@@ -71,10 +71,10 @@
     <string name="swap_addresses">Interchange the addresses</string>
     <string name="routing_title">Routing</string>
     <string name="clearText">Clear Text</string>
-    
+
     <!-- Routing Dialog Fragment -->
-	<string name="to">TO </string>
-	<string name="from">FROM </string>
+    <string name="to">TO </string>
+    <string name="from">FROM </string>
 
     <!-- ImageView content Descriptions -->
     <string name="icon_for_searchResult">Icon indicating Search</string>
@@ -88,10 +88,11 @@
 
     <!-- floating action button -->
     <string name="imagebutton_content_desc">Turn GPS on/off</string>
-    
+
     <!-- Alert dialog strings-->
     <string name="location_tracking_off">Location tracking is required for this app.  Do you want modify the location options?</string>
     <string name="wireless_off">An internet connection is needed for this app. Do you want to modify the wireless settings?</string>
     <string name="open_location_options">Yes</string>
+    <string name="icon_for_navigation_menue"/>
 
 </resources>
