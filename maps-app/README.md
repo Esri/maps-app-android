@@ -9,16 +9,22 @@ Read developer setup instructions [here](https://github.com/Esri/maps-app-androi
 ### My Location
 See your location on the map
 
-Turn on your device's gps and launch the app! If you browse on the map and would like to go back to your location tap the gps icon located in the top-right corner.
+Turn on your device's gps and launch the app! If you browse on the map and would like to go back to your location tap the GPS floating action button located in the bottom-right corner.
 
-![](assets/my-location.png)
+![] (assets/home.png)
 
 ### Place search
-Search for addresses, points of interests, administrative place names, postal codes, or x/y coordinates.  
+Search for addresses, points of interests, administrative place names, postal codes, or x/y coordinates.  As you type, the app will provide hints in the search box.
 
-Long press on the map to get the adress of that point or you can simply search for a place on map by typing in address, postal code, x/y coordinates, place name. The result will be highlighted on the map.
+![] (assets/hints.png)
 
-![](assets/place-search.png)
+Choosing one of the search hints will show the location in the map with a red symbol marker.
+
+Long press on the map to get the adress of that point and a magnifier will be displayed to help pinpoint your desired target location. The result will be highlighted on the map.
+
+![](assets/magnifier.png)
+
+![](assets/magnifier_loc.png)
 
 ### Driving Directions
 Generate turn-by-turn directions between two places with distance and estimated drive time.  
