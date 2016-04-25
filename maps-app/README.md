@@ -38,12 +38,6 @@ You can switch the basemaps by swiping left from the edge of your device and sel
 
 ![](switch-basemap.png)
 
-### Measure tool
-Calculate distance or area in multiple units that are extendible.  
-
-Swipe left from the left edge of your device to open the drawer. Select **Measure** from the the options. Press ![screen shot 2015-06-18 at 3 54 23 pm](https://cloud.githubusercontent.com/assets/12648228/8244122/52deeab0-15d2-11e5-8d4e-c36b8b177213.png) to select your geometry type, unit and you are good to go. Just tap on the locations to view the distance or area. 
-
-![](measure.png)
 
 ### Sign into ArcGIS
 Sign into your ArcGIS account to add custom maps from your organization.
