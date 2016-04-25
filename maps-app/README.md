@@ -26,17 +26,6 @@ Long press on the map to get the adress of that point and a magnifier will be di
 
 ![](assets/magnifier_loc.png)
 
-### Driving Directions
-Generate turn-by-turn directions between two places with distance and estimated drive time.  
-
-You can use the result of **Place Search** to get the route from your location to your destination by simply tapping on  ![screen shot 2015-06-18 at 3 35 06 pm](https://cloud.githubusercontent.com/assets/12648228/8243836/b1f0ce5e-15cf-11e5-8d3b-8e28a7eb0fa7.png). To get detailed driving directions just tap on ![screen shot 2015-06-18 at 3 38 40 pm](https://cloud.githubusercontent.com/assets/12648228/8243890/27cb1896-15d0-11e5-9a85-3da51ffcc32a.png) to get turn by turn instructions.
- 
-If you want to search for a route from 'Location A' to 'Location B', you can tap on the ![screen shot 2015-06-18 at 3 35 06 pm](https://cloud.githubusercontent.com/assets/12648228/8243836/b1f0ce5e-15cf-11e5-8d3b-8e28a7eb0fa7.png) icon in the search bar. 
- 
-Enter your Location and tap on **Get Route** to see the driving directions from one location to another. 
-![screen shot 2015-06-18 at 3 48 00 pm](https://cloud.githubusercontent.com/assets/12648228/8244025/7062a0f0-15d1-11e5-8506-5fa40402316b.png)
-
-![](assets/driving-directions.png)
 ### Switch basemaps
 Choose from a wide range of basemaps including Streets, Topography, World Imagery, etc.  
 
@@ -46,6 +35,26 @@ You can switch the basemaps by swiping left from the edge of your device and sel
 
 
 ### Sign into ArcGIS
-Sign into your ArcGIS account to add custom maps from your organization.
+Tap on the drawer to sign into your ArcGIS account where you can view custom maps from your organization.
 
-![](assets/sign-in.png)
+![](assets/drawer.png)
+
+Tapping the Sign In will launch a URL navigator where you can enter your organization's ArcGIS Online URL.
+
+![](assets/url.png)
+
+You'll be prompted for credentials....
+
+![](assets/auth.png)
+
+Once authenticated, you'll see a number of portal items that can be loaded in to the Map-app.  
+
+![](assets/portal_content.png)
+
+If you have any web maps in your portal, they will be shown in the list view after clicking on 'My Maps'.  You may also have additional basemaps to choose from.
+
+![](assets/my_maps.png)
+
+
+
+
