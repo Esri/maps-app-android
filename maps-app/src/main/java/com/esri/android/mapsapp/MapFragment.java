@@ -79,6 +79,8 @@ import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogList
 import com.esri.android.mapsapp.tools.Compass;
 import com.esri.android.mapsapp.util.TaskExecutor;
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
+import com.esri.arcgisruntime.LicenseLevel;
+import com.esri.arcgisruntime.LicenseResult;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.geometry.Envelope;
 import com.esri.arcgisruntime.geometry.Geometry;
@@ -96,8 +98,10 @@ import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
 import com.esri.arcgisruntime.mapping.view.LocationDisplay;
 import com.esri.arcgisruntime.mapping.view.MapView;
 import com.esri.arcgisruntime.mapping.view.WrapAroundMode;
+import com.esri.arcgisruntime.portal.LicenseInfo;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
+import com.esri.arcgisruntime.security.UserCredential;
 import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.tasks.geocode.GeocodeParameters;
@@ -235,8 +239,6 @@ public class MapFragment extends Fragment {
 			mBasemapPortalItemId = args.getString(KEY_BASEMAP_ITEM_ID);
 		}
 
-		ArcGISRuntimeEnvironment.License.setLicense(getString(R.string.license));
-		mLocator = new LocatorTask(getString(R.string.geocode_url));
 
 	}
 
@@ -498,6 +500,8 @@ public class MapFragment extends Fragment {
 
 		// Setup OnTouchListener to detect and act on long-press
 		mMapView.setOnTouchListener(new MapTouchListener(getActivity().getApplicationContext(), mMapView));
+
+		mLocator = new LocatorTask(getString(R.string.geocode_url));
 
 	}
 
@@ -981,7 +985,6 @@ public class MapFragment extends Fragment {
 	 * @param address
 	 */
 	private void executeLocatorTask(final String address) {
-
 		// Create Locator parameters from single line address string
 		final GeocodeParameters geoParameters = new GeocodeParameters();
 		geoParameters.setMaxResults(2);

@@ -26,6 +26,7 @@ package com.esri.android.mapsapp;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -37,6 +38,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -47,6 +49,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -64,8 +67,17 @@ import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.account.SignInActivity;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
 import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
+import com.esri.arcgisruntime.concurrent.ListenableFuture;
+import com.esri.arcgisruntime.io.RequestConfiguration;
+import com.esri.arcgisruntime.loadable.LoadStatus;
+import com.esri.arcgisruntime.portal.GeocodeServiceInfo;
+import com.esri.arcgisruntime.portal.HelperServices;
+import com.esri.arcgisruntime.portal.Portal;
+import com.esri.arcgisruntime.portal.PortalInfo;
 import com.esri.arcgisruntime.security.AuthenticationManager;
 import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
+import com.esri.arcgisruntime.security.OAuthTokenCredential;
+import com.esri.arcgisruntime.security.OAuthTokenCredentialRequest;
 
 /**
  * Entry point into the Maps App.
@@ -75,6 +87,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	private static final int PERMISSION_REQUEST_LOCATION = 0;
 	private static final int REQUEST_LOCATION_SETTINGS = 1;
 	private static final int REQUEST_AIRPLANE_MODE = 2;
+	private static final int REQUEST_ARCGIS_CRED = 3;
 	private static final String TAG = MapsAppActivity.class.getSimpleName();
 	public static DrawerLayout mDrawerLayout;
 	private final List<DrawerItem> mDrawerItems = new ArrayList<>();
@@ -105,20 +118,6 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		/**
-		 * Unlock basic license level by setting your client id here. The client
-		 * id can be obtained on https://developers.arcgis.com TODO: Add more
-		 * detail on how to get client id set up.
-		 */
-		ArcGISRuntimeEnvironment.setClientId(getString(R.string.client_id));
-
-		// Set up an authentication handler
-		// to be used when loading remote
-		// resources or services.
-		DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(
-				this);
-		AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
 
 		setContentView(R.layout.maps_app_activity);
 		mLayout = findViewById(R.id.maps_app_activity_content_frame);
@@ -154,12 +153,20 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 				Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 				showDialog(gpsIntent, REQUEST_LOCATION_SETTINGS, getString(R.string.location_tracking_off));
 			} else {
-				setView();
+				 	setView();
 			}
 		}
 
 	}
-
+	private void authenticate(){
+		String baseUrl = "http://www.arcgis.com";
+		String clientId = "STV3sRWfJQxqvspH";
+		String redirectUri = "my-maps-app://auth";
+		String url = OAuthTokenCredentialRequest.getAuthorizationUrl(baseUrl, clientId, redirectUri,0);
+		Log.i(TAG, url);
+		Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+		startActivityForResult(intent, REQUEST_ARCGIS_CRED);
+	}
 	/**
 	 * Prompt user to enable location tracking
 	 */
@@ -196,6 +203,8 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if ((requestCode == REQUEST_AIRPLANE_MODE) || (requestCode == REQUEST_LOCATION_SETTINGS)) {
 			checkSettings();
+		}else if (requestCode == REQUEST_ARCGIS_CRED){
+			Log.i(TAG, "Browser returned...");
 		}
 
 	}
@@ -271,7 +280,10 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	@Override
 	protected void onResume() {
 		super.onResume();
-		updateDrawer();
+		if (getIntent().getData()== null){
+			updateDrawer();
+		}
+
 	}
 
 	/**
