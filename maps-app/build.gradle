@@ -8,6 +8,7 @@ android {
         applicationId "com.esri.android.mapsapp"
         minSdkVersion 17
         targetSdkVersion 23
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
 
     packagingOptions {
@@ -26,12 +27,22 @@ android {
 
 dependencies {
     // android support libraries
-    compile 'com.android.support:support-v4:23.2.1'
-    compile 'com.android.support:appcompat-v7:23.2.1'
-    compile 'com.android.support:cardview-v7:23.2.1'
-    compile 'com.android.support:design:23.2.1'
+    compile 'com.android.support:support-v4:23.0.1'
+    compile 'com.android.support:appcompat-v7:23.0.1'
+    compile 'com.android.support:cardview-v7:23.0.1'
+    compile 'com.android.support:design:23.0.1'
     // ArcGIS Android 10.2.7 API
     compile 'com.esri.arcgisruntime:arcgis-android:100.0.0-beta-2'
     // square libs
     compile 'com.jakewharton:butterknife:6.1.0'
+
+    // Android Testing Support Library's runner and rules
+    androidTestCompile "com.android.support.test:runner:$rootProject.ext.runnerVersion"
+    androidTestCompile "com.android.support.test:rules:$rootProject.ext.runnerVersion"
+
+    // Espresso UI Testing
+    androidTestCompile "com.android.support.test.espresso:espresso-core:$rootProject.ext.espressoVersion"
+    androidTestCompile ("com.android.support.test.espresso:espresso-contrib:$rootProject.ext.espressoVersion") {
+        exclude module: 'recyclerview-v7'
+    }
 }

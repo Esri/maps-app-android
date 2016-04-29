@@ -144,7 +144,7 @@ public class MapFragment extends Fragment {
 
 	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
 
-	private static final String SEARCH_HINT = "Search";
+	public static final String SEARCH_HINT = "Search";
 
 	private static final String FIND_PLACE = "Find";
 
@@ -638,6 +638,7 @@ public class MapFragment extends Fragment {
 
 		mSearchview.setIconifiedByDefault(false);
 		mSearchview.setQueryHint(SEARCH_HINT);
+		Log.i(TAG, mSearchview.getQueryHint().toString());
 
 		applySuggestionCursor();
 

@@ -16,4 +16,9 @@ allprojects {
         }
     }
 }
+// Define versions in a single place
+ext {
+    runnerVersion = '0.4.1'
+    espressoVersion = '2.2.1'
+}
 
