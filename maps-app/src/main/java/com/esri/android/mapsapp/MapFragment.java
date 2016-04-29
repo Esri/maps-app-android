@@ -255,9 +255,11 @@ public class MapFragment extends Fragment {
 			if (mBasemapPortalItemId != null) {
 				// show a map with the basemap represented by
 				// mBasemapPortalItemId
-				loadWebMapIntoMapView(mBasemapPortalItemId, null, AccountManager.getInstance().getAGOLPortal());
+
+				loadWebMapIntoMapView(mBasemapPortalItemId, null,
+						AccountManager.getInstance().getAGOLPortal());
+
 			} else {
-				// show the default map
 				String defaultBaseMapURL = getString(R.string.default_basemap_url);
 				Basemap basemap = new Basemap(defaultBaseMapURL);
 				com.esri.arcgisruntime.mapping.Map map = new com.esri.arcgisruntime.mapping.Map(basemap);
@@ -445,6 +447,7 @@ public class MapFragment extends Fragment {
 							setMapView(mapView);
 							setClickListenerForFloatingActionButton(mapView);
 							addGraphicLayers();
+
 						}
 					});
 
@@ -479,6 +482,7 @@ public class MapFragment extends Fragment {
 		int LEFT_MARGIN_SEARCH = 15;
 		int RIGHT_MARGIN_SEARCH = 15;
 		int BOTTOM_MARGIN_SEARCH = 0;
+
 		mlayoutParams.setMargins(LEFT_MARGIN_SEARCH, TOP_MARGIN_SEARCH, RIGHT_MARGIN_SEARCH, BOTTOM_MARGIN_SEARCH);
 
 		// Displaying the searchbox layout
@@ -1101,28 +1105,6 @@ public class MapFragment extends Fragment {
 		return true;
 	}
 
-	/**
-	 * Set up Route Parameters to execute RouteTask
-	 *
-	 * @param start
-	 * @param end
-	 */
-
-	@SuppressWarnings("unchecked")
-	private void executeRoutingTask(String start, String end) {
-		resetGraphicsLayers();
-		// Create a list of start end point params
-		List<String> routeParams = new ArrayList<>();
-
-		// Add params to list
-		routeParams.add(start);
-		routeParams.add(end);
-
-		// Execute async task to do the routing
-		RouteAsyncTask routeTask = new RouteAsyncTask();
-		routeTask.execute(routeParams);
-		mPendingTask = routeTask;
-	}
 
 	// @Override
 	public void onCancel(DialogInterface dialog) {
@@ -1611,267 +1593,6 @@ public class MapFragment extends Fragment {
 		return px / (metrics.densityDpi / 160f);
 	}
 
-	/**
-	 * This class provides an AsyncTask that performs a routing request on a
-	 * background thread and displays the resultant route on the map on the UI
-	 * thread.
-	 */
-	private class RouteAsyncTask extends AsyncTask<List<String>, Void, Void> {
-		private static final String TAG_ROUTE_SEARCH_PROGRESS_DIALOG = "TAG_ROUTE_SEARCH_PROGRESS_DIALOG";
-
-		private Exception mException;
-
-		private ProgressDialogFragment mProgressDialog;
-
-		public RouteAsyncTask() {
-		}
-
-		@Override
-		protected void onPreExecute() {
-			mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.route_search));
-			// set the target fragment to receive cancel notification
-			mProgressDialog.setTargetFragment(MapFragment.this, REQUEST_CODE_PROGRESS_DIALOG);
-			mProgressDialog.show(getActivity().getFragmentManager(), TAG_ROUTE_SEARCH_PROGRESS_DIALOG);
-		}
-
-		@Override
-		protected Void doInBackground(List<String>... params) {
-			// Perform routing request on background thread
-			mException = null;
-
-			// Define route objects
-			List<GeocodeResult> geocodeStartResult;
-			List<GeocodeResult> geocodeEndResult;
-			final Point startPoint;
-			final Point endPoint;
-
-			// Configure params
-			locatorParams(ROUTE);
-			String routeTaskURL = getString(R.string.routingservice_url);
-			Log.i(TAG, "Route task URL = " + routeTaskURL);
-
-			final RouteTask routeTask = new RouteTask(routeTaskURL);
-
-			// Create a new locator to geocode start/end points;
-			// by default uses ArcGIS online world geocoding service
-
-			try {
-				// Geocode start position, or use My Location (from GPS)
-				String startParam = params[0].get(0);
-				final String endParam = params[0].get(1);
-
-				if (startParam.equals(getString(R.string.my_location))) {
-					mStartLocation = getString(R.string.my_location);
-					startPoint = (Point) GeometryEngine.project(mLocation, mWm);
-
-					// We have start location, now get the destination location
-
-					final ListenableFuture<List<GeocodeResult>> geoFutureEnd = mLocator.geocodeAsync(endParam,
-							mGeocodeParams);
-					geoFutureEnd.addDoneListener(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								List<GeocodeResult> results = geoFutureEnd.get();
-								if (results != null && results.size() > 0) {
-									Point endPoint = results.get(0).getDisplayLocation();
-
-									// We have the start and end, now get route
-
-									final Stop start = new Stop(
-											new Point(32.8725884, -117.2835913, mMapView.getSpatialReference()));
-									final Stop end = new Stop(
-											new Point(32.8681446, -117.252512, mMapView.getSpatialReference()));
-
-									routeTask.addDoneLoadingListener(new Runnable() {
-										@Override
-										public void run() {
-											LoadStatus status = routeTask.getLoadStatus();
-											Log.i(TAG, status.name());
-											if (status == LoadStatus.FAILED_TO_LOAD) {
-												Log.i(TAG, routeTask.getLoadError().getMessage());
-												routeTask.retryLoadAsync();
-											} else {
-												final ListenableFuture<RouteParameters> routeTaskFuture = routeTask
-														.generateDefaultParametersAsync();
-												routeTaskFuture.addDoneListener(new Runnable() {
-
-													@Override
-													public void run() {
-														try {
-
-															RouteParameters routeParameters = routeTaskFuture.get();
-															routeParameters.getStops().add(start);
-															routeParameters.getStops().add(end);
-															routeParameters.setReturnDirections(true);
-															routeParameters.setReturnRoutes(true);
-															routeParameters.setDirectionsDistanceTextUnits(
-																	DirectionDistanceTextUnits.IMPERIAL);
-															routeParameters.setOutputSpatialReference(
-																	mMapView.getSpatialReference());
-
-															final ListenableFuture<RouteResult> routeResFuture = routeTask
-																	.solveAsync(routeParameters);
-															routeResFuture.addDoneListener(new Runnable() {
-																@Override
-																public void run() {
-																	try {
-																		RouteResult routeResult = routeResFuture.get();
-																		if (routeResult.getRoutes() != null
-																				&& routeResult.getRoutes().size() > 0) {
-																			for (Route route : routeResult
-																					.getRoutes()) {
-																				Log.i(TAG, route.getRouteName());
-																			}
-																		}
-
-																	} catch (InterruptedException e) {
-																		e.printStackTrace();
-																	} catch (ExecutionException e) {
-																		e.printStackTrace();
-																	}
-																}
-															});
-
-														} catch (InterruptedException e) {
-															e.printStackTrace();
-														} catch (ExecutionException e) {
-															e.printStackTrace();
-														}
-
-													}
-												});
-											}
-
-										}
-									});
-									routeTask.loadAsync();
-
-								}
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							} catch (ExecutionException e) {
-								e.printStackTrace();
-							}
-						}
-					});
-
-				} else {
-					// Get the start location
-					final ListenableFuture<List<GeocodeResult>> geoFutureStart = mLocator.geocodeAsync(startParam,
-							mGeocodeParams);
-					geoFutureStart.addDoneListener(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								List<GeocodeResult> results = geoFutureStart.get();
-								if (results != null && results.size() > 0) {
-									Point origin = results.get(0).getDisplayLocation();
-									String originLabel = results.get(0).getLabel();
-
-									// Now we need to get the end location
-									final ListenableFuture<List<GeocodeResult>> geoFutureEnd2 = mLocator
-											.geocodeAsync(endParam, mGeocodeParams);
-									geoFutureEnd2.addDoneListener(new Runnable() {
-										@Override
-										public void run() {
-											try {
-												List<GeocodeResult> results = geoFutureEnd2.get();
-												if (results != null && results.size() > 0) {
-													Point end = results.get(0).getDisplayLocation();
-													String endLabel = results.get(0).getLabel();
-
-													// We have the start and
-													// end, now get route
-												}
-											} catch (InterruptedException e) {
-												e.printStackTrace();
-											} catch (ExecutionException e) {
-												e.printStackTrace();
-											}
-
-										}
-									});
-								}
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							} catch (ExecutionException e) {
-								e.printStackTrace();
-							}
-						}
-					});
-
-					if (isCancelled()) {
-						return null;
-					}
-				}
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-			return null;
-		}
-		/*
-		 * @Override protected void onPostExecute( ) { // Display results on UI
-		 * thread mProgressDialog.dismiss(); if (mException != null) {
-		 * Log.w(TAG, "RouteSyncTask failed with:");
-		 * mException.printStackTrace(); Toast.makeText(getActivity(),
-		 * getString(R.string.routingFailed), Toast.LENGTH_LONG) .show();
-		 * return; }
-		 *
-		 * // Get first item in list of routes provided by server Route route;
-		 * try { route = result.getRoutes().get(0); if( route.getTotalMiles() ==
-		 * 0.0 || route.getTotalKilometers() == 0.0 ) { throw new Exception(
-		 * "Can not find the Route"); } } catch (Exception e) {
-		 * Toast.makeText(getActivity(),
-		 * "We are sorry, we couldn't find the route. Please make " +
-		 * "sure the Source and Destination are different or are connected by road"
-		 * , Toast.LENGTH_LONG).show(); Log.e(TAG,e.getMessage()); return; }
-		 *
-		 *
-		 * // Create polyline graphic of the full route SimpleLineSymbol
-		 * lineSymbol = new SimpleLineSymbol(Color.RED, 2, STYLE.SOLID); Graphic
-		 * routeGraphic = new Graphic(route.getRouteGraphic() .getGeometry(),
-		 * lineSymbol);
-		 *
-		 * // Create point graphic to mark start of route Point startPoint =
-		 * ((Polyline) routeGraphic.getGeometry()) .getPoint(0); Graphic
-		 * startGraphic = createMarkerGraphic(startPoint, false);
-		 *
-		 * // Create point graphic to mark end of route int endPointIndex =
-		 * ((Polyline) routeGraphic.getGeometry()) .getPointCount() - 1; Point
-		 * endPoint = ((Polyline) routeGraphic.getGeometry())
-		 * .getPoint(endPointIndex); Graphic endGraphic =
-		 * createMarkerGraphic(endPoint, true);
-		 *
-		 * // Add these graphics to route layer mRouteLayer.addGraphics(new
-		 * Graphic[]{routeGraphic, startGraphic, endGraphic});
-		 *
-		 * // Zoom to the extent of the entire route with a padding
-		 * mMapView.setExtent(route.getEnvelope(), 100);
-		 *
-		 * // Save routing directions so user can display them later
-		 * mRoutingDirections = route.getRoutingDirections();
-		 *
-		 * // Show Routing Result Layout
-		 * showRoutingResultLayout(route.getTotalMiles(),
-		 * route.getTotalMinutes());
-		 *
-		 * }
-		 *
-		 * Graphic createMarkerGraphic(Point point, boolean endPoint) { Drawable
-		 * marker = getResources().getDrawable( endPoint ?
-		 * R.drawable.pin_circle_blue : R.drawable.pin_circle_red);
-		 * PictureMarkerSymbol destinationSymbol = new PictureMarkerSymbol(
-		 * mMapView.getContext(), marker); // NOTE: marker's bounds not set till
-		 * marker is used to create // destinationSymbol float offsetY =
-		 * convertPixelsToDp(getActivity(), marker != null ?
-		 * marker.getBounds().bottom : 0);
-		 * destinationSymbol.setOffsetY(offsetY); return new Graphic(point,
-		 * destinationSymbol); }
-		 */
-	}
 
 	private class MapTouchListener extends DefaultMapViewOnTouchListener {
 		/**

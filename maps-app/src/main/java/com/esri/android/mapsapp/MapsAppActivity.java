@@ -24,10 +24,10 @@
 
 package com.esri.android.mapsapp;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Fragment;
@@ -43,6 +43,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
@@ -66,23 +67,15 @@ import butterknife.InjectView;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.account.SignInActivity;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
-import com.esri.arcgisruntime.ArcGISRuntimeEnvironment;
-import com.esri.arcgisruntime.concurrent.ListenableFuture;
-import com.esri.arcgisruntime.io.RequestConfiguration;
-import com.esri.arcgisruntime.loadable.LoadStatus;
-import com.esri.arcgisruntime.portal.GeocodeServiceInfo;
-import com.esri.arcgisruntime.portal.HelperServices;
-import com.esri.arcgisruntime.portal.Portal;
-import com.esri.arcgisruntime.portal.PortalInfo;
-import com.esri.arcgisruntime.security.AuthenticationManager;
-import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
-import com.esri.arcgisruntime.security.OAuthTokenCredential;
-import com.esri.arcgisruntime.security.OAuthTokenCredentialRequest;
+
+
+
 
 /**
  * Entry point into the Maps App.
  */
 public class MapsAppActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
+
 
 	private static final int PERMISSION_REQUEST_LOCATION = 0;
 	private static final int REQUEST_LOCATION_SETTINGS = 1;
@@ -127,6 +120,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 		// permissions)
 		mLayout = findViewById(R.id.maps_app_activity_content_frame);
 
+
 		ButterKnife.inject(this);
 
 		setupDrawer();
@@ -153,20 +147,11 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 				Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 				showDialog(gpsIntent, REQUEST_LOCATION_SETTINGS, getString(R.string.location_tracking_off));
 			} else {
-				 	setView();
+				setView();
 			}
 		}
+	}
 
-	}
-	private void authenticate(){
-		String baseUrl = "http://www.arcgis.com";
-		String clientId = "STV3sRWfJQxqvspH";
-		String redirectUri = "my-maps-app://auth";
-		String url = OAuthTokenCredentialRequest.getAuthorizationUrl(baseUrl, clientId, redirectUri,0);
-		Log.i(TAG, url);
-		Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-		startActivityForResult(intent, REQUEST_ARCGIS_CRED);
-	}
 	/**
 	 * Prompt user to enable location tracking
 	 */
@@ -274,8 +259,8 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 				Snackbar.make(mLayout, "Location permission request was denied.", Snackbar.LENGTH_SHORT).show();
 			}
 		}
-
 	}
+
 
 	@Override
 	protected void onResume() {
