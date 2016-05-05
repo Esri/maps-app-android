@@ -27,8 +27,8 @@ package com.esri.android.mapsapp;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import android.Manifest;
+
+import android.Manifest.permission;
 import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -38,23 +38,24 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
-import android.net.Uri;
-import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.support.annotation.NonNull;
 
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AlertDialog.Builder;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -64,17 +65,21 @@ import android.widget.TextView;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
+import com.esri.android.mapsapp.DrawerItem.OnClickListener;
+import com.esri.android.mapsapp.R.drawable;
+import com.esri.android.mapsapp.R.id;
+import com.esri.android.mapsapp.R.layout;
+import com.esri.android.mapsapp.R.string;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.account.SignInActivity;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
-
-
+import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogListener;
 
 
 /**
  * Entry point into the Maps App.
  */
-public class MapsAppActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
+public class MapsAppActivity extends AppCompatActivity implements OnRequestPermissionsResultCallback {
 
 
 	private static final int PERMISSION_REQUEST_LOCATION = 0;
@@ -88,7 +93,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	/**
 	 * The list of menu items in the navigation drawer
 	 */
-	@InjectView(R.id.maps_app_activity_left_drawer)
+	@InjectView(id.maps_app_activity_left_drawer)
 	ListView mDrawerList;
 	private View mLayout;
 
@@ -99,12 +104,12 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	 * @return true if enabled.
 	 */
 	@SuppressWarnings("deprecation")
-	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+	@TargetApi(VERSION_CODES.JELLY_BEAN_MR1)
 	private static boolean isAirplaneModeOn(Context context) {
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+		if (VERSION.SDK_INT < VERSION_CODES.JELLY_BEAN_MR1) {
 			return Settings.System.getInt(context.getContentResolver(), Settings.System.AIRPLANE_MODE_ON, 0) != 0;
 		} else {
-			return Settings.Global.getInt(context.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
+			return Global.getInt(context.getContentResolver(), Global.AIRPLANE_MODE_ON, 0) != 0;
 		}
 	}
 
@@ -112,13 +117,13 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.maps_app_activity);
-		mLayout = findViewById(R.id.maps_app_activity_content_frame);
+		setContentView(layout.maps_app_activity);
+		mLayout = findViewById(id.maps_app_activity_content_frame);
 
 		// We need a reference to the containing widget when
 		// managing the Snackbar (used for notifying users about app
 		// permissions)
-		mLayout = findViewById(R.id.maps_app_activity_content_frame);
+		mLayout = findViewById(id.maps_app_activity_content_frame);
 
 
 		ButterKnife.inject(this);
@@ -135,17 +140,17 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	 * Prompt user to turn location and wireless if needed
 	 */
 	private void checkSettings() {
-		boolean airplaneMode = isAirplaneModeOn(getApplicationContext());
+		boolean airplaneMode = MapsAppActivity.isAirplaneModeOn(getApplicationContext());
 		boolean gpsEnabled = locationTrackingEnabled();
 		// If GPS is not enabled OR the phone is in airplane mode
 		// show a dialog asking user to enable location tracking
 		if (airplaneMode) {
 			Intent airplaneIntent = new Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS);
-			showDialog(airplaneIntent, REQUEST_AIRPLANE_MODE, getString(R.string.wireless_off));
+			showDialog(airplaneIntent, MapsAppActivity.REQUEST_AIRPLANE_MODE, getString(string.wireless_off));
 		} else { // Airplane mode off
 			if (!gpsEnabled) { // gps off
 				Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-				showDialog(gpsIntent, REQUEST_LOCATION_SETTINGS, getString(R.string.location_tracking_off));
+				showDialog(gpsIntent, MapsAppActivity.REQUEST_LOCATION_SETTINGS, getString(string.location_tracking_off));
 			} else {
 				setView();
 			}
@@ -157,9 +162,9 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	 */
 	private void showDialog(final Intent intent, final int requestCode, String message) {
 
-		final AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+		final Builder alertDialog = new Builder(this);
 		alertDialog.setMessage(message);
-		alertDialog.setPositiveButton(getString(R.string.open_location_options), new DialogInterface.OnClickListener() {
+		alertDialog.setPositiveButton(getString(string.open_location_options), new DialogInterface.OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -167,7 +172,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 				startActivityForResult(intent, requestCode);
 			}
 		});
-		alertDialog.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+		alertDialog.setNegativeButton(getString(string.cancel), new DialogInterface.OnClickListener() {
 
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -185,17 +190,18 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	 * @param resultCode
 	 * @param data
 	 */
+	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if ((requestCode == REQUEST_AIRPLANE_MODE) || (requestCode == REQUEST_LOCATION_SETTINGS)) {
+		if (requestCode == MapsAppActivity.REQUEST_AIRPLANE_MODE || requestCode == MapsAppActivity.REQUEST_LOCATION_SETTINGS) {
 			checkSettings();
-		}else if (requestCode == REQUEST_ARCGIS_CRED){
-			Log.i(TAG, "Browser returned...");
+		}else if (requestCode == MapsAppActivity.REQUEST_ARCGIS_CRED){
+			Log.i(MapsAppActivity.TAG, "Browser returned...");
 		}
 
 	}
 
 	/**
-	 * Requests the {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}
+	 * Requests the {@link permission#ACCESS_COARSE_LOCATION}
 	 * permission. If an additional rationale should be displayed, the user has
 	 * to launch the request from a SnackBar that includes additional
 	 * information.
@@ -203,7 +209,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 
 	private void requestLocationPermission() {
 		// Permission has not been granted and must be requested.
-		if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+		if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission.ACCESS_FINE_LOCATION)) {
 
 			// Provide an additional rationale to the user if the permission was
 			// not granted
@@ -217,16 +223,16 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 						public void onClick(View view) {
 							// Request the permission
 							ActivityCompat.requestPermissions(MapsAppActivity.this,
-									new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-									PERMISSION_REQUEST_LOCATION);
+									new String[]{permission.ACCESS_FINE_LOCATION},
+									MapsAppActivity.PERMISSION_REQUEST_LOCATION);
 						}
 					}).show();
 
 		} else {
 			// Request the permission. The result will be received in
 			// onRequestPermissionResult().
-			ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-					PERMISSION_REQUEST_LOCATION);
+			ActivityCompat.requestPermissions(this, new String[]{permission.ACCESS_FINE_LOCATION},
+					MapsAppActivity.PERMISSION_REQUEST_LOCATION);
 		}
 	}
 
@@ -246,7 +252,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-		if (requestCode == PERMISSION_REQUEST_LOCATION) {
+		if (requestCode == MapsAppActivity.PERMISSION_REQUEST_LOCATION) {
 			// Request for camera permission.
 			if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 				// Permission has been granted, do we have the right phone
@@ -275,14 +281,14 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	 * Initializes the navigation drawer.
 	 */
 	private void setupDrawer() {
-		mDrawerLayout = (DrawerLayout) findViewById(R.id.maps_app_activity_drawer_layout);
+		MapsAppActivity.mDrawerLayout = (DrawerLayout) findViewById(id.maps_app_activity_drawer_layout);
 
 		// Set the list's click listener
 		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
 		// set a custom shadow that overlays the main content when the drawer
 		// opens
-		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+		MapsAppActivity.mDrawerLayout.setDrawerShadow(drawable.drawer_shadow, GravityCompat.START);
 
 		updateDrawer();
 	}
@@ -314,14 +320,14 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 
 		if (!browseFragment.isVisible()) {
 			FragmentTransaction transaction = fragmentManager.beginTransaction();
-			transaction.add(R.id.maps_app_activity_content_frame, browseFragment, ContentBrowserFragment.TAG);
+			transaction.add(id.maps_app_activity_content_frame, browseFragment, ContentBrowserFragment.TAG);
 			transaction.addToBackStack(null);
 			transaction.commit();
 
 			invalidateOptionsMenu(); // reload the options menu
 		}
 
-		mDrawerLayout.closeDrawers();
+		MapsAppActivity.mDrawerLayout.closeDrawers();
 	}
 
 	/**
@@ -348,7 +354,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 		MapFragment mapFragment = MapFragment.newInstance(portalItemId, basemapPortalItemId);
 
 		transaction = fragmentManager.beginTransaction();
-		transaction.replace(R.id.maps_app_activity_content_frame, mapFragment, MapFragment.TAG);
+		transaction.replace(id.maps_app_activity_content_frame, mapFragment, MapFragment.TAG);
 		transaction.addToBackStack(null);
 		transaction.commit();
 
@@ -359,7 +365,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 		Intent intent = new Intent(this, SignInActivity.class);
 		startActivity(intent);
 
-		mDrawerLayout.closeDrawers();
+		MapsAppActivity.mDrawerLayout.closeDrawers();
 	}
 
 	/**
@@ -371,7 +377,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 		setView();
 
 		updateDrawer();
-		mDrawerLayout.closeDrawers();
+		MapsAppActivity.mDrawerLayout.closeDrawers();
 	}
 
 	/**
@@ -384,12 +390,12 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 		if (AccountManager.getInstance().isSignedIn()) {
 
 			// user info
-			LinearLayout userInfoView = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_user_layout,
+			LinearLayout userInfoView = (LinearLayout) getLayoutInflater().inflate(layout.drawer_item_user_layout,
 					null);
-			TextView textView = (TextView) userInfoView.findViewById(R.id.drawer_item_fullname_textview);
+			TextView textView = (TextView) userInfoView.findViewById(id.drawer_item_fullname_textview);
 			textView.setText(AccountManager.getInstance().getPortalUser().getFullName());
 
-			textView = (TextView) userInfoView.findViewById(R.id.drawer_item_username_textview);
+			textView = (TextView) userInfoView.findViewById(id.drawer_item_username_textview);
 			textView.setText(AccountManager.getInstance().getPortalUser().getUserName());
 
 			item = new DrawerItem(userInfoView, null);
@@ -397,13 +403,13 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 
 			// Sign Out
 
-			LinearLayout view_signOut = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
-			TextView text_drawer_signOut = (TextView) view_signOut.findViewById(R.id.drawer_item_textview);
-			ImageView icon_drawer_signOut = (ImageView) view_signOut.findViewById(R.id.drawer_item_icon);
+			LinearLayout view_signOut = (LinearLayout) getLayoutInflater().inflate(layout.drawer_item_layout, null);
+			TextView text_drawer_signOut = (TextView) view_signOut.findViewById(id.drawer_item_textview);
+			ImageView icon_drawer_signOut = (ImageView) view_signOut.findViewById(id.drawer_item_icon);
 
-			text_drawer_signOut.setText(getString(R.string.sign_out));
-			icon_drawer_signOut.setImageResource(R.drawable.ic_profile);
-			item = new DrawerItem(view_signOut, new DrawerItem.OnClickListener() {
+			text_drawer_signOut.setText(getString(string.sign_out));
+			icon_drawer_signOut.setImageResource(drawable.ic_profile);
+			item = new DrawerItem(view_signOut, new OnClickListener() {
 
 				@Override
 				public void onClick() {
@@ -413,13 +419,13 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 			mDrawerItems.add(item);
 
 			// My Maps
-			LinearLayout view_myMaps = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
-			TextView text_drawer_myMaps = (TextView) view_myMaps.findViewById(R.id.drawer_item_textview);
-			ImageView icon_drawer_myMaps = (ImageView) view_myMaps.findViewById(R.id.drawer_item_icon);
+			LinearLayout view_myMaps = (LinearLayout) getLayoutInflater().inflate(layout.drawer_item_layout, null);
+			TextView text_drawer_myMaps = (TextView) view_myMaps.findViewById(id.drawer_item_textview);
+			ImageView icon_drawer_myMaps = (ImageView) view_myMaps.findViewById(id.drawer_item_icon);
 
-			text_drawer_myMaps.setText(getString(R.string.my_maps));
-			icon_drawer_myMaps.setImageResource(R.drawable.ic_map32);
-			item = new DrawerItem(view_myMaps, new DrawerItem.OnClickListener() {
+			text_drawer_myMaps.setText(getString(string.my_maps));
+			icon_drawer_myMaps.setImageResource(drawable.ic_map32);
+			item = new DrawerItem(view_myMaps, new OnClickListener() {
 
 				@Override
 				public void onClick() {
@@ -430,13 +436,13 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 		} else {
 
 			// Adding the Sign In item in the drawer
-			LinearLayout view_signIn = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
-			TextView text_drawer_signIn = (TextView) view_signIn.findViewById(R.id.drawer_item_textview);
-			ImageView icon_drawer_signIn = (ImageView) view_signIn.findViewById(R.id.drawer_item_icon);
+			LinearLayout view_signIn = (LinearLayout) getLayoutInflater().inflate(layout.drawer_item_layout, null);
+			TextView text_drawer_signIn = (TextView) view_signIn.findViewById(id.drawer_item_textview);
+			ImageView icon_drawer_signIn = (ImageView) view_signIn.findViewById(id.drawer_item_icon);
 
-			text_drawer_signIn.setText(getString(R.string.sign_in));
-			icon_drawer_signIn.setImageResource(R.drawable.ic_profile);
-			item = new DrawerItem(view_signIn, new DrawerItem.OnClickListener() {
+			text_drawer_signIn.setText(getString(string.sign_in));
+			icon_drawer_signIn.setImageResource(drawable.ic_profile);
+			item = new DrawerItem(view_signIn, new OnClickListener() {
 
 				@Override
 				public void onClick() {
@@ -447,19 +453,19 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 		}
 
 		// Adding the basemap item in the drawer
-		LinearLayout view_basemap = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
-		TextView text_drawer_basemap = (TextView) view_basemap.findViewById(R.id.drawer_item_textview);
-		ImageView icon_drawer_basemap = (ImageView) view_basemap.findViewById(R.id.drawer_item_icon);
-		text_drawer_basemap.setText(getString(R.string.menu_basemaps));
-		icon_drawer_basemap.setImageResource(R.drawable.action_basemaps);
-		item = new DrawerItem(view_basemap, new DrawerItem.OnClickListener() {
+		LinearLayout view_basemap = (LinearLayout) getLayoutInflater().inflate(layout.drawer_item_layout, null);
+		TextView text_drawer_basemap = (TextView) view_basemap.findViewById(id.drawer_item_textview);
+		ImageView icon_drawer_basemap = (ImageView) view_basemap.findViewById(id.drawer_item_icon);
+		text_drawer_basemap.setText(getString(string.menu_basemaps));
+		icon_drawer_basemap.setImageResource(drawable.action_basemaps);
+		item = new DrawerItem(view_basemap, new OnClickListener() {
 
 			@Override
 			public void onClick() {
 				// Show BasemapsDialogFragment to offer a choice if basemaps.
 				// This calls back to onBasemapChanged() if one is selected.
 				BasemapsDialogFragment basemapsFrag = new BasemapsDialogFragment();
-				basemapsFrag.setBasemapsDialogListener(new BasemapsDialogFragment.BasemapsDialogListener() {
+				basemapsFrag.setBasemapsDialogListener(new BasemapsDialogListener() {
 
 					@Override
 					public void onBasemapChanged(String itemId) {
@@ -467,7 +473,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 					}
 				});
 				basemapsFrag.show(getFragmentManager(), null);
-				mDrawerLayout.closeDrawers();
+				MapsAppActivity.mDrawerLayout.closeDrawers();
 			}
 
 		});
@@ -492,7 +498,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	/**
 	 * Handles selection of items in the navigation drawer.
 	 */
-	private class DrawerItemClickListener implements OnItemClickListener {
+	private class DrawerItemClickListener implements AdapterView.OnItemClickListener {
 
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

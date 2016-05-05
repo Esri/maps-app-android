@@ -31,10 +31,10 @@ import android.widget.LinearLayout;
  * Represents an item in the navigation drawer list.
  */
 public class DrawerItem {
-	private final OnClickListener mListener;
+	private final DrawerItem.OnClickListener mListener;
 	private final LinearLayout mView;
 
-	public DrawerItem(LinearLayout view, OnClickListener listener) {
+	public DrawerItem(LinearLayout view, DrawerItem.OnClickListener listener) {
 		mView = view;
 		mListener = listener;
 	}

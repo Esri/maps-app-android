@@ -36,6 +36,6 @@ public class BasemapItem {
 
 	public BasemapItem(PortalItem item, Bitmap bt) {
 		this.item = item;
-		this.itemThumbnail = bt;
+		itemThumbnail = bt;
 	}
 }

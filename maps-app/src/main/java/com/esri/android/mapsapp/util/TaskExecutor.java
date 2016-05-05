@@ -36,16 +36,16 @@ public class TaskExecutor {
 
 	private static TaskExecutor sInstance;
 
-	private ExecutorService mPool = Executors.newFixedThreadPool(POOL_SIZE);
+	private final ExecutorService mPool = Executors.newFixedThreadPool(TaskExecutor.POOL_SIZE);
 
 	private TaskExecutor() {
 	}
 
 	public static TaskExecutor getInstance() {
-		if (sInstance == null) {
-			sInstance = new TaskExecutor();
+		if (TaskExecutor.sInstance == null) {
+			TaskExecutor.sInstance = new TaskExecutor();
 		}
-		return sInstance;
+		return TaskExecutor.sInstance;
 	}
 
 	public ExecutorService getThreadPool() {

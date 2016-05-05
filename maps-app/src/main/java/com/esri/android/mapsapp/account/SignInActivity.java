@@ -30,11 +30,12 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.esri.android.mapsapp.R;
+import com.esri.android.mapsapp.R.id;
+import com.esri.android.mapsapp.R.layout;
+import com.esri.android.mapsapp.R.string;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.android.mapsapp.util.StringUtils;
 import com.esri.arcgisruntime.loadable.LoadStatus;
@@ -48,7 +49,7 @@ import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
  * Implements the sign in UX to ArcGIS portal accounts. Handles sign in to OAuth
  * and non-OAuth secured portals.
  */
-public class SignInActivity extends Activity implements OnClickListener, TextWatcher {
+public class SignInActivity extends Activity implements View.OnClickListener, TextWatcher {
 
 	public static final String TAG = SignInActivity.class.getSimpleName();
 
@@ -66,16 +67,16 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setContentView(R.layout.sign_in_activity_portal_url_layout);
+		setContentView(layout.sign_in_activity_portal_url_layout);
 
-		mPortalUrlEditText = (EditText) findViewById(R.id.sign_in_activity_portal_url_edittext);
+		mPortalUrlEditText = (EditText) findViewById(id.sign_in_activity_portal_url_edittext);
 		mPortalUrlEditText.addTextChangedListener(this);
 
-		mContinueButton = findViewById(R.id.sign_in_activity_continue_button);
+		mContinueButton = findViewById(id.sign_in_activity_continue_button);
 		mContinueButton.setOnClickListener(this);
 		mContinueButton.setEnabled(!mPortalUrlEditText.getText().toString().trim().isEmpty());
 
-		View cancelButton = findViewById(R.id.sign_in_activity_cancel_button);
+		View cancelButton = findViewById(id.sign_in_activity_cancel_button);
 		cancelButton.setOnClickListener(this);
 		mPortalUrl = mPortalUrlEditText.getText().toString().trim();
 
@@ -92,12 +93,12 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
-			case R.id.sign_in_activity_continue_button :
+			case id.sign_in_activity_continue_button :
 				// determine what type of authentication is required to sign in
 				// to the specified portal
 				mPortalUrl = mPortalUrlEditText.getText().toString().trim();
-				if (!mPortalUrl.startsWith(HTTP)) {
-					mPortalUrl = HTTP + mPortalUrl;
+				if (!mPortalUrl.startsWith(SignInActivity.HTTP)) {
+					mPortalUrl = SignInActivity.HTTP + mPortalUrl;
 				}
 				final Portal portal = new Portal(mPortalUrl);
 				portal.addDoneLoadingListener(new Runnable() {
@@ -112,9 +113,9 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 					}
 				});
 				portal.loadAsync();
-				Log.i(TAG, "Finished handling CONTINUE click in SignIn Activity");
+				Log.i(SignInActivity.TAG, "Finished handling CONTINUE click in SignIn Activity");
 				break;
-			case R.id.sign_in_activity_cancel_button :
+			case id.sign_in_activity_cancel_button :
 				finish();
 				break;
 		}
@@ -144,28 +145,28 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 	 */
 	private void signInWithOAuth() {
 
-		if (mPortalUrl.startsWith(HTTP)) {
-			mPortalUrl = mPortalUrl.replace(HTTP, HTTPS);
+		if (mPortalUrl.startsWith(SignInActivity.HTTP)) {
+			mPortalUrl = mPortalUrl.replace(SignInActivity.HTTP, SignInActivity.HTTPS);
 		}
 
 		// Are we already signed in?
 		if (AccountManager.getInstance().getPortal() != null) {
-			Log.i(TAG, "Already signed into to Portal.");
+			Log.i(SignInActivity.TAG, "Already signed into to Portal.");
 			return;
 		}
-		Log.i(TAG, "Signing in with OAuth...");
+		Log.i(SignInActivity.TAG, "Signing in with OAuth...");
 		final ProgressDialogFragment mProgressDialog;
-		String clientId = getString(R.string.client_id);
+		String clientId = getString(string.client_id);
 
 		if (StringUtils.isEmpty(clientId)) {
-			Toast.makeText(this, MSG_OBTAIN_CLIENT_ID, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, SignInActivity.MSG_OBTAIN_CLIENT_ID, Toast.LENGTH_SHORT).show();
 			return;
 		}
 		// default handler
 
 		final Portal portal = new Portal(mPortalUrl, true);
-		mProgressDialog = ProgressDialogFragment.newInstance(getString(R.string.verifying_portal));
-		mProgressDialog.show(getFragmentManager(), TAG_PROGRESS_DIALOG);
+		mProgressDialog = ProgressDialogFragment.newInstance(getString(string.verifying_portal));
+		mProgressDialog.show(getFragmentManager(), SignInActivity.TAG_PROGRESS_DIALOG);
 		portal.addDoneLoadingListener(new Runnable() {
 			@Override
 			public void run() {
@@ -175,10 +176,10 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 																			// 'ArcGIS
 																			// Online'
 					PortalUser user = portal.getPortalUser();
-					Log.i(TAG, portalName + " , user = " + user.getUserName());
+					Log.i(SignInActivity.TAG, portalName + " , user = " + user.getUserName());
 					mProgressDialog.dismiss();
 					AccountManager.getInstance().setPortal(portal);
-					Log.i(TAG, "Portal has been set in 'SignInActivity'");
+					Log.i(SignInActivity.TAG, "Portal has been set in 'SignInActivity'");
 					finish();
 				}
 			}

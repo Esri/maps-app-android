@@ -1,6 +1,12 @@
 package com.esri.android.maps.app;
 
+import android.app.Instrumentation;
+import android.os.SystemClock;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.DataInteraction;
+import android.support.test.espresso.Espresso;
+import android.support.test.espresso.IdlingPolicies;
+import android.support.test.espresso.IdlingResource;
 import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.ViewInteraction;
 import android.support.test.espresso.assertion.ViewAssertions;
@@ -11,6 +17,7 @@ import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.SearchView;
+import android.text.format.DateUtils;
 import android.view.View;
 
 import com.esri.android.mapsapp.DrawerItem;
@@ -19,18 +26,23 @@ import com.esri.android.mapsapp.MapsAppActivity;
 import com.esri.android.mapsapp.R;
 import com.esri.android.mapsapp.basemaps.BasemapItem;
 import com.esri.android.mapsapp.basemaps.BasemapsAdapter;
+import com.esri.arcgisruntime.mapping.view.MapView;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.AllOf;
 import org.hamcrest.core.AnyOf;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.TimeUnit;
+
 import static android.support.test.espresso.Espresso.onData;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.longClick;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
@@ -57,6 +69,8 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.startsWith;
 
 /**
@@ -68,6 +82,12 @@ public class MappsAppActivityTest  {
     @Rule
     public final ActivityTestRule<MapsAppActivity> main = new ActivityTestRule<>(MapsAppActivity.class);
 
+
+    @Before
+    public void resetTimeout() {
+        IdlingPolicies.setMasterPolicyTimeout(60, TimeUnit.SECONDS);
+        IdlingPolicies.setIdlingResourceTimeout(26, TimeUnit.SECONDS);
+    }
 
     @Test
     public void testMainScreen(){
@@ -103,6 +123,10 @@ public class MappsAppActivityTest  {
     }
 
     @Test
+    /**
+     * This test should open the drawer and select a publicly
+     * available basemap.
+     */
     public void testPublicBasemaps(){
         onView(withId(R.id.maps_app_activity_drawer_layout)).perform(DrawerActions.open());
 
@@ -124,6 +148,22 @@ public class MappsAppActivityTest  {
 
 
         // final ViewInteraction perform = onData(anyOf(withId(R.id.basemap_grid_item_title_textview), withText("Light Gray Canvas"))).perform(click());
+
+    }
+    /**
+     * This test should show a magnifier on long press and result
+     * in the location being reverse geocoded
+     */
+    @Test
+    public void testLongPress(){
+
+        onView(withId(R.id.map)).check(matches(isDisplayed()));
+        /*Instrumentation.ActivityMonitor monitor =  getInstrumentation().addMonitor(MapFragment.class.getName(), null, false);
+        Activity currentActivity = getInstrumentation().waitForMonitorWithTimeout(monitor, 5);
+        [..do something until the view is visible…]
+        MapView mapView = (MapView) InstrumentationRegistry.getTargetContext().
+        onView(withId(R.id.map)).perform(longClick());*/
+
 
     }
 }

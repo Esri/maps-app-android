@@ -36,7 +36,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.view.View;
 
-import com.esri.android.mapsapp.R;
+import com.esri.android.mapsapp.R.drawable;
 
 /**
  * The implementation of compass. There are two modes of operation for rotating
@@ -67,7 +67,7 @@ public class Compass extends View implements SensorEventListener {
 		mPaint = new Paint();
 		mMatrix = new Matrix();
 
-		mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.eaf_compass);
+		mBitmap = BitmapFactory.decodeResource(getResources(), drawable.eaf_compass);
 
 		sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
 		gSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -111,7 +111,7 @@ public class Compass extends View implements SensorEventListener {
 
 		// Pass the current rotation angle to the matrix. The center of rotation
 		// is set to be the center of the bitmap.
-		mMatrix.postRotate(-this.mAngle, mBitmap.getHeight() / 2, mBitmap.getWidth() / 2);
+		mMatrix.postRotate(-mAngle, mBitmap.getHeight() / 2, mBitmap.getWidth() / 2);
 
 		// Use the matrix to draw the bitmap image of the compass.
 		canvas.drawBitmap(mBitmap, mMatrix, mPaint);
@@ -120,6 +120,7 @@ public class Compass extends View implements SensorEventListener {
 
 	}
 
+	@Override
 	public void onSensorChanged(SensorEvent event) {
 		final float alpha = 0.97f;
 
@@ -154,6 +155,7 @@ public class Compass extends View implements SensorEventListener {
 		}
 	}
 
+	@Override
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
 	}
 }

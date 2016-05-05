@@ -32,16 +32,20 @@ import java.util.concurrent.Future;
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.esri.android.mapsapp.R.drawable;
+import com.esri.android.mapsapp.R.id;
+import com.esri.android.mapsapp.R.layout;
+import com.esri.android.mapsapp.R.string;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.android.mapsapp.util.TaskExecutor;
@@ -56,7 +60,7 @@ import com.esri.arcgisruntime.portal.PortalUserContent;
  * Implements the view that shows the user's maps. Tapping on a map will open
  * it.
  */
-public class ContentBrowserFragment extends Fragment implements OnClickListener {
+public class ContentBrowserFragment extends Fragment implements View.OnClickListener {
 
 	public final static String TAG = ContentBrowserFragment.class.getSimpleName();
 	private static final String TAG_FETCH_MAPS_PROGRESS_DIALOG = "TAG_FETCH_MAPS_PROGRESS_DIALOG";
@@ -67,15 +71,15 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.content_browser_fragment_layout, null);
+		View view = inflater.inflate(layout.content_browser_fragment_layout, null);
 
-		mMapGrid = (GridView) view.findViewById(R.id.content_browser_fragment_gridview);
+		mMapGrid = (GridView) view.findViewById(id.content_browser_fragment_gridview);
 		mMapGrid.setVisibility(View.GONE);
 
-		mNoMapsInfo = view.findViewById(R.id.content_browser_fragment_no_maps_layout);
+		mNoMapsInfo = view.findViewById(id.content_browser_fragment_no_maps_layout);
 		mNoMapsInfo.setVisibility(View.GONE);
 
-		View refreshButton = view.findViewById(R.id.content_browser_fragment_refresh_button);
+		View refreshButton = view.findViewById(id.content_browser_fragment_refresh_button);
 		refreshButton.setOnClickListener(this);
 
 		if (mMaps == null || mMaps.isEmpty()) {
@@ -91,12 +95,12 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 	@Override
 	public void onClick(View view) {
 		switch (view.getId()) {
-			case R.id.map_item_linearlayout :
+			case id.map_item_linearlayout :
 				// a map item has been clicked - open it
-				ViewHolder viewHolder = (ViewHolder) view.getTag();
+				ContentBrowserFragment.ViewHolder viewHolder = (ContentBrowserFragment.ViewHolder) view.getTag();
 				((MapsAppActivity) getActivity()).showMap(viewHolder.portalItem.getId(), null);
 				break;
-			case R.id.content_browser_fragment_refresh_button :
+			case id.content_browser_fragment_refresh_button :
 				// re-fetch maps
 				fetchMyMaps();
 				break;
@@ -107,8 +111,8 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 	 * Fetches the user's maps from the portal.
 	 */
 	private void fetchMyMaps() {
-		mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.fetching_maps));
-		mProgressDialog.show(getActivity().getFragmentManager(), TAG_FETCH_MAPS_PROGRESS_DIALOG);
+		mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(string.fetching_maps));
+		mProgressDialog.show(getActivity().getFragmentManager(), ContentBrowserFragment.TAG_FETCH_MAPS_PROGRESS_DIALOG);
 		// new FetchMapsTask().execute();
 
 		final List<PortalItem> webMapItems = new ArrayList<>();
@@ -195,23 +199,23 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View view = convertView;
-			ViewHolder viewHolder;
+			ContentBrowserFragment.ViewHolder viewHolder;
 			if (view == null) {
-				viewHolder = new ViewHolder();
-				view = getActivity().getLayoutInflater().inflate(R.layout.map_item_layout, null);
+				viewHolder = new ContentBrowserFragment.ViewHolder();
+				view = getActivity().getLayoutInflater().inflate(layout.map_item_layout, null);
 				view.setOnClickListener(ContentBrowserFragment.this);
 				view.setTag(viewHolder);
 
-				viewHolder.title = (TextView) view.findViewById(R.id.map_item_title_textView);
-				viewHolder.thumbnailImageView = (ImageView) view.findViewById(R.id.map_item_thumbnail_imageView);
+				viewHolder.title = (TextView) view.findViewById(id.map_item_title_textView);
+				viewHolder.thumbnailImageView = (ImageView) view.findViewById(id.map_item_thumbnail_imageView);
 			} else {
-				viewHolder = (ViewHolder) view.getTag();
+				viewHolder = (ContentBrowserFragment.ViewHolder) view.getTag();
 			}
 
 			PortalItem portalItem = mMaps.get(position);
 
 			viewHolder.title.setText(portalItem.getTitle());
-			viewHolder.thumbnailImageView.setImageResource(R.drawable.ic_map_thumbnail); // use
+			viewHolder.thumbnailImageView.setImageResource(drawable.ic_map_thumbnail); // use
 																							// default
 																							// thumbnail
 																							// temporarily
@@ -257,9 +261,9 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 	 */
 	private class FetchPortalItemThumbnailTask implements Callable<Void> {
 
-		private final ViewHolder mViewHolder;
+		private final ContentBrowserFragment.ViewHolder mViewHolder;
 
-		public FetchPortalItemThumbnailTask(ViewHolder viewHolder) {
+		public FetchPortalItemThumbnailTask(ContentBrowserFragment.ViewHolder viewHolder) {
 			mViewHolder = viewHolder;
 		}
 
@@ -282,7 +286,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 			}
 
 			if (thumbnailBytes != null && thumbnailBytes.length > 0) {
-				BitmapFactory.Options options = new BitmapFactory.Options();
+				Options options = new Options();
 				options.inPurgeable = true;
 				final Bitmap bmp = BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length, options);
 
