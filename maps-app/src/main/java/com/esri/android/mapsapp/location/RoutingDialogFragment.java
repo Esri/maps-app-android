@@ -28,16 +28,13 @@ import android.app.DialogFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SearchView;
 
-import com.esri.android.mapsapp.R.drawable;
-import com.esri.android.mapsapp.R.id;
-import com.esri.android.mapsapp.R.layout;
-import com.esri.android.mapsapp.R.string;
+import android.widget.SearchView.OnQueryTextListener;
+import com.esri.android.mapsapp.R;
 
 public class RoutingDialogFragment extends DialogFragment {
 	public static final String ARG_END_POINT_DEFAULT = "EndPointDefault";
@@ -54,7 +51,7 @@ public class RoutingDialogFragment extends DialogFragment {
 
 	private SearchView mEndText;
 
-	private RoutingDialogFragment.RoutingDialogListener mRoutingDialogListener;
+	private RoutingDialogListener mRoutingDialogListener;
 
 	// Mandatory empty constructor for fragment manager to recreate fragment
 	// after it's destroyed.
@@ -66,7 +63,7 @@ public class RoutingDialogFragment extends DialogFragment {
 	 *
 	 * @param listener
 	 */
-	public void setRoutingDialogListener(RoutingDialogFragment.RoutingDialogListener listener) {
+	public void setRoutingDialogListener(RoutingDialogListener listener) {
 		mRoutingDialogListener = listener;
 	}
 
@@ -75,8 +72,8 @@ public class RoutingDialogFragment extends DialogFragment {
 		super.onCreate(savedInstanceState);
 		setStyle(DialogFragment.STYLE_NORMAL, 0);
 
-		if (getArguments().containsKey(RoutingDialogFragment.ARG_END_POINT_DEFAULT)) {
-			mEndPointDefault = getArguments().getString(RoutingDialogFragment.ARG_END_POINT_DEFAULT);
+		if (getArguments().containsKey(ARG_END_POINT_DEFAULT)) {
+			mEndPointDefault = getArguments().getString(ARG_END_POINT_DEFAULT);
 		} else {
 			mEndPointDefault = null;
 		}
@@ -84,40 +81,40 @@ public class RoutingDialogFragment extends DialogFragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View view = inflater.inflate(layout.routing_layout, container, false);
-		getDialog().setTitle(string.title_routing_dialog);
+		View view = inflater.inflate(R.layout.routing_layout, container, false);
+		getDialog().setTitle(R.string.title_routing_dialog);
 		// Initialize searchviews
-		mStartText = (SearchView) view.findViewById(id.startPoint);
-		mEndText = (SearchView) view.findViewById(id.endPoint);
+		mStartText = (SearchView) view.findViewById(R.id.startPoint);
+		mEndText = (SearchView) view.findViewById(R.id.endPoint);
 
 		mStartText.setIconifiedByDefault(false);
 		mEndText.setIconifiedByDefault(false);
 
 		// Set hint for searchviews
-		mStartText.setQueryHint(RoutingDialogFragment.SEARCH_FROM);
-		mEndText.setQueryHint(RoutingDialogFragment.SEARCH_TO);
+		mStartText.setQueryHint(SEARCH_FROM);
+		mEndText.setQueryHint(SEARCH_TO);
 
 		// Change default search icons for the search view
 		int startIconId = mStartText.getContext().getResources().getIdentifier("android:id/search_mag_icon", null,
 				null);
 		ImageView start_icon = (ImageView) mStartText.findViewById(startIconId);
-		start_icon.setImageResource(drawable.pin_circle_red);
+		start_icon.setImageResource(R.drawable.pin_circle_red);
 
 		int endIconId = mEndText.getContext().getResources().getIdentifier("android:id/search_mag_icon", null, null);
 		ImageView end_icon = (ImageView) mEndText.findViewById(endIconId);
-		end_icon.setImageResource(drawable.pin_circle_blue);
+		end_icon.setImageResource(R.drawable.pin_circle_blue);
 
-		mStartText.setQuery(RoutingDialogFragment.MY_LOCATION, false);
+		mStartText.setQuery(MY_LOCATION, false);
 		mStartText.clearFocus();
 		mEndText.requestFocus();
 		if (mEndPointDefault != null) {
 			mEndText.setQuery(mEndPointDefault, false);
 		}
-		ImageView swap = (ImageView) view.findViewById(id.iv_interchange);
+		ImageView swap = (ImageView) view.findViewById(R.id.iv_interchange);
 
-		Button routeButton = (Button) view.findViewById(id.getRouteButton);
+		Button routeButton = (Button) view.findViewById(R.id.getRouteButton);
 		// Set up onClick listener for the "Get Route" button
-		routeButton.setOnClickListener(new OnClickListener() {
+		routeButton.setOnClickListener(new View.OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
@@ -145,7 +142,7 @@ public class RoutingDialogFragment extends DialogFragment {
 
 		// Setup listener when the search button is clicked n the keyboard for
 		// the searchviews
-		mEndText.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+		mEndText.setOnQueryTextListener(new OnQueryTextListener() {
 
 			@Override
 			public boolean onQueryTextSubmit(String query) {
@@ -169,7 +166,7 @@ public class RoutingDialogFragment extends DialogFragment {
 			}
 		});
 
-		mStartText.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+		mStartText.setOnQueryTextListener(new OnQueryTextListener() {
 
 			@Override
 			public boolean onQueryTextSubmit(String query) {

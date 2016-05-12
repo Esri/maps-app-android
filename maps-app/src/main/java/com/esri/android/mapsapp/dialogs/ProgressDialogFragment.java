@@ -31,6 +31,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.os.Bundle;
 
 /**
@@ -41,7 +42,7 @@ import android.os.Bundle;
 public class ProgressDialogFragment extends DialogFragment {
 	private static final String KEY_PROGRESS_MESSAGE = "KEY_PROGRESS_MESSAGE";
 
-	private DialogInterface.OnCancelListener mOnCancelListener;
+	private OnCancelListener mOnCancelListener;
 
 	public ProgressDialogFragment() {
 	}
@@ -57,7 +58,7 @@ public class ProgressDialogFragment extends DialogFragment {
 		ProgressDialogFragment dlg = new ProgressDialogFragment();
 
 		Bundle args = new Bundle();
-		args.putString(ProgressDialogFragment.KEY_PROGRESS_MESSAGE, message);
+		args.putString(KEY_PROGRESS_MESSAGE, message);
 
 		dlg.setArguments(args);
 		return dlg;
@@ -71,7 +72,7 @@ public class ProgressDialogFragment extends DialogFragment {
 	 * @param tag
 	 */
 	public static void showDialog(Activity activity, String message, String tag) {
-		ProgressDialogFragment.showDialog(activity, message, tag, true);
+		showDialog(activity, message, tag, true);
 	}
 
 	/**
@@ -86,7 +87,7 @@ public class ProgressDialogFragment extends DialogFragment {
 		ProgressDialogFragment progressDlg = new ProgressDialogFragment();
 
 		Bundle args = new Bundle();
-		args.putString(KEY_PROGRESS_MESSAGE, message);
+		args.putString(ProgressDialogFragment.KEY_PROGRESS_MESSAGE, message);
 		progressDlg.setArguments(args);
 		progressDlg.setCancelable(cancelable);
 
@@ -111,7 +112,7 @@ public class ProgressDialogFragment extends DialogFragment {
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 		Bundle args = getArguments();
-		String msg = args.getString(ProgressDialogFragment.KEY_PROGRESS_MESSAGE);
+		String msg = args.getString(KEY_PROGRESS_MESSAGE);
 
 		ProgressDialog progressDlg = new ProgressDialog(getActivity());
 		progressDlg.setIndeterminate(true);
@@ -128,10 +129,10 @@ public class ProgressDialogFragment extends DialogFragment {
 		// check if the host activity or fragment implements OnCancelListener
 		//
 		Fragment targetFragment = getTargetFragment();
-		if (targetFragment instanceof DialogInterface.OnCancelListener) {
-			mOnCancelListener = (DialogInterface.OnCancelListener) targetFragment;
-		} else if (activity instanceof DialogInterface.OnCancelListener) {
-			mOnCancelListener = (DialogInterface.OnCancelListener) activity;
+		if (targetFragment instanceof OnCancelListener) {
+			mOnCancelListener = (OnCancelListener) targetFragment;
+		} else if (activity instanceof OnCancelListener) {
+			mOnCancelListener = (OnCancelListener) activity;
 		}
 	}
 

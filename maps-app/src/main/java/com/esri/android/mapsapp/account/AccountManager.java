@@ -50,10 +50,10 @@ public class AccountManager {
 	}
 
 	public static AccountManager getInstance() {
-		if (AccountManager.sAccountManager == null) {
-			AccountManager.sAccountManager = new AccountManager();
+		if (sAccountManager == null) {
+			sAccountManager = new AccountManager();
 		}
-		return AccountManager.sAccountManager;
+		return sAccountManager;
 	}
 
 	/**
@@ -88,7 +88,7 @@ public class AccountManager {
 	 */
 	public Portal getAGOLPortal() {
 		if (mAGOLPortal == null) {
-			mAGOLPortal = new Portal(AccountManager.AGOL_PORTAL_URL, null);
+			mAGOLPortal = new Portal(AGOL_PORTAL_URL, null);
 		}
 		return mAGOLPortal;
 	}

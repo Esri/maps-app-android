@@ -37,7 +37,7 @@ public class StringUtils {
 	 * @return whether or not the string is not empty
 	 */
 	public static boolean isNotEmpty(String str) {
-		return !StringUtils.isEmpty(str);
+		return !isEmpty(str);
 	}
 
 	/**

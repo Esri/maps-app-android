@@ -35,8 +35,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.view.View;
-
-import com.esri.android.mapsapp.R.drawable;
+import com.esri.android.mapsapp.R;
 
 /**
  * The implementation of compass. There are two modes of operation for rotating
@@ -67,7 +66,7 @@ public class Compass extends View implements SensorEventListener {
 		mPaint = new Paint();
 		mMatrix = new Matrix();
 
-		mBitmap = BitmapFactory.decodeResource(getResources(), drawable.eaf_compass);
+		mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.eaf_compass);
 
 		sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
 		gSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);

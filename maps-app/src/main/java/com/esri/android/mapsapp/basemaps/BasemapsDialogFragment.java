@@ -29,6 +29,7 @@ import java.util.List;
 
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -37,9 +38,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 
-import com.esri.android.mapsapp.R.layout;
-import com.esri.android.mapsapp.R.string;
+import android.widget.SimpleCursorAdapter;
+import com.esri.android.mapsapp.MapFragment;
+import com.esri.android.mapsapp.R;
 import com.esri.android.mapsapp.account.AccountManager;
+import com.esri.android.mapsapp.basemaps.BasemapsAdapter.BasemapsAdapterClickListener;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.portal.Portal;
@@ -47,22 +50,23 @@ import com.esri.arcgisruntime.portal.PortalGroup;
 import com.esri.arcgisruntime.portal.PortalInfo;
 import com.esri.arcgisruntime.portal.PortalItem;
 import com.esri.arcgisruntime.portal.PortalQueryParams;
-import com.esri.arcgisruntime.portal.PortalQueryParams.SortOrder;
 import com.esri.arcgisruntime.portal.PortalQueryResultSet;
 
 /**
  * Implements the dialog that provides a collection of basemaps to the user.
  */
-public class BasemapsDialogFragment extends DialogFragment implements BasemapsAdapter.BasemapsAdapterClickListener, DialogInterface.OnCancelListener {
+public class BasemapsDialogFragment extends DialogFragment implements BasemapsAdapterClickListener, OnCancelListener {
 
 	private static final String TAG = "BasemapsDialogFragment";
 	private static final String TAG_BASEMAP_SEARCH_PROGRESS_DIALOG = "TAG_BASEMAP_SEARCH_PROGRESS_DIALOG";
 	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
 	private final List<PortalItem> mBasemapResult = new ArrayList<PortalItem>();
 	private ProgressDialogFragment mProgressDialog;
-	private BasemapsDialogFragment.BasemapsDialogListener mBasemapsDialogListener;
+	private BasemapsDialogListener mBasemapsDialogListener;
 	private BasemapsAdapter mBasemapsAdapter;
 	private ArrayList<BasemapItem> mBasemapItemList;
+
+
 
 	// Mandatory empty constructor for fragment manager to recreate fragment
 	// after it's destroyed
@@ -74,7 +78,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 	 *
 	 * @param listener
 	 */
-	public void setBasemapsDialogListener(BasemapsDialogFragment.BasemapsDialogListener listener) {
+	public void setBasemapsDialogListener(BasemapsDialogListener listener) {
 		mBasemapsDialogListener = listener;
 	}
 
@@ -87,18 +91,18 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		getDialog().setTitle(string.title_basemaps_dialog);
+		getDialog().setTitle(R.string.title_basemaps_dialog);
 
 		// Inflate basemaps grid layout and setup list and adapter to back it
-		GridView view = (GridView) inflater.inflate(layout.grid_layout, container, false);
+		GridView view = (GridView) inflater.inflate(R.layout.grid_layout, container, false);
 		mBasemapItemList = new ArrayList<>();
 		mBasemapsAdapter = new BasemapsAdapter(getActivity(), mBasemapItemList, this);
 		view.setAdapter(mBasemapsAdapter);
 
 		// Show progress dialog
-		mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(string.fetching_basemaps));
+		mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.fetching_basemaps));
 		// set the target fragment to receive cancel notification
-		mProgressDialog.setTargetFragment(this, BasemapsDialogFragment.REQUEST_CODE_PROGRESS_DIALOG);
+		mProgressDialog.setTargetFragment(this, REQUEST_CODE_PROGRESS_DIALOG);
 
 		// If no basemaps yet, execute search for available basemaps and
 		// populate the grid with them.
@@ -135,7 +139,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 	 */
 	private void fetchBasemapItems() {
 		// Show a progress dialog
-		mProgressDialog.show(getActivity().getFragmentManager(), BasemapsDialogFragment.TAG_BASEMAP_SEARCH_PROGRESS_DIALOG);
+		mProgressDialog.show(getActivity().getFragmentManager(), TAG_BASEMAP_SEARCH_PROGRESS_DIALOG);
 
 		if (AccountManager.getInstance().isSignedIn()) {
 			getBasemapsFromUserPortal();
@@ -235,7 +239,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 
 		// Create a PortalQueryParams to query for items in basemap group
 		PortalQueryParams queryParams = new PortalQueryParams();
-		queryParams.setSortField("name").setSortOrder(SortOrder.ASCENDING);
+		queryParams.setSortField("name").setSortOrder(PortalQueryParams.SortOrder.ASCENDING);
 		queryParams.setQuery(createDefaultQueryString());
 
 		// Find items that match the query
@@ -287,6 +291,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 		}
 		mProgressDialog.dismiss();
 	}
+
 	/**
 	 * A callback interface that all activities containing this fragment must
 	 * implement, to receive a new basemap from this fragment.

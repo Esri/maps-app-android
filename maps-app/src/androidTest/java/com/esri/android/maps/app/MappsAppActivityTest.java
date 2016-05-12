@@ -17,6 +17,7 @@ import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.SearchView.SearchAutoComplete;
 import android.text.format.DateUtils;
 import android.view.View;
 
@@ -24,6 +25,8 @@ import com.esri.android.mapsapp.DrawerItem;
 import com.esri.android.mapsapp.MapFragment;
 import com.esri.android.mapsapp.MapsAppActivity;
 import com.esri.android.mapsapp.R;
+import com.esri.android.mapsapp.R.id;
+import com.esri.android.mapsapp.R.string;
 import com.esri.android.mapsapp.basemaps.BasemapItem;
 import com.esri.android.mapsapp.basemaps.BasemapsAdapter;
 import com.esri.arcgisruntime.mapping.view.MapView;
@@ -92,34 +95,34 @@ public class MappsAppActivityTest  {
     @Test
     public void testMainScreen(){
         // Various layouts should be present and/or enabled
-        onView(withId(R.id.maps_app_activity_drawer_layout)).check(matches(isEnabled()));
-        onView(withId(R.id.maps_app_activity_content_frame)).check(matches(isDisplayed()));
-        onView(withId(R.id.maps_app_activity_left_drawer)).check(matches(isEnabled()));
+        onView(withId(id.maps_app_activity_drawer_layout)).check(matches(isEnabled()));
+        onView(withId(id.maps_app_activity_content_frame)).check(matches(isDisplayed()));
+        onView(withId(id.maps_app_activity_left_drawer)).check(matches(isEnabled()));
 
         // Map should be enabled
-        onView(withId(R.id.map)).check(matches(isEnabled()));
+        onView(withId(id.map)).check(matches(isEnabled()));
 
         // Floating action button should be enabled
-        onView(withId(R.id.fab)).check(matches(isEnabled()));
+        onView(withId(id.fab)).check(matches(isEnabled()));
 
         // Search view should be displayed
-        onView(allOf(withId(R.id.searchView1))).check(matches(isDisplayed()));
+        onView(allOf(withId(id.searchView1))).check(matches(isDisplayed()));
 
         // Should be able to tap on the search box
-        onView(withClassName(endsWith(SearchView.SearchAutoComplete.class.getSimpleName()))).perform(click());
+        onView(withClassName(endsWith(SearchAutoComplete.class.getSimpleName()))).perform(click());
     }
 
     @Test
     public void testDrawer(){
         //Open up the drawer
-        onView(withId(R.id.maps_app_activity_drawer_layout)).perform(DrawerActions.open());
+        onView(withId(id.maps_app_activity_drawer_layout)).perform(DrawerActions.open());
 
         // The 'Switch Basemap' and 'Sign In' items should be present in the drawer
-        onView(withText(main.getActivity().getString(R.string.menu_basemaps)));
-        onView(withText(main.getActivity().getString(R.string.sign_in)));
+        onView(withText(main.getActivity().getString(string.menu_basemaps)));
+        onView(withText(main.getActivity().getString(string.sign_in)));
 
         // Close the drawer
-        onView(withId(R.id.maps_app_activity_drawer_layout)).perform(DrawerActions.close());
+        onView(withId(id.maps_app_activity_drawer_layout)).perform(DrawerActions.close());
     }
 
     @Test
@@ -128,20 +131,20 @@ public class MappsAppActivityTest  {
      * available basemap.
      */
     public void testPublicBasemaps(){
-        onView(withId(R.id.maps_app_activity_drawer_layout)).perform(DrawerActions.open());
+        onView(withId(id.maps_app_activity_drawer_layout)).perform(DrawerActions.open());
 
         // Does the list item for basemaps exist?
-        onView(withText(main.getActivity().getString(R.string.menu_basemaps))).perform(click());
+        onView(withText(main.getActivity().getString(string.menu_basemaps))).perform(click());
 
         //We should be seeing a grid view populated with items
-        onView(withId(R.id.basemap_gridview)).check(matches(isDisplayed()));
+        onView(withId(id.basemap_gridview)).check(matches(isDisplayed()));
 
         // It should be populated using a basemaps adapter
         onData(allOf(is(instanceOf(BasemapItem.class))));
 
         // Find the basemap item with a thumbnail Click on the Light Gray Canvas
-        onData(anyOf(withId(R.id.basemap_grid_item_title_textview),withText("Light Gray Canvas"), isDisplayed()));
-        onData(anyOf(withId(R.id.basemap_grid_item_title_textview),withText("Light Gray Canvas"), isClickable()));
+        onData(anyOf(withId(id.basemap_grid_item_title_textview),withText("Light Gray Canvas"), isDisplayed()));
+        onData(anyOf(withId(id.basemap_grid_item_title_textview),withText("Light Gray Canvas"), isClickable()));
         onData(allOf(is(instanceOf(BasemapItem.class)), hasProperty("getTitle"))).perform(click());
         //onData(allOf(is(instanceOf(BasemapItem.class)), hasProperty("hasTitle")))
      //   onData(is(instanceOf(BasemapItem.class))).atPosition(0).inAdapterView(allOf(withId(R.id.basemap_gridview),isDisplayed())).perform(click());
@@ -157,7 +160,7 @@ public class MappsAppActivityTest  {
     @Test
     public void testLongPress(){
 
-        onView(withId(R.id.map)).check(matches(isDisplayed()));
+        onView(withId(id.map)).check(matches(isDisplayed()));
         /*Instrumentation.ActivityMonitor monitor =  getInstrumentation().addMonitor(MapFragment.class.getName(), null, false);
         Activity currentActivity = getInstrumentation().waitForMonitorWithTimeout(monitor, 5);
         [..do something until the view is visible…]
