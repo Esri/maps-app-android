@@ -26,6 +26,23 @@ Long press on the map to get the adress of that point and a magnifier will be di
 
 ![](assets/magnifier_loc.png)
 
+### Routing
+Routing requires requires credits and will require you to login into your organization's ArcGIS Online account. After searching for a location, the route to it from your current location can be mapped by pressing the routing icon to the right of the search box.  You'll be prompted for authentication credentials the first time your ask for a route.
+
+![](assets/route_auth.png)
+
+The route is shown with travel time and distance in meters.  
+
+![](assets/route.png)
+
+Tapping on the three-headed arrow in the route result dialog will display driving directions.
+
+![](assets/directions.png)
+
+To clear the route, tap the 'X' in the route result dialog.  You can route between any two locations by clicking the route icon without having first searched for a location.  This will bring up a routing dialog where you can either use your current location as the origin or type in another address.  Type in the address of your destination and click 'Get Route'.
+
+![](assets/route_dialog.png)
+
 ### Switch basemaps
 Choose from a wide range of basemaps including Streets, Topography, World Imagery, etc.  
 
