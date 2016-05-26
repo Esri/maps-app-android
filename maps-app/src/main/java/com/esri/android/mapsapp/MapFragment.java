@@ -56,7 +56,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
-import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
@@ -70,9 +69,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.esri.android.mapsapp.R.menu;
 import com.esri.android.mapsapp.account.AccountManager;
-import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogListener;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.android.mapsapp.location.DirectionsDialogFragment;
@@ -733,38 +730,61 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * @param query
 	 *            String typed so far by the user to fetch the suggestions
 	 */
-	private void getSuggestions(String query) {
+	private void getSuggestions(final String query) {
 		if (query == null || query.isEmpty()) {
 			return;
 		}
+
 		// Initialize the locatorSugestion parameters
 		locatorParams(SUGGEST_PLACE);
 
-		final ListenableFuture<List<SuggestResult>> suggestionsFuture = mLocator.suggestAsync(query, suggestParams);
-		suggestionsFuture.addDoneListener(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					// Get the suggestions returned from the locator task
-					mSuggestionsList = suggestionsFuture.get();
-
-					if (mSuggestionsList != null && mSuggestionsList.size() > 0) {
-						initSuggestionCursor();
-						int key = 0;
-						for (SuggestResult result : mSuggestionsList) {
-							// Add the suggestion results to the cursor
-							mSuggestionCursor.addRow(new Object[]{key++, result.getLabel(), "0", "0"});
-						}
-						applySuggestionCursor();
-					}
-
-				} catch (Exception e) {
-					Log.e(TAG, "No suggested places found");
-					Log.e(TAG, "Get suggestions error " + e.getMessage());
+		// Attach a listener to the locator task since
+		// the LocatorTask may or may not be loaded the
+		// the very first time a user types text into the search box.
+		// If the Locator is already loaded, the following listener
+		// is invoked immediately.
+		mLocator.addDoneLoadingListener(new Runnable() {
+			@Override public void run() {
+				// Does this locator support suggestions?
+				if (!mLocator.getLocatorInfo().isSupportsSuggestions()){
+					return;
 				}
+				final ListenableFuture<List<SuggestResult>> suggestionsFuture = mLocator.suggestAsync(query, suggestParams);
+				suggestionsFuture.addDoneListener(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							// Get the suggestions returned from the locator task.
+							// Store retrieved suggestions for future use (e.g. if the user
+							// selects a retrieved suggestion, it can easily be
+							// geocoded).
+							mSuggestionsList = suggestionsFuture.get();
+
+							showSuggestedPlaceNames(mSuggestionsList);
+
+						} catch (Exception e) {
+							Log.e(TAG, "Error on getting suggestions " + e.getMessage());
+						}
+					}
+				});
 			}
 		});
+		mLocator.loadAsync();
 	}
+
+	private void showSuggestedPlaceNames(List<SuggestResult> suggestions){
+		if (suggestions == null || suggestions.isEmpty()){
+			return;
+		}
+		initSuggestionCursor();
+		int key = 0;
+		for (SuggestResult result : suggestions) {
+			// Add the suggestion results to the cursor
+			mSuggestionCursor.addRow(new Object[]{key++, result.getLabel(), "0", "0"});
+		}
+		applySuggestionCursor();
+	}
+
 
 	/**
 	 * Initialize SuggestionParameters or GeocodeParameters
@@ -810,7 +830,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
    * Retrieves location for selected suggestion
    * @param address Suggested address user clicked on
    */
-	private void geoCodeSuggestedLocation(String address) {
+	private void geoCodeSuggestedLocation(final String address) {
 
     final String TAG_LOCATOR_PROGRESS_DIALOG = "TAG_LOCATOR_PROGRESS_DIALOG";
     // Display progress dialog on UI thread
@@ -838,33 +858,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
         @Override
         public void run() {
           try {
-
             List<GeocodeResult> locationResults = locFuture.get();
-            GeocodeResult result = null;
-            Point resultPoint = null;
-            String resultAddress = null;
-            if (locationResults != null && locationResults.size() > 0) {
-              // Get the first returned result
-              result = locationResults.get(0);
-              resultPoint = result.getDisplayLocation();
-              resultAddress = result.getLabel();
-            }else{
-							Log.i(MapFragment.TAG, "No geocode results found for suggestion");
-
-						}
-
-            // Dismiss progress dialog
-            mProgressDialog.dismiss();
-            if (resultPoint == null){
-							Toast.makeText(getActivity(),
-									getString(R.string.location_not_foud) + resultAddress,
-									Toast.LENGTH_LONG).show();
-							return;
-						}
-
-            // Display the result
-            displaySearchResult(resultPoint, resultAddress);
-            hideKeyboard();
+						showSuggestedPlace(locationResults, address);
+						mProgressDialog.dismiss();
           } catch (Exception e) {
             Log.e(TAG, "Geocode error " + e.getMessage());
 						mProgressDialog.dismiss();
@@ -874,16 +870,43 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
           }
         }
       });
-
     }else{
 			mProgressDialog.dismiss();
 			Toast.makeText(getActivity(),
-					getString(R.string.location_not_foud) + address,
+					getString(R.string.location_not_foud) + " " + address,
 					Toast.LENGTH_LONG).show();
 		}
 
 	}
 
+	/**
+	 * Given an address and the geocode results, dismiss
+	 * progress dialog and keyboard and show the geocoded location.
+	 * @param locationResults - List of GeocodeResult
+   */
+	private void showSuggestedPlace(final List<GeocodeResult> locationResults, final String address){
+		GeocodeResult result = null;
+		Point resultPoint = null;
+		String resultAddress = null;
+		if (locationResults != null && locationResults.size() > 0) {
+			// Get the first returned result
+			result = locationResults.get(0);
+			resultPoint = result.getDisplayLocation();
+			resultAddress = result.getLabel();
+		}else{
+			Log.i(MapFragment.TAG, "No geocode results found for suggestion");
+		}
+
+		if (resultPoint == null){
+			Toast.makeText(getActivity(),
+					getString(R.string.location_not_foud) + resultAddress,
+					Toast.LENGTH_LONG).show();
+			return;
+		}
+		// Display the result
+		displaySearchResult(resultPoint, address);
+		hideKeyboard();
+	}
   /**
    * Hides soft keyboard
    */
@@ -1263,8 +1286,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Read more about routing services (here)
 		String routeTaskURL = getString(R.string.routingservice_url);
 
-
 		mRouteTask = new RouteTask(routeTaskURL);
+		Log.i(TAG, mRouteTask.getUrl());
 		try {
 			// Geocode start position, or use My Location (from GPS)
 
@@ -1462,7 +1485,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				} catch (ExecutionException e) {
 					e.printStackTrace();
 				}
-
 			}
 		});
 	}
