@@ -107,17 +107,20 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 	 * Fetches the user's maps from the portal.
 	 */
 	private void fetchMyMaps() {
+		// Show a progress dialog while we retrieve web maps...
 		mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.fetching_maps));
 		mProgressDialog.show(getActivity().getFragmentManager(), TAG_FETCH_MAPS_PROGRESS_DIALOG);
-		// new FetchMapsTask().execute();
 
 		final List<PortalItem> webMapItems = new ArrayList<>();
 		try {
-			// fetch the user's maps from the portal
+			// Get the Portal the user is signed in to.
 			Portal portal = AccountManager.getInstance().getPortal();
 			if (portal != null) {
+				// Get user content from the portal
 				PortalUser portalUser = portal.getPortalUser();
+
 				final ListenableFuture<PortalUserContent> contentFuture = portalUser.fetchContentAsync();
+				// Filter returned content for WEBMAP items
 				contentFuture.addDoneListener(new Runnable() {
 
 					@Override
@@ -134,21 +137,21 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 								}
 							}
 							mMaps = webMapItems;
+							// Show the web maps in the grid view
 							refreshView();
 
+							// Dismiss the progress dialog
 							mProgressDialog.dismiss();
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
 					}
 				});
-
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 
 		}
-
 	}
 
 	/**

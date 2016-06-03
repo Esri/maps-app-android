@@ -178,7 +178,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private Point mLocation = null;
 	// Graphics layer to show geocode and reverse geocode results
 	private GraphicsOverlay mLocationLayer;
-	private Point mLocationLayerPoint;
+	private Point mFoundLocation;
 	private String mLocationLayerPointString;
 	// Graphics layer to show routes
 	private GraphicsOverlay mRouteLayer;
@@ -191,7 +191,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private LocatorTask mLocator;
 	private View mSearchResult;
 	private LayoutInflater mInflater;
-	private String mStartLocation, mEndLocation;
+	private String mStartLocationName, mEndLocationName;
 	private SuggestParameters suggestParams;
 	private GeocodeParameters mGeocodeParams;
 	private ReverseGeocodeParameters mReverseGeocodeParams;
@@ -199,6 +199,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private Map mMap;
 	private Basemap mBasemap;
 	private boolean suggestionClickFlag;
+	private GeocodeResult mGeocodedLocation;
 
 	public MapFragment() {
 		// make MapFragment ctor private - use newInstance() instead
@@ -553,7 +554,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 		});
 		Bundle arguments = new Bundle();
-		if (mLocationLayerPoint != null) {
+		if (mFoundLocation != null) {
 			arguments.putString(RoutingDialogFragment.ARG_END_POINT_DEFAULT, mLocationLayerPointString);
 		}
     FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -743,13 +744,18 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// the very first time a user types text into the search box.
 		// If the Locator is already loaded, the following listener
 		// is invoked immediately.
+
 		mLocator.addDoneLoadingListener(new Runnable() {
 			@Override public void run() {
 				// Does this locator support suggestions?
-				if (!mLocator.getLocatorInfo().isSupportsSuggestions()){
+				if (mLocator.getLoadStatus().name() != LoadStatus.LOADED.name()){
+					//Log.i(TAG,"##### " + mLocator.getLoadStatus().name());
+				} else if (!mLocator.getLocatorInfo().isSupportsSuggestions()){
 					return;
 				}
+				//og.i(TAG,"****** " + mLocator.getLoadStatus().name());
 				final ListenableFuture<List<SuggestResult>> suggestionsFuture = mLocator.suggestAsync(query, suggestParams);
+				// Attach a done listener that executes upon completion of the async call
 				suggestionsFuture.addDoneListener(new Runnable() {
 					@Override
 					public void run() {
@@ -769,6 +775,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				});
 			}
 		});
+		// Initiate the asynchronous call
 		mLocator.loadAsync();
 	}
 
@@ -840,20 +847,25 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
     mProgressDialog.setTargetFragment(this, REQUEST_CODE_PROGRESS_DIALOG);
     mProgressDialog.show(getActivity().getFragmentManager(), TAG_LOCATOR_PROGRESS_DIALOG);
 
+		// Null out any previously located result
+		mGeocodedLocation = null;
+
     SuggestResult matchedSuggestion = null;
     // get the Location for the suggestion from the ArrayList
     for (SuggestResult result : mSuggestionsList) {
-      if (address.equalsIgnoreCase(result.getLabel())) {  // changed from address.matches because addresses with parentheses were throwing off REGEX.
+			// changed from address.matches because addresses with parentheses were throwing off REGEX.
+      if (address.equalsIgnoreCase(result.getLabel())) {
         matchedSuggestion = result;
         break;
       }
     }
     if (matchedSuggestion != null) {
 			final SuggestResult matchedAddress = matchedSuggestion;
-      // Prepare the GeocodeParams
+      // Prepare the GeocodeParameters for geocoding the address
       locatorParams(FIND_PLACE);
 
       final ListenableFuture<List<GeocodeResult>> locFuture = mLocator.geocodeAsync(matchedAddress, mGeocodeParams);
+			// Attach a done listener that executes upon completion of the async call
       locFuture.addDoneListener(new Runnable() {
         @Override
         public void run() {
@@ -862,6 +874,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 						showSuggestedPlace(locationResults, address);
 						mProgressDialog.dismiss();
           } catch (Exception e) {
+						// Notify that there was a problem with geocoding
             Log.e(TAG, "Geocode error " + e.getMessage());
 						mProgressDialog.dismiss();
 						Toast.makeText(getActivity(),
@@ -871,6 +884,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
         }
       });
     }else{
+			// Notify that no matched suggestion was found
 			mProgressDialog.dismiss();
 			Toast.makeText(getActivity(),
 					getString(R.string.location_not_foud) + " " + address,
@@ -885,14 +899,14 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * @param locationResults - List of GeocodeResult
    */
 	private void showSuggestedPlace(final List<GeocodeResult> locationResults, final String address){
-		GeocodeResult result = null;
+
 		Point resultPoint = null;
 		String resultAddress = null;
 		if (locationResults != null && locationResults.size() > 0) {
 			// Get the first returned result
-			result = locationResults.get(0);
-			resultPoint = result.getDisplayLocation();
-			resultAddress = result.getLabel();
+			mGeocodedLocation = locationResults.get(0);
+			resultPoint = mGeocodedLocation.getDisplayLocation();
+			resultAddress = mGeocodedLocation.getLabel();
 		}else{
 			Log.i(MapFragment.TAG, "No geocode results found for suggestion");
 		}
@@ -928,7 +942,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// add graphic to location layer
 		mLocationLayer.getGraphics().add(resultLocGraphic);
 
-		mLocationLayerPoint = resultPoint;
+		mFoundLocation = resultPoint;
 
 		mLocationLayerPointString = address;
 
@@ -942,7 +956,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	void resetGraphicsLayers() {
 		mLocationLayer.getGraphics().clear();
 		mRouteLayer.getGraphics().clear();
-		mLocationLayerPoint = null;
+		mFoundLocation = null;
 		mLocationLayerPointString = null;
 		mRoutingDirections = null;
 	}
@@ -974,6 +988,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 */
 	public void onSearchButtonClicked(final String address) {
 
+		Log.i(TAG, " #### Submitted address " + address);
 		// Hide virtual keyboard
 		hideKeyboard();
 
@@ -997,6 +1012,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		if (mLocation != null) {
 			geoParameters.setPreferredSearchLocation(mLocation);
 		}
+		// Null out any previously located result
+		mGeocodedLocation = null;
 
 		// Set address spatial reference to match map
 		SpatialReference sR = mMapView.getSpatialReference();
@@ -1022,13 +1039,14 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 								if (geocodeResults.size() > 0) {
 									// Use the first result - for example
 									// display on the map
-									GeocodeResult topResult = geocodeResults.get(0);
-									displaySearchResult(topResult.getDisplayLocation(), topResult.getLabel());
+									mGeocodedLocation = geocodeResults.get(0);
+									displaySearchResult(mGeocodedLocation.getDisplayLocation(), mGeocodedLocation.getLabel());
 
 								}else{
                   Toast.makeText(getActivity(),
                       getString(R.string.location_not_foud) + address,
                       Toast.LENGTH_LONG).show();
+
 								}
 
 							} catch (InterruptedException e) {
@@ -1196,21 +1214,21 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Shorten the start and end location by finding the first comma if
 		// present
-		int index_from = mStartLocation.indexOf(",");
-		int index_to = mEndLocation.indexOf(",");
+		int index_from = mStartLocationName.indexOf(",");
+		int index_to = mEndLocationName.indexOf(",");
 		if (index_from != -1)
-			mStartLocation = mStartLocation.substring(0, index_from);
+			mStartLocationName = mStartLocationName.substring(0, index_from);
 		if (index_to != -1)
-			mEndLocation = mEndLocation.substring(0, index_to);
+			mEndLocationName = mEndLocationName.substring(0, index_to);
 
 		// Initialize the textvieww and display the text
 		TextView tv_from = (TextView) mSearchResult.findViewById(R.id.tv_from);
 		tv_from.setTypeface(null, Typeface.BOLD);
-		tv_from.setText(" " + mStartLocation);
+		tv_from.setText(" " + mStartLocationName);
 
 		TextView tv_to = (TextView) mSearchResult.findViewById(R.id.tv_to);
 		tv_to.setTypeface(null, Typeface.BOLD);
-		tv_to.setText(" " + mEndLocation);
+		tv_to.setText(" " + mEndLocationName);
 
     // Convert meters to miles
 
@@ -1269,10 +1287,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	/**
 	 * Given an origin and destination, execute a route solving task
-	 * @param origin - string representing a starting location
-	 * @param destination - string representing an ending location
+	 * @param originName - string representing a starting location
+	 * @param destinationName - string representing an ending location
    */
-	private void getRoute(String origin, final String destination) {
+	private void getRoute(String originName, final String destinationName) {
 		// Show the progress dialog while getting route info
 		showProgressDialog(getString(R.string.route_search), TAG_ROUTE_SEARCH_PROGRESS_DIALOG);
 
@@ -1285,52 +1303,57 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// make a difference.
 		// Read more about routing services (here)
 		String routeTaskURL = getString(R.string.routingservice_url);
-
 		mRouteTask = new RouteTask(routeTaskURL);
+		mEndLocationName = destinationName;
 		Log.i(TAG, mRouteTask.getUrl());
-		try {
-			// Geocode start position, or use My Location (from GPS)
+		Point endPoint = null;
 
-			if (origin.equals(getString(R.string.my_location))) {
-				mStartLocation = getString(R.string.my_location);
+		try {
+			// Geocode start position or use My Location (from GPS)
+			if (originName.equals(getString(R.string.my_location))) {
+				mStartLocationName = getString(R.string.my_location);
 
 				// We're using my current location as the
-				// start location, so just geocode the destination location
-				Log.i(TAG, "Geocoding address: " + destination);
-				final ListenableFuture<List<GeocodeResult>> geoFutureEnd = mLocator.geocodeAsync(destination,
-						mGeocodeParams);
-				geoFutureEnd.addDoneListener(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							List<GeocodeResult> results = geoFutureEnd.get();
-							if (results != null && results.size() > 0) {
-								final Point endPoint = results.get(0).getDisplayLocation();
-								mEndLocation = destination;
+				// start location, do we need to geocode the destination?
+				// A previous GeocodeResult may be available...
+				if (mGeocodedLocation != null){
+					endPoint = mGeocodedLocation.getDisplayLocation();
+					// We have the start and end, now get route
+					mRouteTask.addDoneLoadingListener(new RouteSolver(mLocation,endPoint));
+					mRouteTask.loadAsync();
 
-								// We have the start and end, now get route
-								final Stop start = new Stop(mLocation);
-								final Stop end = new Stop(endPoint);
+				}else{
+					Log.i(TAG, "Geocoding destination address: " + destinationName);
+					final ListenableFuture<List<GeocodeResult>> geoFutureEnd = mLocator.geocodeAsync(destinationName,
+							mGeocodeParams);
+					geoFutureEnd.addDoneListener(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								List<GeocodeResult> results = geoFutureEnd.get();
+								if (results != null && results.size() > 0) {
+									final Point endPoint = results.get(0).getDisplayLocation();
 
-								mRouteTask.addDoneLoadingListener(new RouteSolver(mLocation,endPoint));
-								mRouteTask.loadAsync();
+									// We have the start and end, now get route
+									mRouteTask.addDoneLoadingListener(new RouteSolver(mLocation,endPoint));
+									mRouteTask.loadAsync();
 
-							} else {
-								Log.i(TAG, "Geocoding failed to return results for this address: " + destination);
+								} else {
+									Log.i(TAG, "Geocoding failed to return results for this address: " + destinationName);
+								}
+							} catch (Exception ie) {
+								mProgressDialog.dismiss();
+								ie.printStackTrace();
+								Toast.makeText(getActivity(),
+										getString(R.string.geo_locate_error),
+										Toast.LENGTH_LONG);
 							}
-						} catch (Exception ie) {
-							mProgressDialog.dismiss();
-							ie.printStackTrace();
-							Toast.makeText(getActivity(),
-									getString(R.string.geo_locate_error),
-									Toast.LENGTH_LONG);
 						}
-					}
-				});
-
+					});
+				}
 			} else {
 				// Get the start location
-				final ListenableFuture<List<GeocodeResult>> geoFutureStart = mLocator.geocodeAsync(origin,
+				final ListenableFuture<List<GeocodeResult>> geoFutureStart = mLocator.geocodeAsync(originName,
 						mGeocodeParams);
 				geoFutureStart.addDoneListener(new Runnable() {
 					@Override
@@ -1339,11 +1362,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 							List<GeocodeResult> results = geoFutureStart.get();
 							if (results != null && results.size() > 0) {
 								final Point origin = results.get(0).getDisplayLocation();
-                mStartLocation = results.get(0).getLabel();
+                mStartLocationName = results.get(0).getLabel();
 
 								// Now we need to get the end location
 								final ListenableFuture<List<GeocodeResult>> geoFutureEnd2 = mLocator
-										.geocodeAsync(destination, mGeocodeParams);
+										.geocodeAsync(destinationName, mGeocodeParams);
 								geoFutureEnd2.addDoneListener(new Runnable() {
 									@Override
 									public void run() {
@@ -1351,7 +1374,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 											List<GeocodeResult> results = geoFutureEnd2.get();
 											if (results != null && results.size() > 0) {
 												Point end = results.get(0).getDisplayLocation();
-                        mEndLocation = results.get(0).getLabel();
+                        mEndLocationName = results.get(0).getLabel();
 												// We have the start and end,
 												// now get route
 												mRouteTask.addDoneLoadingListener(new RouteSolver(origin,end));
@@ -1471,14 +1494,20 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Provision reverse geocode parameers
 		locatorParams(REVERSE_GECODE);
+		// Pass in the point and geocode parameters to the reverse geocode method
 		final ListenableFuture<List<GeocodeResult>> reverseFuture = mLocator.reverseGeocodeAsync(point,
 				mReverseGeocodeParams);
+		// Attach a done listener that shows the results upon completion of the async call
 		reverseFuture.addDoneListener(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					mProgressDialog.dismiss();
+					if (mProgressDialog !=null){
+						mProgressDialog.dismiss();
+					}
+
 					List<GeocodeResult> results = reverseFuture.get();
+					// Process and display results
 					showReverseGeocodeResult(results);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -1502,17 +1531,17 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			// Show the first item returned
 			// Address string is saved for use in routing
 			mLocationLayerPointString = results.get(0).getLabel();
-			Point addressPoint = results.get(0).getDisplayLocation();
+			mFoundLocation = results.get(0).getDisplayLocation();
 			// Draw marker on map.
 			// create marker symbol to represent location
 
 			BitmapDrawable bitmapDrawable = (BitmapDrawable) ContextCompat
 					.getDrawable(getActivity().getApplicationContext(), R.drawable.pin_circle_red);
 			PictureMarkerSymbol destinationSymbol = new PictureMarkerSymbol(bitmapDrawable);
-			mLocationLayer.getGraphics().add(new Graphic(addressPoint, destinationSymbol));
+			mLocationLayer.getGraphics().add(new Graphic(mFoundLocation, destinationSymbol));
 
 			// center the map to result location
-			mMapView.setViewpointCenterAsync(addressPoint);
+			mMapView.setViewpointCenterAsync(mFoundLocation);
 
 			// Show the result on the search result layout
 			showSearchResultLayout(mLocationLayerPointString);
@@ -1560,12 +1589,13 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		public boolean onUp(MotionEvent motionEvent) {
 			if (mLongPressEvent != null) {
 				// This is the end of a long-press that will have displayed
-				// the magnifier.
-				// Perform reverse-geocoding of the point that was pressed
-
+				// the magnifier.  Get the graphic
+				// coordinates for the motion event.
 				android.graphics.Point mapPoint = new android.graphics.Point((int) motionEvent.getX(),
 						(int) motionEvent.getY());
 				Point point = mMapView.screenToLocation(mapPoint);
+				// Set any previously located point to null
+				mFoundLocation = null;
 				reverseGeocode(point);
 
 				mLongPressEvent = null;
@@ -1626,20 +1656,24 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				Toast.makeText(getActivity(),
 						"There was a problem loading the route task.",
 						Toast.LENGTH_LONG).show();
+				// We may want to try reloading it  --> mRouteTask.retryLoadAsync();
 
 			} else {
 				final ListenableFuture<RouteParameters> routeTaskFuture = mRouteTask
 						.generateDefaultParametersAsync();
+				// Add a done listener that uses the returned route parameters
+				// to build up a specific request for the route we need
 				routeTaskFuture.addDoneListener(new Runnable() {
 
 					@Override
 					public void run() {
 						try {
 							RouteParameters routeParameters = routeTaskFuture.get();
+							// Add a stop for origin and destination
 							routeParameters.getStops().add(origin);
 							routeParameters.getStops().add(destination);
+							// We want the task to return driving directions and routes
 							routeParameters.setReturnDirections(true);
-							routeParameters.setReturnRoutes(true);
 							routeParameters.setDirectionsDistanceTextUnits(
 									DirectionDistanceTextUnits.IMPERIAL);
 							routeParameters.setOutputSpatialReference(MapFragment.mMapView.getSpatialReference());
@@ -1651,14 +1685,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 								public void run() {
 									try {
 										RouteResult routeResult = routeResFuture.get();
-										// Show
-										// route
-										// results
+										// Show route results
 										showRoute(routeResult, origin.getGeometry(), destination.getGeometry());
-
-										// Dismiss
-										// progress
-										// dialog
+										// Dismiss progress dialog
 										mProgressDialog.dismiss();
 
 									} catch (InterruptedException e) {
@@ -1676,17 +1705,14 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 									}
 								}
 							});
-
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						} catch (ExecutionException e) {
 							e.printStackTrace();
 						}
-
 					}
 				});
 			}
-
 		}
 	}
 }

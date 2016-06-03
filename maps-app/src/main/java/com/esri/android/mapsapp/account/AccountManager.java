@@ -29,8 +29,8 @@ import com.esri.arcgisruntime.portal.PortalInfo;
 import com.esri.arcgisruntime.portal.PortalUser;
 
 /**
- * Singleton used to provide access to, and helper methods around, a
- * com.esri.core.portal.Portal object.
+ * Singleton used to provide access to, and helper
+ * methods around, a Portal object.
  */
 public class AccountManager {
 

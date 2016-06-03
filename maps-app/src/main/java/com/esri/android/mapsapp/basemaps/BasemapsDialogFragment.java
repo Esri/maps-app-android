@@ -184,8 +184,8 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 
 		PortalQueryParams queryParams = new PortalQueryParams();
 
-		// get the query string to fetch the portal group that defines the
-		// portal's basemaps
+		// get the query string to fetch the portal
+		// group that defines the portal's basemaps
 		queryParams.setQuery(portalInfo.getBasemapGalleryGroupQuery());
 
 		// Use a listenable future for retrieving search results from portal
@@ -244,6 +244,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 
 		// Find items that match the query
 		final ListenableFuture<PortalQueryResultSet<PortalItem>> itemFuture = portal.findItemsAsync(queryParams);
+		// Once async call has completed, get the associated thumbnails
 		itemFuture.addDoneListener(new Runnable() {
 			@Override
 			public void run() {

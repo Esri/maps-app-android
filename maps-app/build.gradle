@@ -46,4 +46,6 @@ dependencies {
     androidTestCompile ("com.android.support.test.espresso:espresso-contrib:$rootProject.ext.espressoVersion") {
         exclude module: 'recyclerview-v7'
     }
+    // Robotium dependencies
+    androidTestCompile 'com.jayway.android.robotium:robotium-solo:5.5.4'
 }

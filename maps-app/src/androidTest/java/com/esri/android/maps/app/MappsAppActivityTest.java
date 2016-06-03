@@ -76,8 +76,28 @@ import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.startsWith;
 
-/**
- * Created by sand8529 on 4/26/16.
+/* Copyright 2016 Esri
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * For additional information, contact:
+ * Environmental Systems Research Institute, Inc.
+ * Attn: Contracts Dept
+ * 380 New York Street
+ * Redlands, California, USA 92373
+ *
+ * email: contracts@esri.com
+ *
  */
 @RunWith(AndroidJUnit4.class)
 public class MappsAppActivityTest  {
@@ -145,28 +165,7 @@ public class MappsAppActivityTest  {
         // Find the basemap item with a thumbnail Click on the Light Gray Canvas
         onData(anyOf(withId(id.basemap_grid_item_title_textview),withText("Light Gray Canvas"), isDisplayed()));
         onData(anyOf(withId(id.basemap_grid_item_title_textview),withText("Light Gray Canvas"), isClickable()));
-        onData(allOf(is(instanceOf(BasemapItem.class)), hasProperty("getTitle"))).perform(click());
-        //onData(allOf(is(instanceOf(BasemapItem.class)), hasProperty("hasTitle")))
-     //   onData(is(instanceOf(BasemapItem.class))).atPosition(0).inAdapterView(allOf(withId(R.id.basemap_gridview),isDisplayed())).perform(click());
-
-
-        // final ViewInteraction perform = onData(anyOf(withId(R.id.basemap_grid_item_title_textview), withText("Light Gray Canvas"))).perform(click());
 
     }
-    /**
-     * This test should show a magnifier on long press and result
-     * in the location being reverse geocoded
-     */
-    @Test
-    public void testLongPress(){
 
-        onView(withId(id.map)).check(matches(isDisplayed()));
-        /*Instrumentation.ActivityMonitor monitor =  getInstrumentation().addMonitor(MapFragment.class.getName(), null, false);
-        Activity currentActivity = getInstrumentation().waitForMonitorWithTimeout(monitor, 5);
-        [..do something until the view is visible…]
-        MapView mapView = (MapView) InstrumentationRegistry.getTargetContext().
-        onView(withId(R.id.map)).perform(longClick());*/
-
-
-    }
 }
