@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_alignParentLeft="true"
-    android:layout_alignWithParentIfMissing="true"
-    android:layout_centerInParent="true"
-    android:layout_gravity="center"
-    android:background="@drawable/map_results_ribbon_item_selector"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp" >
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignWithParentIfMissing="true"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:background="@drawable/map_results_ribbon_item_selector"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp">
 
     <ImageView
         android:id="@+id/route_overview_symbol_imageview"
@@ -19,11 +19,11 @@
         android:layout_alignTop="@+id/route_overview_info_layout"
         android:layout_centerVertical="true"
         android:layout_gravity="center"
+        android:contentDescription="@string/route_overview_symbol"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:src="@drawable/pin_green"
-        android:visibility="visible"
-        android:contentDescription="@string/route_overview_symbol"/>
+        android:visibility="visible"/>
 
     <LinearLayout
         android:id="@+id/route_overview_info_layout"
@@ -34,7 +34,7 @@
         android:layout_toRightOf="@+id/route_overview_symbol_imageview"
         android:baselineAligned="false"
         android:gravity="center"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -42,7 +42,7 @@
             android:layout_gravity="center"
             android:layout_marginRight="@dimen/route_overview_layout_margin"
             android:layout_weight="0.5"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/route_overview_time_textview"
@@ -54,7 +54,7 @@
                 android:paddingBottom="1dp"
                 android:singleLine="true"
                 android:text="@string/route_time"
-                android:textSize="@dimen/route_overview_text_size" />
+                android:textSize="@dimen/route_overview_text_size"/>
 
             <TextView
                 android:id="@+id/route_overview_distance_textview"
@@ -65,7 +65,7 @@
                 android:gravity="right|center_vertical"
                 android:singleLine="true"
                 android:text="@string/route_distance"
-                android:textSize="@dimen/route_overview_text_size" />
+                android:textSize="@dimen/route_overview_text_size"/>
         </LinearLayout>
 
         <LinearLayout
@@ -74,7 +74,7 @@
             android:layout_gravity="center|right"
             android:layout_marginLeft="@dimen/route_overview_layout_margin"
             android:layout_weight="0.5"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/route_overview_time_value_textview"
@@ -86,7 +86,7 @@
                 android:singleLine="true"
                 android:text="7 min."
                 android:textSize="@dimen/route_overview_text_size"
-                tools:ignore="HardcodedText" />
+                tools:ignore="HardcodedText"/>
 
             <TextView
                 android:id="@+id/route_overview_distance_value_textview"
@@ -97,7 +97,7 @@
                 android:singleLine="true"
                 android:text="1.1 mi."
                 android:textSize="@dimen/route_overview_text_size"
-                tools:ignore="HardcodedText" />
+                tools:ignore="HardcodedText"/>
         </LinearLayout>
     </LinearLayout>
 

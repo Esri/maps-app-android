@@ -24,28 +24,25 @@
 
 package com.esri.android.mapsapp;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.database.MatrixCursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
-import android.location.Location;
-import android.location.LocationListener;
-import android.os.AsyncTask;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -58,10 +55,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -71,13 +69,6 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.esri.android.map.GraphicsLayer;
-import com.esri.android.map.LocationDisplayManager;
-import com.esri.android.map.LocationDisplayManager.AutoPanMode;
-import com.esri.android.map.MapOnTouchListener;
-import com.esri.android.map.MapView;
-import com.esri.android.map.event.OnPinchListener;
-import com.esri.android.map.event.OnStatusChangedListener;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogListener;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
@@ -87,41 +78,49 @@ import com.esri.android.mapsapp.location.RoutingDialogFragment;
 import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogListener;
 import com.esri.android.mapsapp.tools.Compass;
 import com.esri.android.mapsapp.util.TaskExecutor;
-import com.esri.core.geometry.Envelope;
-import com.esri.core.geometry.GeometryEngine;
-import com.esri.core.geometry.LinearUnit;
-import com.esri.core.geometry.Point;
-import com.esri.core.geometry.Polyline;
-import com.esri.core.geometry.SpatialReference;
-import com.esri.core.geometry.Unit;
-import com.esri.core.map.CallbackListener;
-import com.esri.core.map.Graphic;
-import com.esri.core.portal.BaseMap;
-import com.esri.core.portal.Portal;
-import com.esri.core.portal.WebMap;
-import com.esri.core.symbol.PictureMarkerSymbol;
-import com.esri.core.symbol.SimpleLineSymbol;
-import com.esri.core.symbol.SimpleLineSymbol.STYLE;
-import com.esri.core.tasks.geocode.Locator;
-import com.esri.core.tasks.geocode.LocatorFindParameters;
-import com.esri.core.tasks.geocode.LocatorGeocodeResult;
-import com.esri.core.tasks.geocode.LocatorReverseGeocodeResult;
-import com.esri.core.tasks.geocode.LocatorSuggestionParameters;
-import com.esri.core.tasks.geocode.LocatorSuggestionResult;
-import com.esri.core.tasks.na.NAFeaturesAsFeature;
-import com.esri.core.tasks.na.Route;
-import com.esri.core.tasks.na.RouteDirection;
-import com.esri.core.tasks.na.RouteParameters;
-import com.esri.core.tasks.na.RouteResult;
-import com.esri.core.tasks.na.RouteTask;
-import com.esri.core.tasks.na.StopGraphic;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import com.esri.arcgisruntime.concurrent.ListenableFuture;
+import com.esri.arcgisruntime.geometry.Envelope;
+import com.esri.arcgisruntime.geometry.Geometry;
+import com.esri.arcgisruntime.geometry.Point;
+import com.esri.arcgisruntime.geometry.SpatialReference;
+import com.esri.arcgisruntime.loadable.LoadStatus;
+import com.esri.arcgisruntime.mapping.Basemap;
+import com.esri.arcgisruntime.mapping.Map;
+import com.esri.arcgisruntime.mapping.Viewpoint;
+import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
+import com.esri.arcgisruntime.mapping.view.Graphic;
+import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
+import com.esri.arcgisruntime.mapping.view.LocationDisplay;
+import com.esri.arcgisruntime.mapping.view.MapView;
+import com.esri.arcgisruntime.mapping.view.WrapAroundMode;
+import com.esri.arcgisruntime.portal.Portal;
+import com.esri.arcgisruntime.portal.PortalItem;
+import com.esri.arcgisruntime.security.AuthenticationManager;
+import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
+import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
+import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
+import com.esri.arcgisruntime.tasks.geocode.GeocodeParameters;
+import com.esri.arcgisruntime.tasks.geocode.GeocodeResult;
+import com.esri.arcgisruntime.tasks.geocode.LocatorTask;
+import com.esri.arcgisruntime.tasks.geocode.ReverseGeocodeParameters;
+import com.esri.arcgisruntime.tasks.geocode.SuggestParameters;
+import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
+import com.esri.arcgisruntime.tasks.route.DirectionDistanceTextUnits;
+import com.esri.arcgisruntime.tasks.route.DirectionManeuver;
+import com.esri.arcgisruntime.tasks.route.Route;
+import com.esri.arcgisruntime.tasks.route.RouteParameters;
+import com.esri.arcgisruntime.tasks.route.RouteResult;
+import com.esri.arcgisruntime.tasks.route.RouteTask;
+import com.esri.arcgisruntime.tasks.route.Stop;
 
 /**
  * Implements the view that shows the map.
  */
+
 public class MapFragment extends Fragment implements BasemapsDialogListener,
-		RoutingDialogListener, OnCancelListener {
+    RoutingDialogListener, OnCancelListener
+{
+
 	public static final String TAG = MapFragment.class.getSimpleName();
 
 	private static final String KEY_PORTAL_ITEM_ID = "KEY_PORTAL_ITEM_ID";
@@ -129,6 +128,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static final String KEY_BASEMAP_ITEM_ID = "KEY_BASEMAP_ITEM_ID";
 
 	private static final String KEY_IS_LOCATION_TRACKING = "IsLocationTracking";
+
+	private static final String TAG_ROUTE_SEARCH_PROGRESS_DIALOG = "TAG_ROUTE_SEARCH_PROGRESS_DIALOG";
+
+	private static final String TAG_REVERSE_GEOCODING_PROGRESS_DIALOG = "TAG_REVERSE_GEOCODING_PROGRESS_DIALOG";
 
 	private static final String COLUMN_NAME_ADDRESS = "address";
 
@@ -138,79 +141,71 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
 
-	private static final String SEARCH_HINT = "Search";
+	public static final String SEARCH_HINT = "Search";
 
 	private static final String FIND_PLACE = "Find";
 
 	private static final String SUGGEST_PLACE = "Suggest";
 
-	private static FrameLayout.LayoutParams mlayoutParams;
+	private static final String ROUTE = "Route";
 
-	// Margins parameters for search view
-	private static int TOP_MARGIN_SEARCH = 55;
-
+	private static final String REVERSE_GECODE = "Reverse Geocode";
 	// The circle area specified by search_radius and input lat/lon serves
 	// searching purpose.
 	// It is also used to construct the extent which map zooms to after the
 	// first
 	// GPS fix is retrieved.
-	private final static double SEARCH_RADIUS = 10;
-
-	private String mPortalItemId;
-	private String mBasemapPortalItemId;
-	private FrameLayout mMapContainer;
 	public static MapView mMapView;
-	private String mMapViewState;
-	private SearchView mSearchview;
-
-	// GPS location tracking
-	private boolean mIsLocationTracking;
-	private Point mLocation = null;
-
-	// Graphics layer to show geocode and reverse geocode results
-	private GraphicsLayer mLocationLayer;
-	private Point mLocationLayerPoint;
-	private String mLocationLayerPointString;
-
-	// Graphics layer to show routes
-	private GraphicsLayer mRouteLayer;
-	private List<RouteDirection> mRoutingDirections;
-
+	private static LayoutParams mlayoutParams;
+	// Margins parameters for search view
+	private static final int TOP_MARGIN_SEARCH = 55;
+	private static List<SuggestResult> mSuggestionsList;
 	// Spatial references used for projecting points
 	private final SpatialReference mWm = SpatialReference.create(102100);
 	private final SpatialReference mEgs = SpatialReference.create(4326);
-	private MatrixCursor mSuggestionCursor;
-
 	Compass mCompass;
-	LayoutParams compassFrameParams;
-	private MotionEvent mLongPressEvent;
-
-	@SuppressWarnings("rawtypes")
-	// - using this only to cancel pending tasks in a generic way
-	private AsyncTask mPendingTask;
-	private View mSearchBox;
-	private Locator mLocator = Locator.createOnlineLocator();
-	private View mSearchResult;
-	private LayoutInflater mInflater;
-	private String mStartLocation, mEndLocation;
-	private LocatorSuggestionParameters suggestParams;
-
-	private final Map<String,Point> suggestMap = new TreeMap<>();
-	private static ArrayList<LocatorSuggestionResult> suggestionsList;
-
-	private SpatialReference mapSpatialReference;
-	private boolean suggestionClickFlag = false;
-	private Point resultEndPoint;
-	int width, height;
-
-	LayoutParams gpsFrameParams;
-
+	ViewGroup.LayoutParams compassFrameParams;
 	ImageButton navButton;
 	DrawerLayout mDrawerLayout;
 	ListView mDrawerList;
+	private String mPortalItemId;
+	private String mBasemapPortalItemId;
+	private FrameLayout mMapContainer;
+	private SearchView mSearchview;
+	// GPS location tracking
+	private LocationDisplay mLocationDisplay;
+	private boolean mIsInCompassMode;
+	private Point mLocation = null;
+	// Graphics layer to show geocode and reverse geocode results
+	private GraphicsOverlay mLocationLayer;
+	private Point mFoundLocation;
+	private String mLocationLayerPointString;
+	// Graphics layer to show routes
+	private GraphicsOverlay mRouteLayer;
+	private List<DirectionManeuver> mRoutingDirections;
+	private MatrixCursor mSuggestionCursor;
+	private MotionEvent mLongPressEvent;
+	private ProgressDialogFragment mProgressDialog;
+	@SuppressWarnings("rawtypes")
+	private View mSearchBox;
+	private LocatorTask mLocator;
+	private View mSearchResult;
+	private LayoutInflater mInflater;
+	private String mStartLocationName, mEndLocationName;
+	private SuggestParameters suggestParams;
+	private GeocodeParameters mGeocodeParams;
+	private ReverseGeocodeParameters mReverseGeocodeParams;
+	private RouteTask mRouteTask;
+	private Map mMap;
+	private Basemap mBasemap;
+	private boolean suggestionClickFlag;
+	private GeocodeResult mGeocodedLocation;
 
-	public static MapFragment newInstance(String portalItemId,
-			String basemapPortalItemId) {
+	public MapFragment() {
+		// make MapFragment ctor private - use newInstance() instead
+	}
+
+	public static MapFragment newInstance(String portalItemId, String basemapPortalItemId) {
 		MapFragment mapFragment = new MapFragment();
 
 		Bundle args = new Bundle();
@@ -221,83 +216,106 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		return mapFragment;
 	}
 
-	public MapFragment() {
-		// make MapFragment ctor private - use newInstance() instead
-	}
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		setHasOptionsMenu(true);
 
-		Bundle args = savedInstanceState != null ? savedInstanceState
-				: getArguments();
+		// Restore any previous state
+		Bundle args = savedInstanceState != null ? savedInstanceState : getArguments();
 		if (args != null) {
-			mIsLocationTracking = args.getBoolean(KEY_IS_LOCATION_TRACKING);
+			mIsInCompassMode = args.getBoolean(KEY_IS_LOCATION_TRACKING);
 			mPortalItemId = args.getString(KEY_PORTAL_ITEM_ID);
 			mBasemapPortalItemId = args.getString(KEY_BASEMAP_ITEM_ID);
 		}
+		DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(
+				getActivity());
+		AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
 
 	}
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-		mMapContainer= (FrameLayout)inflater.inflate(R.layout.map_fragment_layout, container, false);
+		mMapContainer = (FrameLayout) inflater.inflate(R.layout.map_fragment_layout, null);
 
 		if (mPortalItemId != null) {
 			// load the WebMap
-			loadWebMapIntoMapView(mPortalItemId, mBasemapPortalItemId,
-					AccountManager.getInstance().getPortal());
-
+			loadWebMapIntoMapView(mPortalItemId, mBasemapPortalItemId, AccountManager.getInstance().getPortal());
 		} else {
 			if (mBasemapPortalItemId != null) {
 				// show a map with the basemap represented by
 				// mBasemapPortalItemId
+
 				loadWebMapIntoMapView(mBasemapPortalItemId, null,
 						AccountManager.getInstance().getAGOLPortal());
 
 			} else {
 				String defaultBaseMapURL = getString(R.string.default_basemap_url);
-				MapView mapView = new MapView(getActivity(), defaultBaseMapURL,
-						"", "");
+				mBasemap = new Basemap(defaultBaseMapURL);
+				mMap = new Map(mBasemap);
 
-				// Finish wiring up map view
-				setMapView(mapView);
-				// Then zoom to location
-				mapView.zoomin();
+        MapFragment.mMapView = (MapView) mMapContainer.findViewById(R.id.map);
+
+        MapFragment.mMapView.setMap(mMap);
+
+				setMapView(MapFragment.mMapView);
+
+				// Set up click listener on floating action button
+				setClickListenerForFloatingActionButton(MapFragment.mMapView);
+
+				// add graphics layer
+				addGraphicLayers();
+
 			}
 		}
 
 		return mMapContainer;
 	}
-	private void setClickListenerForFloatingActionButton(){
+
+	/**
+	 * The floating action button toggles location tracking. When location
+	 * tracking is on, the compass is shown in the upper right of the map view.
+	 * When location tracking is off, the compass is shown if the map is not
+	 * oriented north (0 degrees).
+	 *
+	 * @param mapView
+	 */
+	private void setClickListenerForFloatingActionButton(final MapView mapView) {
 		final FloatingActionButton fab = (FloatingActionButton) mMapContainer.findViewById(R.id.fab);
 		fab.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Log.d("***", "onClick called with: " + "view = [" + v + "]");
-				// Toggle location tracking on or off
-				if (mIsLocationTracking) {
+				mLocationDisplay = mapView.getLocationDisplay();
+				// Pan to location
+				mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.DEFAULT);
+
+
+				final String currentMode = mLocationDisplay.getAutoPanMode().name();
+				// Toggle compass mode
+				if (!mIsInCompassMode){
 					fab.setImageResource(R.drawable.ic_action_compass_mode);
-					mMapView.getLocationDisplayManager().setAutoPanMode(
-							AutoPanMode.COMPASS);
 					mCompass.start();
 					mCompass.setVisibility(View.VISIBLE);
-					mIsLocationTracking = false;
+					mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.COMPASS);
+					mIsInCompassMode = true;
+
 				} else {
-					startLocationTracking();
+
 					fab.setImageResource(android.R.drawable.ic_menu_mylocation);
-					if (mMapView.getRotationAngle() != 0) {
-						mCompass.setVisibility(View.VISIBLE);
-						mCompass.setRotationAngle(mMapView.getRotationAngle());
-					} else {
-						mCompass.setVisibility(View.GONE);
+					mCompass.setRotationAngle(0);
+					final ListenableFuture<Boolean> setViewpointListener = mMapView.setViewpointRotationAsync(0);
+					try {
+						setViewpointListener.get();
+					} catch (InterruptedException | ExecutionException e) {
+						e.printStackTrace();
 					}
+					mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.OFF);
+					mIsInCompassMode = false;
 				}
 			}
+
 		});
 	}
 
@@ -310,43 +328,14 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	}
 
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		switch (item.getItemId()) {
 
-		default:
-			return super.onOptionsItemSelected(item);
+			default :
+				return super.onOptionsItemSelected(item);
 		}
-	}
-
-	/**
-	 * Opens the map represented by the specified portal item or if null, opens
-	 * a default map.
-	 */
-	public void showMap(String portalItemId, String basemapPortalItemId) {
-
-		// remove existing MapFragment explicitly, simply replacing it can cause
-		// the app to freeze when switching basemaps
-		FragmentTransaction transaction;
-		FragmentManager fragmentManager = getFragmentManager();
-		Fragment currentMapFragment = fragmentManager
-				.findFragmentByTag(MapFragment.TAG);
-		if (currentMapFragment != null) {
-			transaction = fragmentManager.beginTransaction();
-			transaction.remove(currentMapFragment);
-			transaction.commit();
-		}
-
-		MapFragment mapFragment = MapFragment.newInstance(portalItemId,
-				basemapPortalItemId);
-
-		transaction = fragmentManager.beginTransaction();
-		transaction.replace(R.id.maps_app_activity_content_frame, mapFragment,
-				MapFragment.TAG);
-		transaction.addToBackStack(null);
-		transaction.commit();
-
-		getActivity().invalidateOptionsMenu(); // reload the options menu
 	}
 
 	@Override
@@ -355,11 +344,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Pause the MapView and stop the LocationDisplayManager to save battery
 		if (mMapView != null) {
-			if (mIsLocationTracking) {
-				mMapView.getLocationDisplayManager().stop();
-				mCompass.stop();
-			}
-			mMapViewState = mMapView.retainState();
+			 if (mIsInCompassMode) {
+				 mMapView.getLocationDisplay().stop();
+			 }
+			//mMapViewState = mMapView.
+
 
 			mMapView.pause();
 		}
@@ -371,22 +360,30 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Start the MapView and LocationDisplayManager running again
 		if (mMapView != null) {
-			// mCompass.start();
-			mMapView.unpause();
-			if (mMapViewState != null) {
-				mMapView.restoreState(mMapViewState);
+			mMapView.resume();
+			// TODO: Anything else to do here?
+			 if (mIsInCompassMode) {
+				 mMapView.getLocationDisplay().startAsync();
+			 }
+			if (mCompass != null){
+				mCompass.start();
 			}
-			if (mIsLocationTracking) {
-				mMapView.getLocationDisplayManager().start();
-			}
+
 		}
+	}
+	@Override
+	public void onDestroyView(){
+		super.onDestroyView();
+
+		mMapView.dispose();
+		mMapView = null;
 	}
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 
-		outState.putBoolean(KEY_IS_LOCATION_TRACKING, mIsLocationTracking);
+		outState.putBoolean(KEY_IS_LOCATION_TRACKING, mIsInCompassMode);
 		outState.putString(KEY_PORTAL_ITEM_ID, mPortalItemId);
 		outState.putString(KEY_BASEMAP_ITEM_ID, mBasemapPortalItemId);
 	}
@@ -394,7 +391,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	/**
 	 * Loads a WebMap and creates a MapView from it which is set into the
 	 * fragment's layout.
-	 * 
+	 *
 	 * @param portalItemId
 	 *            The portal item id that represents the web map.
 	 * @param basemapPortalItemId
@@ -402,8 +399,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * @throws Exception
 	 *             if WebMap loading failed.
 	 */
-	private void loadWebMapIntoMapView(final String portalItemId,
-			final String basemapPortalItemId, final Portal portal) {
+	private void loadWebMapIntoMapView(final String portalItemId, final String basemapPortalItemId,
+			final Portal portal) {
 
 		TaskExecutor.getInstance().getThreadPool().submit(new Callable<Void>() {
 
@@ -411,34 +408,31 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			public Void call() throws Exception {
 
 				// load a WebMap instance from the portal item
-				final WebMap webmap = WebMap.newInstance(portalItemId, portal);
+				PortalItem portalItem = new PortalItem(portal, portalItemId);
+				final Map webmap = new Map(portalItem);
 
 				// load the WebMap that represents the basemap if one was
 				// specified
-				WebMap basemapWebMap = null;
-				if (basemapPortalItemId != null
-						&& !basemapPortalItemId.isEmpty()) {
-					basemapWebMap = WebMap.newInstance(basemapPortalItemId,
-							portal);
+
+				if (basemapPortalItemId != null && !basemapPortalItemId.isEmpty()) {
+					PortalItem webPortalItem = new PortalItem(portal, basemapPortalItemId);
+					Basemap basemapWebMap = new Basemap(webPortalItem);
+					webmap.setBasemap(basemapWebMap);
 				}
-				final BaseMap basemap = basemapWebMap != null ? basemapWebMap
-						.getBaseMap() : null;
 
 				if (webmap != null) {
 					getActivity().runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							MapView mapView = new MapView(getActivity(),
-									webmap, basemap, null, null);
-
-							// mapView.setAllowRotationByPinch(true);
-
+							final MapView mapView = (MapView) mMapContainer.findViewById(R.id.map);
+							mapView.setMap(webmap);
 							setMapView(mapView);
-							setClickListenerForFloatingActionButton();
-							mapView.zoomin();
+							setClickListenerForFloatingActionButton(mapView);
+							addGraphicLayers();
 
 						}
 					});
+
 				} else {
 					throw new Exception("Failed to load web map.");
 				}
@@ -451,163 +445,54 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * Takes a MapView that has already been instantiated to show a WebMap,
 	 * completes its setup by setting various listeners and attributes, and sets
 	 * it as the activity's content view.
-	 * 
+	 *
 	 * @param mapView
 	 */
 	private void setMapView(final MapView mapView) {
 
 		mMapView = mapView;
-		mMapView.setEsriLogoVisible(true);
-		mMapView.enableWrapAround(true);
-		mapView.setAllowRotationByPinch(true);
+		mMapView.setLogoVisible(true);
+		mMapView.setWrapAroundMode(WrapAroundMode.ENABLE_WHEN_SUPPORTED);
 
 		// Creating an inflater
-		mInflater = (LayoutInflater) getActivity().getSystemService(
-				Context.LAYOUT_INFLATER_SERVICE);
+		mInflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 		// Setting up the layout params for the searchview and searchresult
 		// layout
-		mlayoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT, Gravity.LEFT | Gravity.TOP);
+		mlayoutParams = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT,
+				Gravity.LEFT | Gravity.TOP);
 		int LEFT_MARGIN_SEARCH = 15;
 		int RIGHT_MARGIN_SEARCH = 15;
 		int BOTTOM_MARGIN_SEARCH = 0;
-		mlayoutParams.setMargins(LEFT_MARGIN_SEARCH, TOP_MARGIN_SEARCH,
-				RIGHT_MARGIN_SEARCH, BOTTOM_MARGIN_SEARCH);
 
-		// Add the map to the layout
-		mMapContainer.addView(mMapView,0);
-
-		// Set up floating action button
-		setClickListenerForFloatingActionButton();
-
+		mlayoutParams.setMargins(LEFT_MARGIN_SEARCH, TOP_MARGIN_SEARCH, RIGHT_MARGIN_SEARCH, BOTTOM_MARGIN_SEARCH);
 
 		// Displaying the searchbox layout
 		showSearchBoxLayout();
 
-		mMapView.setOnPinchListener(new OnPinchListener() {
+		// Show current location
+		mLocationDisplay = mapView.getLocationDisplay();
+		mLocationDisplay.startAsync();
+		mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.DEFAULT);
+		mLocationDisplay.setInitialZoomScale(50000);
 
-			/**
-			 * Default value
-			 */
-			private static final long serialVersionUID = 1L;
+		// Handle any location changes
+		mLocationDisplay.addLocationChangedListener(new LocationListener());
 
-			@Override
-			public void postPointersDown(float x1, float y1, float x2,
-										 float y2, double factor) {
-			}
-
-			@Override
-			public void postPointersMove(float x1, float y1, float x2,
-										 float y2, double factor) {
-			}
-
-			@Override
-			public void postPointersUp(float x1, float y1, float x2, float y2,
-									   double factor) {
-			}
-
-			@Override
-			public void prePointersDown(float x1, float y1, float x2, float y2,
-										double factor) {
-			}
-
-			@Override
-			public void prePointersMove(float x1, float y1, float x2, float y2,
-										double factor) {
-				if (mMapView.getRotationAngle() > 5
-						|| mMapView.getRotationAngle() < -5) {
-					mCompass.setVisibility(View.VISIBLE);
-					mCompass.sensorManager.unregisterListener(mCompass.sensorEventListener);
-					mCompass.setRotationAngle(mMapView.getRotationAngle());
-				}
-			}
-
-			@Override
-			public void prePointersUp(float x1, float y1, float x2, float y2,
-									  double factor) {
-			}
-
-		});
-
-		// Setup listener for map initialized
-		mMapView.setOnStatusChangedListener(new OnStatusChangedListener() {
-
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public void onStatusChanged(Object source, STATUS status) {
-
-				if (source == mMapView && status == STATUS.INITIALIZED) {
-
-					mapSpatialReference = mMapView.getSpatialReference();
-
-					if (mMapViewState == null) {
-						// Starting location tracking will cause zoom to My
-						// Location
-						startLocationTracking();
-					} else {
-						mMapView.restoreState(mMapViewState);
-					}
-					// add search and routing layers
-					addGraphicLayers();
-				}
-			}
-		});
 
 		// Setup use of magnifier on a long press on the map
-		mMapView.setShowMagnifierOnLongPress(true);
+		mMapView.setMagnifierEnabled(true);
 		mLongPressEvent = null;
 
 		// Setup OnTouchListener to detect and act on long-press
-		mMapView.setOnTouchListener(new MapOnTouchListener(getActivity(),
-				mMapView) {
-			@Override
-			public boolean onTouch(View v, MotionEvent event) {
-				if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
-					// Start of a new gesture. Make sure mLongPressEvent is
-					// cleared.
-					mLongPressEvent = null;
-				}
-				return super.onTouch(v, event);
-			}
+		mMapView.setOnTouchListener(new MapTouchListener(getActivity().getApplicationContext(), mMapView));
 
-			@Override
-			public void onLongPress(MotionEvent point) {
-				// Set mLongPressEvent to indicate we are processing a
-				// long-press
-				mLongPressEvent = point;
-				super.onLongPress(point);
-
-			}
-
-			@Override
-			public boolean onDragPointerUp(MotionEvent from,
-										   final MotionEvent to) {
-				if (mLongPressEvent != null) {
-					// This is the end of a long-press that will have displayed
-					// the
-					// magnifier.
-					// Perform reverse-geocoding of the point that was pressed
-					Point mapPoint = mMapView.toMapPoint(to.getX(), to.getY());
-					ReverseGeocodingAsyncTask reverseGeocodeTask = new ReverseGeocodingAsyncTask();
-					reverseGeocodeTask.execute(mapPoint);
-					mPendingTask = reverseGeocodeTask;
-
-					mLongPressEvent = null;
-					// Remove any previous graphics
-					resetGraphicsLayers();
-				}
-				return super.onDragPointerUp(from, to);
-			}
-
-		});
-
+		mLocator = new LocatorTask(getString(R.string.geocode_url));
 	}
 
 	/**
 	 * Adds the compass as per the height of the layout
-	 * 
+	 *
 	 * @param height
 	 */
 	private void addCompass(int height) {
@@ -621,17 +506,15 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mCompass.setRotationAngle(45);
 		int HEIGHT = 240;
 		int WIDTH = 240;
-		compassFrameParams = new FrameLayout.LayoutParams(WIDTH, HEIGHT,
-				Gravity.RIGHT);
+		compassFrameParams = new LayoutParams(WIDTH, HEIGHT, Gravity.RIGHT);
 
 		int TOP_MARGIN_COMPASS = TOP_MARGIN_SEARCH + height + 45;
 
 		int LEFT_MARGIN_COMPASS = 0;
 		int BOTTOM_MARGIN_COMPASS = 0;
 		int RIGHT_MARGIN_COMPASS = 0;
-		((MarginLayoutParams) compassFrameParams).setMargins(
-				LEFT_MARGIN_COMPASS, TOP_MARGIN_COMPASS, RIGHT_MARGIN_COMPASS,
-				BOTTOM_MARGIN_COMPASS);
+		((MarginLayoutParams) compassFrameParams).setMargins(LEFT_MARGIN_COMPASS, TOP_MARGIN_COMPASS,
+				RIGHT_MARGIN_COMPASS, BOTTOM_MARGIN_COMPASS);
 
 		mCompass.setLayoutParams(compassFrameParams);
 
@@ -642,7 +525,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			@Override
 			public void onClick(View v) {
 				mCompass.setVisibility(View.GONE);
-				mMapView.setRotationAngle(0);
+				mMapView.setRotation(0f);
 			}
 		});
 
@@ -652,7 +535,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	}
 
 	/**
-	 * 
+	 *
 	 * Displays the Dialog Fragment which allows users to route
 	 */
 	private void showRoutingDialogFragment() {
@@ -661,16 +544,28 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Show RoutingDialogFragment to get routing start and end points.
 		// This calls back to onGetRoute() to do the routing.
 		RoutingDialogFragment routingFrag = new RoutingDialogFragment();
-		routingFrag.setRoutingDialogListener(this);
+		routingFrag.setRoutingDialogListener(new RoutingDialogListener() {
+			@Override
+			public boolean onGetRoute(String startPoint, String endPoint) {
+				getRoute(startPoint,endPoint);
+				return true;
+			}
+		});
 		Bundle arguments = new Bundle();
-		if (mLocationLayerPoint != null) {
-			arguments.putString(RoutingDialogFragment.ARG_END_POINT_DEFAULT,
-					mLocationLayerPointString);
+		if (mFoundLocation != null) {
+			arguments.putString(RoutingDialogFragment.ARG_END_POINT_DEFAULT, mLocationLayerPointString);
 		}
+    FragmentTransaction ft = getFragmentManager().beginTransaction();
+    Fragment prev = getFragmentManager().findFragmentByTag("routingdialog");
+    if (prev != null) {
+      ft.remove(prev);
+    }
+    ft.addToBackStack(null);
 		routingFrag.setArguments(arguments);
-		routingFrag.show(getFragmentManager(), null);
+		routingFrag.show(ft, "routingdialog");
 
 	}
+
 
 	/**
 	 * Displays the Directions Dialog Fragment
@@ -678,28 +573,29 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private void showDirectionsDialogFragment() {
 		// Launch a DirectionsListFragment to display list of directions
 		final DirectionsDialogFragment frag = new DirectionsDialogFragment();
-		frag.setRoutingDirections(mRoutingDirections,
-				new DirectionsDialogListener() {
+		frag.setRoutingDirections(mRoutingDirections, new DirectionsDialogListener() {
 
-					@Override
-					public void onDirectionSelected(int position) {
-						// User has selected a particular direction -
-						// dismiss the dialog and
-						// zoom to the selected direction
-						frag.dismiss();
-						RouteDirection direction = mRoutingDirections
-								.get(position);
-						mMapView.setExtent(direction.getGeometry());
-					}
+			@Override
+			public void onDirectionSelected(int position) {
+				// User has selected a particular direction -
+				// dismiss the dialog and
+				// zoom to the selected direction
+				frag.dismiss();
+				DirectionManeuver direction = mRoutingDirections.get(position);
 
-				});
+				// create a viewpoint from envelope
+				Viewpoint vp = new Viewpoint(direction.getGeometry().getExtent());
+				mMapView.setViewpoint(vp);
+			}
+
+		});
 		getFragmentManager().beginTransaction().add(frag, null).commit();
 
 	}
 
 	/**
 	 * Displays the search view layout
-	 * 
+	 *
 	 */
 	private void showSearchBoxLayout() {
 
@@ -715,9 +611,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		navButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if(mDrawerLayout.isDrawerOpen(mDrawerList)){
+				if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
 					mDrawerLayout.closeDrawer(mDrawerList);
-				}else{
+				} else {
 					mDrawerLayout.openDrawer(mDrawerList);
 				}
 
@@ -728,18 +624,16 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mSearchBox.setLayoutParams(mlayoutParams);
 
 		// Initializing the searchview and the image view
-		mSearchview = (SearchView) mSearchBox
-				.findViewById(R.id.searchView1);
+		mSearchview = (SearchView) mSearchBox.findViewById(R.id.searchView1);
 
-		ImageView iv_route = (ImageView) mSearchBox
-				.findViewById(R.id.imageView1);
+		ImageView iv_route = (ImageView) mSearchBox.findViewById(R.id.imageView1);
 
 		mSearchview.setIconifiedByDefault(false);
 		mSearchview.setQueryHint(SEARCH_HINT);
 
 		applySuggestionCursor();
 
-//		navButton = (Button)mSearchBox.findViewById(R.id.navbutton);
+		// navButton = (Button)mSearchBox.findViewById(R.id.navbutton);
 
 		// Adding the layout to the map conatiner
 		mMapContainer.addView(mSearchBox);
@@ -766,7 +660,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			@Override
 			public boolean onQueryTextChange(String newText) {
-				if(mLocator == null)
+				if (mLocator == null)
 					return false;
 				getSuggestions(newText);
 				return true;
@@ -774,15 +668,14 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		});
 
 		// Add the compass after getting the height of the layout
-		mSearchBox.getViewTreeObserver().addOnGlobalLayoutListener(
-				new OnGlobalLayoutListener() {
-					@Override
-					public void onGlobalLayout() {
-						addCompass(mSearchBox.getHeight());
-						mSearchBox.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-					}
+		mSearchBox.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				addCompass(mSearchBox.getHeight());
+				mSearchBox.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+			}
 
-				});
+		});
 
 		mSearchview.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
 
@@ -793,28 +686,28 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			@Override
 			public boolean onSuggestionClick(int position) {
-				// Obtain the content of the selected suggesting place via cursor
+				// Obtain the content of the selected suggesting place via
+				// cursor
 				MatrixCursor cursor = (MatrixCursor) mSearchview.getSuggestionsAdapter().getItem(position);
 				int indexColumnSuggestion = cursor.getColumnIndex(COLUMN_NAME_ADDRESS);
 				final String address = cursor.getString(indexColumnSuggestion);
 
 				suggestionClickFlag = true;
 				// Find the Location of the suggestion
-				new FindLocationTask(address).execute(address);
+				geoCodeSuggestedLocation(address);
 
 				cursor.close();
 
 				return true;
 			}
 		});
-
 	}
 
 	/**
 	 * Initialize Suggestion Cursor
 	 */
 	private void initSuggestionCursor() {
-		String[] cols = new String[]{BaseColumns._ID, COLUMN_NAME_ADDRESS, COLUMN_NAME_X, COLUMN_NAME_Y};
+		String[] cols = {BaseColumns._ID, COLUMN_NAME_ADDRESS, COLUMN_NAME_X, COLUMN_NAME_Y};
 		mSuggestionCursor = new MatrixCursor(cols);
 	}
 
@@ -822,220 +715,246 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * Set the suggestion cursor to an Adapter then set it to the search view
 	 */
 	private void applySuggestionCursor() {
-		String[] cols = new String[]{COLUMN_NAME_ADDRESS};
-		int[] to = new int[]{R.id.suggestion_item_address};
-
-		SimpleCursorAdapter mSuggestionAdapter = new SimpleCursorAdapter(mMapView.getContext(), R.layout.search_suggestion_item, mSuggestionCursor, cols, to, 0);
+		String[] cols = { COLUMN_NAME_ADDRESS};
+		int[] to = {R.id.suggestion_item_address};
+		SimpleCursorAdapter mSuggestionAdapter = new SimpleCursorAdapter(mMapView.getContext(),
+				R.layout.search_suggestion_item, mSuggestionCursor, cols, to, 0);
 		mSearchview.setSuggestionsAdapter(mSuggestionAdapter);
 		mSuggestionAdapter.notifyDataSetChanged();
 	}
 
-
 	/**
 	 * Provide a character by character suggestions for the search string
 	 *
-	 * @param query String typed so far by the user to fetch the suggestions
+	 * @param query
+	 *            String typed so far by the user to fetch the suggestions
 	 */
-	private void getSuggestions(String query) {
-		final CallbackListener<List<LocatorSuggestionResult>> suggestCallback = new CallbackListener<List<LocatorSuggestionResult>>() {
-			@Override
-			public void onCallback(List<LocatorSuggestionResult> locatorSuggestionResults) {
-				final List<LocatorSuggestionResult> locSuggestionResults = locatorSuggestionResults;
-				if (locatorSuggestionResults == null)
+	private void getSuggestions(final String query) {
+		if (query == null || query.isEmpty()) {
+			return;
+		}
+
+		// Initialize the locatorSugestion parameters
+		locatorParams(SUGGEST_PLACE);
+
+		// Attach a listener to the locator task since
+		// the LocatorTask may or may not be loaded the
+		// the very first time a user types text into the search box.
+		// If the Locator is already loaded, the following listener
+		// is invoked immediately.
+
+		mLocator.addDoneLoadingListener(new Runnable() {
+			@Override public void run() {
+				// Does this locator support suggestions?
+				if (mLocator.getLoadStatus().name() != LoadStatus.LOADED.name()){
+					//Log.i(TAG,"##### " + mLocator.getLoadStatus().name());
+				} else if (!mLocator.getLocatorInfo().isSupportsSuggestions()){
 					return;
-				suggestionsList = new ArrayList<>();
-				getActivity().runOnUiThread(new Runnable() {
+				}
+				//og.i(TAG,"****** " + mLocator.getLoadStatus().name());
+				final ListenableFuture<List<SuggestResult>> suggestionsFuture = mLocator.suggestAsync(query, suggestParams);
+				// Attach a done listener that executes upon completion of the async call
+				suggestionsFuture.addDoneListener(new Runnable() {
 					@Override
 					public void run() {
-						int key = 0;
-						if (locSuggestionResults.size() > 0) {
-							// Add suggestion list to a cursor
-							initSuggestionCursor();
-							for (final LocatorSuggestionResult result : locSuggestionResults) {
+						try {
+							// Get the suggestions returned from the locator task.
+							// Store retrieved suggestions for future use (e.g. if the user
+							// selects a retrieved suggestion, it can easily be
+							// geocoded).
+							mSuggestionsList = suggestionsFuture.get();
 
-								// add the locatorSuggestionResult to the ArrayList
-								suggestionsList.add(result);
+							showSuggestedPlaceNames(mSuggestionsList);
 
-								// Add the suggestion results to the cursor
-								mSuggestionCursor.addRow(new Object[]{key++, result.getText(), "0", "0"});
-							}
-
-							applySuggestionCursor();
+						} catch (Exception e) {
+							Log.e(TAG, "Error on getting suggestions " + e.getMessage());
 						}
 					}
-
 				});
-
 			}
+		});
+		// Initiate the asynchronous call
+		mLocator.loadAsync();
+	}
 
-			@Override
-			public void onError(Throwable throwable) {
-
-				//Log the error
-				Log.e(MapFragment.class.getSimpleName(), "No Results found!!");
-				Log.e(MapFragment.class.getSimpleName(), throwable.getMessage());
-			}
-		};
-
-		try {
-			// Initialize the locatorSugestion parameters
-			locatorParams(SUGGEST_PLACE,query);
-
-			mLocator.suggest(suggestParams, suggestCallback);
+	private void showSuggestedPlaceNames(List<SuggestResult> suggestions){
+		if (suggestions == null || suggestions.isEmpty()){
+			return;
 		}
-		catch (Exception e) {
-			Log.e(MapFragment.class.getSimpleName(),"No Results found");
-			Log.e(MapFragment.class.getSimpleName(),e.getMessage());
+		initSuggestionCursor();
+		int key = 0;
+		for (SuggestResult result : suggestions) {
+			// Add the suggestion results to the cursor
+			mSuggestionCursor.addRow(new Object[]{key++, result.getLabel(), "0", "0"});
 		}
+		applySuggestionCursor();
+	}
+
+
+	/**
+	 * Initialize SuggestionParameters or GeocodeParameters
+	 *
+	 * @param TYPE
+	 *            A String determining thr type of parameters to be initialized
+	 */
+
+	private void locatorParams(String TYPE) {
+		if (TYPE.contentEquals(SUGGEST_PLACE)) {
+			// Create suggestion parameters
+			suggestParams = new SuggestParameters();
+			suggestParams.setSearchArea(calculateSearchArea());
+			suggestParams.setPreferredSearchLocation(mLocation);
+
+		}
+		if (TYPE.contentEquals(FIND_PLACE)) {
+			// Create find parameters
+			mGeocodeParams = new GeocodeParameters();
+			// Set max results and spatial reference
+			mGeocodeParams.setMaxResults(2);
+			mGeocodeParams.setOutputSpatialReference(mMapView.getSpatialReference());
+			// Use the centre of the current map extent as the location
+			mGeocodeParams.setSearchArea(calculateSearchArea());
+			mGeocodeParams.setPreferredSearchLocation(mLocation);
+		}
+		if (TYPE.contentEquals(ROUTE)) {
+			// Create find parameters
+			mGeocodeParams = new GeocodeParameters();
+			// Set max results and spatial reference
+			mGeocodeParams.setMaxResults(2);
+			mGeocodeParams.setOutputSpatialReference(mMapView.getSpatialReference());
+		}
+		if (TYPE.contentEquals(REVERSE_GECODE)) {
+			mReverseGeocodeParams = new ReverseGeocodeParameters();
+			mReverseGeocodeParams.setOutputSpatialReference(mMapView.getSpatialReference());
+
+		}
+	}
+
+  /**
+   *
+   * Retrieves location for selected suggestion
+   * @param address Suggested address user clicked on
+   */
+	private void geoCodeSuggestedLocation(final String address) {
+
+    final String TAG_LOCATOR_PROGRESS_DIALOG = "TAG_LOCATOR_PROGRESS_DIALOG";
+    // Display progress dialog on UI thread
+    final ProgressDialogFragment mProgressDialog = ProgressDialogFragment
+        .newInstance(getActivity().getString(R.string.address_search));
+    // set the target fragment to receive cancel notification
+    mProgressDialog.setTargetFragment(this, REQUEST_CODE_PROGRESS_DIALOG);
+    mProgressDialog.show(getActivity().getFragmentManager(), TAG_LOCATOR_PROGRESS_DIALOG);
+
+		// Null out any previously located result
+		mGeocodedLocation = null;
+
+    SuggestResult matchedSuggestion = null;
+    // get the Location for the suggestion from the ArrayList
+    for (SuggestResult result : mSuggestionsList) {
+			// changed from address.matches because addresses with parentheses were throwing off REGEX.
+      if (address.equalsIgnoreCase(result.getLabel())) {
+        matchedSuggestion = result;
+        break;
+      }
+    }
+    if (matchedSuggestion != null) {
+			final SuggestResult matchedAddress = matchedSuggestion;
+      // Prepare the GeocodeParameters for geocoding the address
+      locatorParams(FIND_PLACE);
+
+      final ListenableFuture<List<GeocodeResult>> locFuture = mLocator.geocodeAsync(matchedAddress, mGeocodeParams);
+			// Attach a done listener that executes upon completion of the async call
+      locFuture.addDoneListener(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            List<GeocodeResult> locationResults = locFuture.get();
+						showSuggestedPlace(locationResults, address);
+						mProgressDialog.dismiss();
+          } catch (Exception e) {
+						// Notify that there was a problem with geocoding
+            Log.e(TAG, "Geocode error " + e.getMessage());
+						mProgressDialog.dismiss();
+						Toast.makeText(getActivity(),
+								getString(R.string.geo_locate_error),
+								Toast.LENGTH_LONG).show();
+          }
+        }
+      });
+    }else{
+			// Notify that no matched suggestion was found
+			mProgressDialog.dismiss();
+			Toast.makeText(getActivity(),
+					getString(R.string.location_not_foud) + " " + address,
+					Toast.LENGTH_LONG).show();
+		}
+
 	}
 
 	/**
-	 * Initialize LocatorSuggestionParameters or LocatorFindParameters
-	 *
-	 * @param TYPE A String determining thr type of parameters to be initialized
-	 * @param query The string for which the locator parameters are to be initialized
-	 */
-	private void locatorParams(String TYPE, String query) {
-		if(TYPE.contentEquals(SUGGEST_PLACE)) {
-			// Create suggestion parameters
-			suggestParams = new LocatorSuggestionParameters(query);
+	 * Given an address and the geocode results, dismiss
+	 * progress dialog and keyboard and show the geocoded location.
+	 * @param locationResults - List of GeocodeResult
+   */
+	private void showSuggestedPlace(final List<GeocodeResult> locationResults, final String address){
 
-			// Use the centre of the current map extent as the location
-			suggestParams.setLocation(mMapView.getCenter(),
-					mMapView.getSpatialReference());
-
-			// Calculate distance for search operation
-			Envelope mapExtent = new Envelope();
-			mMapView.getExtent().queryEnvelope(mapExtent);
-
-			// assume map is in meters, other units wont work, double
-			// current envelope
-			double distance = (mapExtent.getWidth() > 0) ? mapExtent
-					.getWidth() * 2 : 10000;
-			suggestParams.setDistance(distance);
-
-
-
+		Point resultPoint = null;
+		String resultAddress = null;
+		if (locationResults != null && locationResults.size() > 0) {
+			// Get the first returned result
+			mGeocodedLocation = locationResults.get(0);
+			resultPoint = mGeocodedLocation.getDisplayLocation();
+			resultAddress = mGeocodedLocation.getLabel();
+		}else{
+			Log.i(MapFragment.TAG, "No geocode results found for suggestion");
 		}
 
-		if (TYPE.contentEquals(FIND_PLACE)) {
-			// Create find parameters
-			LocatorFindParameters findParams = new LocatorFindParameters(query);
-
-			// Use the centre of the current map extent as the location
-			findParams.setLocation(mMapView.getCenter(),
-			mMapView.getSpatialReference());
-
-			// Calculate distance for search operation
-			Envelope mapExtent = new Envelope();
-			mMapView.getExtent().queryEnvelope(mapExtent);
-
-			// assume map is in meters, double current envelope
-			double distance = (mapExtent.getWidth() > 0) ? mapExtent
-					.getWidth() * 2 : 10000;
-			findParams.setDistance(distance);
-
-			findParams.setOutSR(mMapView.getSpatialReference());
+		if (resultPoint == null){
+			Toast.makeText(getActivity(),
+					getString(R.string.location_not_foud) + resultAddress,
+					Toast.LENGTH_LONG).show();
+			return;
 		}
+		// Display the result
+		displaySearchResult(resultPoint, address);
+		hideKeyboard();
 	}
-
-	//Fetch the Location from the suggestMap and display it
-	private class FindLocationTask extends AsyncTask<String,Void,Point> {
-		private Point resultPoint = null;
-		private String resultAddress;
-		private static final String TAG_LOCATOR_PROGRESS_DIALOG = "TAG_LOCATOR_PROGRESS_DIALOG";
-
-		private ProgressDialogFragment mProgressDialog;
-
-		public FindLocationTask(String address) {
-			resultAddress = address;
-		}
-
-		@Override
-		protected Point doInBackground(String... params) {
-
-			// get the Location for the suggestion from the ArrayList
-			for(LocatorSuggestionResult result: suggestionsList) {
-				if(resultAddress.matches(result.getText())) {
-					try {
-						resultPoint = ((mLocator.find(result, 2, null, mapSpatialReference)).get(0)).getLocation();
-					} catch (Exception e) {
-						Log.e(TAG,"Error in fetching the Location");
-						Log.e(TAG,e.getMessage());
-					}
-				}
-			}
-
-			resultEndPoint = resultPoint;
-
-			return resultPoint;
-		}
-
-		@Override
-		protected void onPreExecute() {
-			// Display progress dialog on UI thread
-			mProgressDialog = ProgressDialogFragment.newInstance(getActivity()
-					.getString(R.string.address_search));
-			// set the target fragment to receive cancel notification
-			mProgressDialog.setTargetFragment(MapFragment.this,
-					REQUEST_CODE_PROGRESS_DIALOG);
-			mProgressDialog.show(getActivity().getFragmentManager(),
-					TAG_LOCATOR_PROGRESS_DIALOG);
-		}
-
-		@Override
-		protected void onPostExecute(Point resultPoint) {
-			// Dismiss progress dialog
-			mProgressDialog.dismiss();
-			if (resultPoint == null)
-				return;
-
-			// Display the result
-			displaySearchResult(resultPoint,resultAddress);
-			hideKeyboard();
-		}
-
-	}
-
-	protected void hideKeyboard() {
-
-		// Hide soft keyboard
+  /**
+   * Hides soft keyboard
+   */
+  protected void hideKeyboard() {
 		mSearchview.clearFocus();
-		InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+		InputMethodManager inputManager = (InputMethodManager) getActivity()
+				.getSystemService(Context.INPUT_METHOD_SERVICE);
 		inputManager.hideSoftInputFromWindow(mSearchview.getWindowToken(), 0);
 	}
 
 	private void displaySearchResult(Point resultPoint, String address) {
 
 		// create marker symbol to represent location
-		Drawable drawable = getActivity().getResources().getDrawable(
-				R.drawable.pin_circle_red);
-		PictureMarkerSymbol resultSymbol = new PictureMarkerSymbol(
-				getActivity(), drawable);
+		Bitmap icon = BitmapFactory.decodeResource(getActivity().getResources(), R.drawable.pin_circle_red);
+		BitmapDrawable drawable = new BitmapDrawable(getActivity().getResources(), icon);
+		PictureMarkerSymbol resultSymbol = new PictureMarkerSymbol(drawable);
 		// create graphic object for resulting location
-		Graphic resultLocGraphic = new Graphic(resultPoint,
-				resultSymbol);
+		Graphic resultLocGraphic = new Graphic(resultPoint, resultSymbol);
 		// add graphic to location layer
-		mLocationLayer.addGraphic(resultLocGraphic);
+		mLocationLayer.getGraphics().add(resultLocGraphic);
 
-		mLocationLayerPoint = resultPoint;
+		mFoundLocation = resultPoint;
 
 		mLocationLayerPointString = address;
 
 		// Zoom map to geocode result location
-		mMapView.zoomToResolution(resultPoint, 2);
+    MapFragment.mMapView.setViewpointCenterAsync(resultPoint);
 		showSearchResultLayout(address);
 	}
-
-
-
 	/**
 	 * Clears all graphics out of the location layer and the route layer.
 	 */
 	void resetGraphicsLayers() {
-		mLocationLayer.removeAll();
-		mRouteLayer.removeAll();
-		mLocationLayerPoint = null;
+		mLocationLayer.getGraphics().clear();
+		mRouteLayer.getGraphics().clear();
+		mFoundLocation = null;
 		mLocationLayerPointString = null;
 		mRoutingDirections = null;
 	}
@@ -1046,189 +965,170 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	void addGraphicLayers() {
 		// Add location layer
 		if (mLocationLayer == null) {
-			mLocationLayer = new GraphicsLayer();
+			mLocationLayer = new GraphicsOverlay();
 		}
-		mMapView.addLayer(mLocationLayer);
+
+		mMapView.getGraphicsOverlays().add(mLocationLayer);
 
 		// Add the route graphic layer
 		if (mRouteLayer == null) {
-			mRouteLayer = new GraphicsLayer();
+			mRouteLayer = new GraphicsOverlay();
 		}
-		mMapView.addLayer(mRouteLayer);
+		mMapView.getGraphicsOverlays().add(mRouteLayer);
 	}
 
-	/**
-	 * Starts tracking GPS location.
-	 */
-	void startLocationTracking() {
-		LocationDisplayManager locDispMgr = mMapView
-				.getLocationDisplayManager();
-		mCompass.start();
-		locDispMgr.setAutoPanMode(AutoPanMode.LOCATION);
-		locDispMgr.setAllowNetworkLocation(true);
 
-		locDispMgr.setLocationListener(new LocationListener() {
-
-			boolean locationChanged = false;
-
-			// Zooms to the current location when first GPS fix arrives
-			@Override
-			public void onLocationChanged(Location loc) {
-				double locy = loc.getLatitude();
-				double locx = loc.getLongitude();
-				Point wgspoint = new Point(locx, locy);
-				mLocation = (Point) GeometryEngine.project(wgspoint,
-						SpatialReference.create(4326),
-						mMapView.getSpatialReference());
-				if (!locationChanged) {
-					locationChanged = true;
-					Unit mapUnit = mMapView.getSpatialReference().getUnit();
-					double zoomWidth = Unit.convertUnits(SEARCH_RADIUS,
-							Unit.create(LinearUnit.Code.MILE_US), mapUnit);
-					Envelope zoomExtent = new Envelope(mLocation,
-							zoomWidth / 10, zoomWidth / 10);
-					mMapView.setExtent(zoomExtent);
-				}
-			}
-
-			@Override
-			public void onProviderDisabled(String arg0) {
-			}
-
-			@Override
-			public void onProviderEnabled(String arg0) {
-			}
-
-			@Override
-			public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
-			}
-		});
-		locDispMgr.start();
-		mIsLocationTracking = true;
-	}
-
-	@Override
-	public void onBasemapChanged(String basemapPortalItemId) {
-		((MapsAppActivity) getActivity()).showMap(mPortalItemId,
-				basemapPortalItemId);
-	}
 
 	/**
 	 * Called from search_layout.xml when user presses Search button.
-	 * 
+	 *
 	 * @param address
 	 */
-	public void onSearchButtonClicked(String address) {
+	public void onSearchButtonClicked(final String address) {
 
+		Log.i(TAG, " #### Submitted address " + address);
 		// Hide virtual keyboard
 		hideKeyboard();
 
 		// Remove any previous graphics and routes
 		resetGraphicsLayers();
 
-		executeLocatorTask(address);
+		geoCodeTypedAddress(address);
 	}
 
 	/**
-	 * Set up the search parameters and execute the Locator task.
-	 * 
+	 * Geocode an address typed in by user
+	 *
 	 * @param address
 	 */
-	private void executeLocatorTask(String address) {
+	private void geoCodeTypedAddress(final String address) {
 		// Create Locator parameters from single line address string
-		LocatorFindParameters findParams = new LocatorFindParameters(address);
+		final GeocodeParameters geoParameters = new GeocodeParameters();
+		geoParameters.setMaxResults(2);
 
 		// Use the centre of the current map extent as the find location point
-		findParams.setLocation(mMapView.getCenter(),
-				mMapView.getSpatialReference());
-
-		// Calculate distance for find operation
-		Envelope mapExtent = new Envelope();
-		mMapView.getExtent().queryEnvelope(mapExtent);
-		// assume map is in metres, other units wont work, double current
-		// envelope
-		double distance = (mapExtent.getWidth() > 0) ? mapExtent
-				.getWidth() * 2 : 10000;
-		findParams.setDistance(distance);
-		findParams.setMaxLocations(2);
+		if (mLocation != null) {
+			geoParameters.setPreferredSearchLocation(mLocation);
+		}
+		// Null out any previously located result
+		mGeocodedLocation = null;
 
 		// Set address spatial reference to match map
-		findParams.setOutSR(mMapView.getSpatialReference());
+		SpatialReference sR = mMapView.getSpatialReference();
+		geoParameters.setOutputSpatialReference(sR);
+
+		geoParameters.setSearchArea(calculateSearchArea());
 
 		// Execute async task to find the address
-		LocatorAsyncTask locatorTask = new LocatorAsyncTask();
-		locatorTask.execute(findParams);
-		mPendingTask = locatorTask;
+		mLocator.addDoneLoadingListener(new Runnable() {
+			@Override
+			public void run() {
+				if (mLocator.getLoadStatus() == LoadStatus.LOADED) {
+					// Call geocodeAsync passing in an address
+					final ListenableFuture<List<GeocodeResult>> geocodeFuture = mLocator.geocodeAsync(address,
+							geoParameters);
+					geocodeFuture.addDoneListener(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								// Get the results of the async operation
+								List<GeocodeResult> geocodeResults = geocodeFuture.get();
 
-		mLocationLayerPointString = address;
+								if (geocodeResults.size() > 0) {
+									// Use the first result - for example
+									// display on the map
+									mGeocodedLocation = geocodeResults.get(0);
+									displaySearchResult(mGeocodedLocation.getDisplayLocation(), mGeocodedLocation.getLabel());
+
+								}else{
+                  Toast.makeText(getActivity(),
+                      getString(R.string.location_not_foud) + address,
+                      Toast.LENGTH_LONG).show();
+
+								}
+
+							} catch (InterruptedException e) {
+								// Deal with exception...
+								e.printStackTrace();
+								Toast.makeText(getActivity(),
+										getString(R.string.geo_locate_error),
+										Toast.LENGTH_LONG);
+
+							} catch (ExecutionException e) {
+								// Deal with exception...
+								e.printStackTrace();
+								Toast.makeText(getActivity(),
+										getString(R.string.geo_locate_error),
+										Toast.LENGTH_LONG);
+							}
+							// Done processing and can remove this listener.
+							geocodeFuture.removeDoneListener(this);
+						}
+					});
+
+				} else {
+					Log.i(TAG, "Trying to reload locator task");
+					mLocator.retryLoadAsync();
+				}
+			}
+		});
+		mLocator.loadAsync();
+	}
+
+	/**
+	 * Calculate search geometry given current map extent
+	 *
+	 * @return Envelope representing an area double the size of the current map
+	 *         extent
+	 *
+	 */
+	private Envelope calculateSearchArea() {
+		SpatialReference sR = mMapView.getSpatialReference();
+
+		// Get the current map space
+		Geometry mapGeometry = mMapView.getCurrentViewpoint(Viewpoint.Type.BOUNDING_GEOMETRY).getTargetGeometry();
+		Envelope mapExtent = mapGeometry.getExtent();
+		// Calculate distance for find operation
+
+		// assume map is in metres, other units wont work, double current
+		// envelope
+		double width = mapExtent.getWidth() > 0 ? mapExtent.getWidth() * 2 : 10000;
+		double height = mapExtent.getHeight() > 0 ? mapExtent.getHeight() * 2 : 10000;
+		double xMax = mapExtent.getXMax() + width;
+		double xMin = mapExtent.getXMin() - width;
+		double yMax = mapExtent.getYMax() + height;
+		double yMin = mapExtent.getYMin() - height;
+		return new Envelope(new Point(xMax, yMax, sR), new Point(xMin, yMin, sR));
 	}
 
 	/**
 	 * Called by RoutingDialogFragment when user presses Get Route button.
-	 * 
+	 *
 	 * @param startPoint
 	 *            String entered by user to define start point.
 	 * @param endPoint
 	 *            String entered by user to define end point.
-	 * @return true if routing task executed, false if parameters rejected. If
-	 *         this method rejects the parameters it must display an explanatory
-	 *         Toast to the user before returning.
 	 */
-	@Override
-	public boolean onGetRoute(String startPoint, String endPoint) {
+
+	@Override public boolean onGetRoute(String startPoint, String endPoint) {
 		// Check if we need a location fix
-		if (startPoint.equals(getString(R.string.my_location))
-				&& mLocation == null) {
-			Toast.makeText(getActivity(),
-					getString(R.string.need_location_fix), Toast.LENGTH_LONG)
-					.show();
-			return false;
+		if (startPoint.equals(getString(R.string.my_location)) && mLocation == null) {
+			Toast.makeText(getActivity(), getString(R.string.need_location_fix), Toast.LENGTH_LONG).show();
+
 		}
 		// Remove any previous graphics and routes
 		resetGraphicsLayers();
 
 		// Do the routing
-		executeRoutingTask(startPoint, endPoint);
+		getRoute(startPoint, endPoint);
 		return true;
-	}
 
-	/**
-	 * Set up Route Parameters to execute RouteTask
-	 * 
-	 * @param start
-	 * @param end
-	 */
-	@SuppressWarnings("unchecked")
-	private void executeRoutingTask(String start, String end) {
-		resetGraphicsLayers();
-		// Create a list of start end point params
-		LocatorFindParameters routeStartParams = new LocatorFindParameters(
-				start);
-		LocatorFindParameters routeEndParams = new LocatorFindParameters(end);
-		List<LocatorFindParameters> routeParams = new ArrayList<>();
-
-		// Add params to list
-		routeParams.add(routeStartParams);
-		routeParams.add(routeEndParams);
-
-		// Execute async task to do the routing
-		RouteAsyncTask routeTask = new RouteAsyncTask();
-		routeTask.execute(routeParams);
-		mPendingTask = routeTask;
-	}
-
-	@Override
-	public void onCancel(DialogInterface dialog) {
-		// a pending task needs to be canceled
-		if (mPendingTask != null) {
-			mPendingTask.cancel(true);
-		}
 	}
 
 	/**
 	 * Shows the search result in the layout after successful geocoding and
 	 * reverse geocoding
-	 * 
+	 *
 	 */
 
 	private void showSearchResultLayout(String address) {
@@ -1251,8 +1151,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mMapContainer.addView(mSearchResult);
 
 		// Setup the listener for the "cancel" icon
-		ImageView iv_cancel = (ImageView) mSearchResult
-				.findViewById(R.id.imageView3);
+		ImageView iv_cancel = (ImageView) mSearchResult.findViewById(R.id.imageView3);
 		iv_cancel.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -1271,36 +1170,33 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		});
 
 		// Set up the listener for the "Get Directions" icon
-		ImageView iv_route = (ImageView) mSearchResult
-				.findViewById(R.id.imageView2);
+		ImageView iv_route = (ImageView) mSearchResult.findViewById(R.id.imageView2);
 		iv_route.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				onGetRoute(getString(R.string.my_location),
-						mLocationLayerPointString);
+				onGetRoute(getString(R.string.my_location), mLocationLayerPointString);
 			}
 		});
 
 		// Add the compass after getting the height of the layout
-		mSearchResult.getViewTreeObserver().addOnGlobalLayoutListener(
-				new OnGlobalLayoutListener() {
-					@Override
-					public void onGlobalLayout() {
-						addCompass(mSearchResult.getHeight());
-						mSearchResult.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-					}
+		mSearchResult.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				addCompass(mSearchResult.getHeight());
+				mSearchResult.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+			}
 
-				});
+		});
 
 	}
 
 	/**
 	 * Shows the Routing result layout after successful routing
-	 * 
+	 *
 	 * @param time
 	 * @param distance
-	 * 
+	 *
 	 */
 
 	private void showRoutingResultLayout(double distance, double time) {
@@ -1316,21 +1212,23 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Shorten the start and end location by finding the first comma if
 		// present
-		int index_from = mStartLocation.indexOf(",");
-		int index_to = mEndLocation.indexOf(",");
+		int index_from = mStartLocationName.indexOf(",");
+		int index_to = mEndLocationName.indexOf(",");
 		if (index_from != -1)
-			mStartLocation = mStartLocation.substring(0, index_from);
+			mStartLocationName = mStartLocationName.substring(0, index_from);
 		if (index_to != -1)
-			mEndLocation = mEndLocation.substring(0, index_to);
+			mEndLocationName = mEndLocationName.substring(0, index_to);
 
 		// Initialize the textvieww and display the text
 		TextView tv_from = (TextView) mSearchResult.findViewById(R.id.tv_from);
 		tv_from.setTypeface(null, Typeface.BOLD);
-		tv_from.setText(" " + mStartLocation);
+		tv_from.setText(" " + mStartLocationName);
 
 		TextView tv_to = (TextView) mSearchResult.findViewById(R.id.tv_to);
 		tv_to.setTypeface(null, Typeface.BOLD);
-		tv_to.setText(" " + mEndLocation);
+		tv_to.setText(" " + mEndLocationName);
+
+    // Convert meters to miles
 
 		// Rounding off the values
 		distance = Math.round(distance * 10.0) / 10.0;
@@ -1342,14 +1240,13 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		TextView tv_dist = (TextView) mSearchResult.findViewById(R.id.tv_dist);
 		tv_dist.setTypeface(null, Typeface.BOLD);
-		tv_dist.setText(" (" + distance + " miles)");
+		tv_dist.setText(" (" + distance + " meters)");
 
 		// Adding the layout
 		mMapContainer.addView(mSearchResult);
 
 		// Setup the listener for the "Cancel" icon
-		ImageView iv_cancel = (ImageView) mSearchResult
-				.findViewById(R.id.imageView3);
+		ImageView iv_cancel = (ImageView) mSearchResult.findViewById(R.id.imageView3);
 		iv_cancel.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -1365,8 +1262,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		});
 
 		// Set up the listener for the "Show Directions" icon
-		ImageView iv_directions = (ImageView) mSearchResult
-				.findViewById(R.id.imageView2);
+		ImageView iv_directions = (ImageView) mSearchResult.findViewById(R.id.imageView2);
 		iv_directions.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -1376,398 +1272,283 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		});
 
 		// Add the compass after getting the height of the layout
-		mSearchResult.getViewTreeObserver().addOnGlobalLayoutListener(
-				new OnGlobalLayoutListener() {
-					@Override
-					public void onGlobalLayout() {
-						addCompass(mSearchResult.getHeight());
-						mSearchResult.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-					}
+		mSearchResult.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				addCompass(mSearchResult.getHeight());
+				mSearchResult.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+			}
 
-				});
+		});
 
 	}
 
-	/*
-	 * This class provides an AsyncTask that performs a geolocation request on a
-	 * background thread and displays the first result on the map on the UI
-	 * thread.
-	 */
-	private class LocatorAsyncTask extends
-			AsyncTask<LocatorFindParameters, Void, List<LocatorGeocodeResult>> {
-		private static final String TAG_LOCATOR_PROGRESS_DIALOG = "TAG_LOCATOR_PROGRESS_DIALOG";
+	/**
+	 * Given an origin and destination, execute a route solving task
+	 * @param originName - string representing a starting location
+	 * @param destinationName - string representing an ending location
+   */
+	private void getRoute(String originName, final String destinationName) {
+		// Show the progress dialog while getting route info
+		showProgressDialog(getString(R.string.route_search), TAG_ROUTE_SEARCH_PROGRESS_DIALOG);
 
-		private Exception mException;
+		// Configure geocode params specific for routing
+		locatorParams(ROUTE);
 
-		private ProgressDialogFragment mProgressDialog;
+		// Assign the appropriate routing url.
+		// Note that the version (e.g. 10.0, 10.3)
+		// of the server publishing the service does
+		// make a difference.
+		// Read more about routing services (here)
+		String routeTaskURL = getString(R.string.routingservice_url);
+		mRouteTask = new RouteTask(routeTaskURL);
+		mEndLocationName = destinationName;
+		Log.i(TAG, mRouteTask.getUrl());
+		Point endPoint = null;
 
-		public LocatorAsyncTask() {
-		}
+		try {
+			// Geocode start position or use My Location (from GPS)
+			if (originName.equals(getString(R.string.my_location))) {
+				mStartLocationName = getString(R.string.my_location);
 
-		@Override
-		protected void onPreExecute() {
-			mProgressDialog = ProgressDialogFragment.newInstance(getActivity()
-					.getString(R.string.address_search));
-			// set the target fragment to receive cancel notification
-			mProgressDialog.setTargetFragment(MapFragment.this,
-					REQUEST_CODE_PROGRESS_DIALOG);
-			mProgressDialog.show(getActivity().getFragmentManager(),
-					TAG_LOCATOR_PROGRESS_DIALOG);
-		}
+				// We're using my current location as the
+				// start location, do we need to geocode the destination?
+				// A previous GeocodeResult may be available...
+				if (mGeocodedLocation != null){
+					endPoint = mGeocodedLocation.getDisplayLocation();
+					// We have the start and end, now get route
+					mRouteTask.addDoneLoadingListener(new RouteSolver(mLocation,endPoint));
+					mRouteTask.loadAsync();
 
-		@Override
-		protected List<LocatorGeocodeResult> doInBackground(
-				LocatorFindParameters... params) {
-			// Perform routing request on background thread
-			mException = null;
-			List<LocatorGeocodeResult> results = null;
+				}else{
+					Log.i(TAG, "Geocoding destination address: " + destinationName);
+					final ListenableFuture<List<GeocodeResult>> geoFutureEnd = mLocator.geocodeAsync(destinationName,
+							mGeocodeParams);
+					geoFutureEnd.addDoneListener(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								List<GeocodeResult> results = geoFutureEnd.get();
+								if (results != null && results.size() > 0) {
+									final Point endPoint = results.get(0).getDisplayLocation();
 
-			// Create locator using default online geocoding service and tell it
-			// to
-			// find the given address
-			Locator locator = Locator.createOnlineLocator();
-			try {
-				results = locator.find(params[0]);
-			} catch (Exception e) {
-				mException = e;
-			}
-			return results;
-		}
+									// We have the start and end, now get route
+									mRouteTask.addDoneLoadingListener(new RouteSolver(mLocation,endPoint));
+									mRouteTask.loadAsync();
 
-		@Override
-		protected void onPostExecute(List<LocatorGeocodeResult> result) {
-			// Display results on UI thread
-			mProgressDialog.dismiss();
-			if (mException != null) {
-				Log.w(TAG, "LocatorSyncTask failed with:");
-				mException.printStackTrace();
-				Toast.makeText(getActivity(),
-						getString(R.string.addressSearchFailed),
-						Toast.LENGTH_LONG).show();
-				return;
-			}
-
-			if (result.size() == 0) {
-				Toast.makeText(getActivity(),
-						getString(R.string.noResultsFound), Toast.LENGTH_LONG)
-						.show();
+								} else {
+									Log.i(TAG, "Geocoding failed to return results for this address: " + destinationName);
+								}
+							} catch (Exception ie) {
+								mProgressDialog.dismiss();
+								ie.printStackTrace();
+								Toast.makeText(getActivity(),
+										getString(R.string.geo_locate_error),
+										Toast.LENGTH_LONG);
+							}
+						}
+					});
+				}
 			} else {
-				// Use first result in the list
-				LocatorGeocodeResult geocodeResult = result.get(0);
+				// Get the start location
+				final ListenableFuture<List<GeocodeResult>> geoFutureStart = mLocator.geocodeAsync(originName,
+						mGeocodeParams);
+				geoFutureStart.addDoneListener(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							List<GeocodeResult> results = geoFutureStart.get();
+							if (results != null && results.size() > 0) {
+								final Point origin = results.get(0).getDisplayLocation();
+                mStartLocationName = results.get(0).getLabel();
 
-				// get return geometry from geocode result
-				Point resultPoint = geocodeResult.getLocation();
+								// Now we need to get the end location
+								final ListenableFuture<List<GeocodeResult>> geoFutureEnd2 = mLocator
+										.geocodeAsync(destinationName, mGeocodeParams);
+								geoFutureEnd2.addDoneListener(new Runnable() {
+									@Override
+									public void run() {
+										try {
+											List<GeocodeResult> results = geoFutureEnd2.get();
+											if (results != null && results.size() > 0) {
+												Point end = results.get(0).getDisplayLocation();
+                        mEndLocationName = results.get(0).getLabel();
+												// We have the start and end,
+												// now get route
+												mRouteTask.addDoneLoadingListener(new RouteSolver(origin,end));
+												mRouteTask.loadAsync();
+											}
+										} catch (Exception e) {
+											e.printStackTrace();
+											mProgressDialog.dismiss();
+											Toast.makeText(getActivity(),
+													getString(R.string.geo_locate_error),
+													Toast.LENGTH_LONG);
+										}
 
-				// Get the address
-				String address = geocodeResult.getAddress();
-
-				// Display the result on the map
-				displaySearchResult(resultPoint,address);
-
+									}
+								});
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+							mProgressDialog.dismiss();
+							Toast.makeText(getActivity(),
+									getString(R.string.geo_locate_error),
+									Toast.LENGTH_LONG);
+						}
+					}
+				});
 			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			mProgressDialog.dismiss();
+			Toast.makeText(getActivity(),
+					getString(R.string.routingFailed),
+					Toast.LENGTH_LONG);
 		}
 
 	}
 
 	/**
-	 * This class provides an AsyncTask that performs a routing request on a
-	 * background thread and displays the resultant route on the map on the UI
-	 * thread.
+	 * Show progress dialog with the given message and name
+	 *
+	 * @param message
+	 *            String
+	 * @param name
+	 *            String
 	 */
-	private class RouteAsyncTask extends
-			AsyncTask<List<LocatorFindParameters>, Void, RouteResult> {
-		private static final String TAG_ROUTE_SEARCH_PROGRESS_DIALOG = "TAG_ROUTE_SEARCH_PROGRESS_DIALOG";
+	private void showProgressDialog(String message, String name) {
+		mProgressDialog = ProgressDialogFragment.newInstance(message);
+		// set the target fragment to receive cancel notification
+		mProgressDialog.setTargetFragment(this, REQUEST_CODE_PROGRESS_DIALOG);
+		mProgressDialog.show(getActivity().getFragmentManager(), name);
+	}
 
-		private Exception mException;
-
-		private ProgressDialogFragment mProgressDialog;
-
-		public RouteAsyncTask() {
+	private void showRoute(RouteResult routeResult, Point startPoint, Point endPoint) {
+		// Get first item in list of routes provided by server
+		Route route;
+		try {
+			route = routeResult.getRoutes().get(0);
+			if (route.getTotalLength() == 0.0) {
+				throw new Exception("Can not find the Route");
+			}
+		} catch (Exception e) {
+			Toast.makeText(getActivity(),
+					"We are sorry, we couldn't find the route. Please make "
+							+ "sure the Source and Destination are different or are connected by road",
+					Toast.LENGTH_LONG).show();
+			Log.e(TAG, e.getMessage());
+			return;
 		}
 
-		@Override
-		protected void onPreExecute() {
-			mProgressDialog = ProgressDialogFragment.newInstance(getActivity()
-					.getString(R.string.route_search));
-			// set the target fragment to receive cancel notification
-			mProgressDialog.setTargetFragment(MapFragment.this,
-					REQUEST_CODE_PROGRESS_DIALOG);
-			mProgressDialog.show(getActivity().getFragmentManager(),
-					TAG_ROUTE_SEARCH_PROGRESS_DIALOG);
+		// Create polyline graphic of the full route
+		SimpleLineSymbol lineSymbol = new SimpleLineSymbol(SimpleLineSymbol.Style.SOLID, Color.RED, 2);
+		Graphic routeGraphic = new Graphic(route.getRouteGeometry(), lineSymbol);
+
+		// Create point graphic to mark start of route
+
+		Geometry shape = routeGraphic.getGeometry();
+		Graphic startGraphic = createMarkerGraphic(startPoint, false);
+
+		// Create point graphic to mark end of route
+		Graphic endGraphic = createMarkerGraphic(endPoint, true);
+
+		// Add these graphics to route layer
+		mRouteLayer.getGraphics().add(routeGraphic);
+		mRouteLayer.getGraphics().add(startGraphic);
+		mRouteLayer.getGraphics().add(endGraphic);
+
+		// Zoom to the extent of the entire route with a padding
+		mMapView.setViewpointGeometryWithPaddingAsync(shape, 400);
+
+		// Save routing directions so user can display them later
+		mRoutingDirections = route.getDirectionManeuvers();
+
+		// Show Routing Result Layout
+		showRoutingResultLayout(route.getTotalLength(), route.getTotalTime());
+	}
+
+	private Graphic createMarkerGraphic(Point point, boolean endPoint) {
+
+		BitmapDrawable bitmapDrawable = (BitmapDrawable) ContextCompat.getDrawable(
+				getActivity().getApplicationContext(),
+				endPoint ? R.drawable.pin_circle_blue : R.drawable.pin_circle_red);
+		PictureMarkerSymbol destinationSymbol = new PictureMarkerSymbol(bitmapDrawable);
+		// NOTE: marker's bounds not set till marker is used to create
+		// destinationSymbol
+		float offsetY = convertPixelsToDp(getActivity(),
+				bitmapDrawable.getBounds().bottom);
+		destinationSymbol.setOffsetY(offsetY);
+		return new Graphic(point, destinationSymbol);
+	}
+
+	private void reverseGeocode(Point point) {
+		if (point == null){
+			return;
 		}
+		// Show progress dialog
+		showProgressDialog(getString(R.string.reverse_geocoding), TAG_REVERSE_GEOCODING_PROGRESS_DIALOG);
 
-		@Override
-		protected RouteResult doInBackground(
-				List<LocatorFindParameters>... params) {
-			// Perform routing request on background thread
-			mException = null;
-
-			// Define route objects
-			List<LocatorGeocodeResult> geocodeStartResult;
-			List<LocatorGeocodeResult> geocodeEndResult;
-			Point startPoint;
-			Point endPoint;
-
-			// Create a new locator to geocode start/end points;
-			// by default uses ArcGIS online world geocoding service
-			Locator locator = Locator.createOnlineLocator();
-
-			try {
-				// Geocode start position, or use My Location (from GPS)
-				LocatorFindParameters startParam = params[0].get(0);
-				if (startParam.getText()
-						.equals(getString(R.string.my_location))) {
-					mStartLocation = getString(R.string.my_location);
-					startPoint = (Point) GeometryEngine.project(mLocation, mWm,
-							mEgs);
-				} else {
-					geocodeStartResult = locator.find(startParam);
-					startPoint = geocodeStartResult.get(0).getLocation();
-					mStartLocation = geocodeStartResult.get(0).getAddress();
-
-					if (isCancelled()) {
-						return null;
+		// Provision reverse geocode parameers
+		locatorParams(REVERSE_GECODE);
+		// Pass in the point and geocode parameters to the reverse geocode method
+		final ListenableFuture<List<GeocodeResult>> reverseFuture = mLocator.reverseGeocodeAsync(point,
+				mReverseGeocodeParams);
+		// Attach a done listener that shows the results upon completion of the async call
+		reverseFuture.addDoneListener(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					if (mProgressDialog !=null){
+						mProgressDialog.dismiss();
 					}
+
+					List<GeocodeResult> results = reverseFuture.get();
+					// Process and display results
+					showReverseGeocodeResult(results);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					e.printStackTrace();
 				}
-
-				// Geocode the destination
-				LocatorFindParameters endParam = params[0].get(1);
-				if (endParam.getText().equals(getString(R.string.my_location))) {
-					mEndLocation = getString(R.string.my_location);
-					endPoint = (Point) GeometryEngine.project(mLocation, mWm,
-							mEgs);
-				} else {
-					geocodeEndResult = locator.find(endParam);
-					if (suggestionClickFlag) {
-
-						endPoint = (Point) GeometryEngine.project(resultEndPoint, mWm, mEgs);
-						mEndLocation = endParam.getText();
-					} else {
-						endPoint = geocodeEndResult.get(0).getLocation();
-						mEndLocation = geocodeEndResult.get(0).getAddress();
-					}
-				}
-
-			} catch (Exception e) {
-				mException = e;
-				return null;
 			}
-			if (isCancelled()) {
-				return null;
-			}
-
-			// Create a new routing task pointing to an ArcGIS Network Analysis
-			// Service
-			RouteTask routeTask;
-			RouteParameters routeParams;
-			try {
-				routeTask = RouteTask.createOnlineRouteTask(
-						getString(R.string.routingservice_url), null);
-				// Retrieve default routing parameters
-				routeParams = routeTask.retrieveDefaultRouteTaskParameters();
-			} catch (Exception e) {
-				mException = e;
-				return null;
-			}
-			if (isCancelled()) {
-				return null;
-			}
-
-			// Customize the route parameters
-			NAFeaturesAsFeature routeFAF = new NAFeaturesAsFeature();
-			StopGraphic sgStart = new StopGraphic(startPoint);
-			StopGraphic sgEnd = new StopGraphic(endPoint);
-			routeFAF.setFeatures(new Graphic[]{sgStart, sgEnd});
-			routeFAF.setCompressedRequest(true);
-			routeParams.setStops(routeFAF);
-			routeParams.setOutSpatialReference(mMapView.getSpatialReference());
-
-			// Solve the route
-			RouteResult routeResult;
-			try {
-				routeResult = routeTask.solve(routeParams);
-			} catch (Exception e) {
-				mException = e;
-				return null;
-			}
-			if (isCancelled()) {
-				return null;
-			}
-			return routeResult;
-		}
-
-		@Override
-		protected void onPostExecute(RouteResult result) {
-			// Display results on UI thread
-			mProgressDialog.dismiss();
-			if (mException != null) {
-				Log.w(TAG, "RouteSyncTask failed with:");
-				mException.printStackTrace();
-				Toast.makeText(getActivity(),
-						getString(R.string.routingFailed), Toast.LENGTH_LONG)
-						.show();
-				return;
-			}
-
-			// Get first item in list of routes provided by server
-			Route route;
-			try {
-				route = result.getRoutes().get(0);
-				if( route.getTotalMiles() == 0.0 || route.getTotalKilometers() == 0.0 ) {
-					throw new Exception("Can not find the Route");
-				}
-			} catch (Exception e) {
-				Toast.makeText(getActivity(), "We are sorry, we couldn't find the route. Please make " +
-								"sure the Source and Destination are different or are connected by road",
-						Toast.LENGTH_LONG).show();
-				Log.e(TAG,e.getMessage());
-				return;
-			}
-
-
-			// Create polyline graphic of the full route
-			SimpleLineSymbol lineSymbol = new SimpleLineSymbol(Color.RED, 2,
-					STYLE.SOLID);
-			Graphic routeGraphic = new Graphic(route.getRouteGraphic()
-					.getGeometry(), lineSymbol);
-
-			// Create point graphic to mark start of route
-			Point startPoint = ((Polyline) routeGraphic.getGeometry())
-					.getPoint(0);
-			Graphic startGraphic = createMarkerGraphic(startPoint, false);
-
-			// Create point graphic to mark end of route
-			int endPointIndex = ((Polyline) routeGraphic.getGeometry())
-					.getPointCount() - 1;
-			Point endPoint = ((Polyline) routeGraphic.getGeometry())
-					.getPoint(endPointIndex);
-			Graphic endGraphic = createMarkerGraphic(endPoint, true);
-
-			// Add these graphics to route layer
-			mRouteLayer.addGraphics(new Graphic[]{routeGraphic, startGraphic,
-					endGraphic});
-
-			// Zoom to the extent of the entire route with a padding
-			mMapView.setExtent(route.getEnvelope(), 100);
-
-			// Save routing directions so user can display them later
-			mRoutingDirections = route.getRoutingDirections();
-
-			// Show Routing Result Layout
-			showRoutingResultLayout(route.getTotalMiles(),
-					route.getTotalMinutes());
-
-		}
-
-		Graphic createMarkerGraphic(Point point, boolean endPoint) {
-			Drawable marker = getResources().getDrawable(
-					endPoint ? R.drawable.pin_circle_blue
-							: R.drawable.pin_circle_red);
-			PictureMarkerSymbol destinationSymbol = new PictureMarkerSymbol(
-					mMapView.getContext(), marker);
-			// NOTE: marker's bounds not set till marker is used to create
-			// destinationSymbol
-			float offsetY = convertPixelsToDp(getActivity(),
-					marker != null ? marker.getBounds().bottom : 0);
-			destinationSymbol.setOffsetY(offsetY);
-			return new Graphic(point, destinationSymbol);
-		}
+		});
 	}
 
 	/**
-	 * This class provides an AsyncTask that performs a reverse geocoding
-	 * request on a background thread and displays the resultant point on the
-	 * map on the UI thread.
+	 * Displays any gecoded results by add a PictureMarkerSymbol to the map's
+	 * graphics layer.
+	 *
+	 * @param results
+	 *            A list of GeocodeResult items
 	 */
-	public class ReverseGeocodingAsyncTask extends
-			AsyncTask<Point, Void, LocatorReverseGeocodeResult> {
-		private static final String TAG_REVERSE_GEOCODING_PROGRESS_DIALOG = "TAG_REVERSE_GEOCODING_PROGRESS_DIALOG";
+	private void showReverseGeocodeResult(List<GeocodeResult> results) {
 
-		private Exception mException;
+		if (results != null && results.size() > 0) {
+			// Show the first item returned
+			// Address string is saved for use in routing
+			mLocationLayerPointString = results.get(0).getLabel();
+			mFoundLocation = results.get(0).getDisplayLocation();
+			// Draw marker on map.
+			// create marker symbol to represent location
 
-		private ProgressDialogFragment mProgressDialog;
+			BitmapDrawable bitmapDrawable = (BitmapDrawable) ContextCompat
+					.getDrawable(getActivity().getApplicationContext(), R.drawable.pin_circle_red);
+			PictureMarkerSymbol destinationSymbol = new PictureMarkerSymbol(bitmapDrawable);
+			mLocationLayer.getGraphics().add(new Graphic(mFoundLocation, destinationSymbol));
 
-		private Point mPoint;
+			// center the map to result location
+			mMapView.setViewpointCenterAsync(mFoundLocation);
 
-		@Override
-		protected void onPreExecute() {
-			mProgressDialog = ProgressDialogFragment.newInstance(getActivity()
-					.getString(R.string.reverse_geocoding));
-			// set the target fragment to receive cancel notification
-			mProgressDialog.setTargetFragment(MapFragment.this,
-					REQUEST_CODE_PROGRESS_DIALOG);
-			mProgressDialog.show(getActivity().getFragmentManager(),
-					TAG_REVERSE_GEOCODING_PROGRESS_DIALOG);
-		}
-
-		@Override
-		protected LocatorReverseGeocodeResult doInBackground(Point... params) {
-			// Perform reverse geocoding request on background thread
-			mException = null;
-			LocatorReverseGeocodeResult result = null;
-			mPoint = params[0];
-
-			// Create locator using default online geocoding service and tell it
-			// to
-			// find the given point
-			Locator locator = Locator.createOnlineLocator();
-			try {
-				// Our input and output spatial reference will be the same as
-				// the map
-				SpatialReference mapRef = mMapView.getSpatialReference();
-				result = locator.reverseGeocode(mPoint, 100.0, mapRef, mapRef);
-				mLocationLayerPoint = mPoint;
-			} catch (Exception e) {
-				mException = e;
-			}
-			// return the resulting point(s)
-			return result;
-		}
-
-		@Override
-		protected void onPostExecute(LocatorReverseGeocodeResult result) {
-			// Display results on UI thread
-			mProgressDialog.dismiss();
-			if (mException != null) {
-				Log.w(TAG, "LocatorSyncTask failed with:");
-				mException.printStackTrace();
-				Toast.makeText(getActivity(),
-						getString(R.string.addressSearchFailed),
-						Toast.LENGTH_LONG).show();
-				return;
-			}
-
-			// Construct a nicely formatted address from the results
-			StringBuilder address = new StringBuilder();
-			if (result != null && result.getAddressFields() != null) {
-				Map<String, String> addressFields = result.getAddressFields();
-				address.append(String.format("%s\n%s, %s %s",
-						addressFields.get("Address"),
-						addressFields.get("City"), addressFields.get("Region"),
-						addressFields.get("Postal")));
-
-				// Draw marker on map.
-				// create marker symbol to represent location
-				Drawable drawable = getActivity().getResources().getDrawable(
-						R.drawable.pin_circle_red);
-				PictureMarkerSymbol symbol = new PictureMarkerSymbol(
-						getActivity(), drawable);
-				mLocationLayer.addGraphic(new Graphic(mPoint, symbol));
-
-				// Address string is saved for use in routing
-				mLocationLayerPointString = address.toString();
-				// center the map to result location
-				mMapView.centerAt(mPoint, true);
-
-				// Show the result on the search result layout
-				showSearchResultLayout(address.toString());
-			}
+			// Show the result on the search result layout
+			showSearchResultLayout(mLocationLayerPointString);
 		}
 	}
 
 	/**
 	 * Converts device specific pixels to density independent pixels.
-	 * 
+	 *
 	 * @param context
 	 * @param px
 	 *            number of device specific pixels
@@ -1776,5 +1557,160 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private float convertPixelsToDp(Context context, float px) {
 		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 		return px / (metrics.densityDpi / 160f);
+	}
+
+  @Override public void onBasemapChanged(String itemId) {
+    ((MapsAppActivity) getActivity()).showMap(mPortalItemId,
+        itemId);
+  }
+
+  @Override public void onCancel(DialogInterface dialog) {
+
+  }
+
+  private class MapTouchListener extends DefaultMapViewOnTouchListener {
+		/**
+		 * Instantiates a new DrawingMapViewOnTouchListener with the specified
+		 * context and MapView.
+		 *
+		 * @param context
+		 *            the application context from which to get the display
+		 *            metrics
+		 * @param mapView
+		 *            the MapView on which to control touch events
+		 */
+		public MapTouchListener(Context context, MapView mapView) {
+			super(context, mapView);
+		}
+
+		@Override
+		public boolean onUp(MotionEvent motionEvent) {
+			if (mLongPressEvent != null) {
+				// This is the end of a long-press that will have displayed
+				// the magnifier.  Get the graphic
+				// coordinates for the motion event.
+				android.graphics.Point mapPoint = new android.graphics.Point((int) motionEvent.getX(),
+						(int) motionEvent.getY());
+				Point point = mMapView.screenToLocation(mapPoint);
+				// Set any previously located point to null
+				mFoundLocation = null;
+				reverseGeocode(point);
+
+				mLongPressEvent = null;
+
+				// Remove any previous graphics
+				resetGraphicsLayers();
+			}
+			return true;
+		}
+
+		@Override
+		public void onLongPress(MotionEvent e) {
+			super.onLongPress(e);
+			// Set mLongPressEvent to indicate
+			// we are processing a long-press
+			mLongPressEvent = e;
+		}
+		@Override
+		public boolean onRotate (MotionEvent e, double angle){
+			super.onRotate(e,angle);
+
+			return true;
+		}
+
+	}
+	/**
+	 * Listen for location changes and update my location
+	 */
+	private class LocationListener implements LocationDisplay.LocationChangedListener {
+
+		@Override public void onLocationChanged(LocationDisplay.LocationChangedEvent locationChangedEvent) {
+			if (locationChangedEvent.getLocation().getPosition() != null){
+				mLocation = locationChangedEvent.getLocation().getPosition();
+			}
+		}
+	}
+	/**
+	 * A helper class for solving routes
+	 */
+	private class RouteSolver implements Runnable{
+		private final Stop origin;
+
+    private final Stop destination;
+
+		public RouteSolver(Point start, Point end){
+			origin = new Stop(start);
+			destination = new Stop(end);
+		}
+		@Override
+		public void run (){
+			LoadStatus status = mRouteTask.getLoadStatus();
+			Log.i(TAG, "Route task is " + status.name());
+
+			// Has the route task loaded successfully?
+			if (status == LoadStatus.FAILED_TO_LOAD) {
+				Log.i(TAG, mRouteTask.getLoadError().getMessage());
+				mProgressDialog.dismiss();
+				Toast.makeText(getActivity(),
+						"There was a problem loading the route task.",
+						Toast.LENGTH_LONG).show();
+				// We may want to try reloading it  --> mRouteTask.retryLoadAsync();
+
+			} else {
+				final ListenableFuture<RouteParameters> routeTaskFuture = mRouteTask
+						.generateDefaultParametersAsync();
+				// Add a done listener that uses the returned route parameters
+				// to build up a specific request for the route we need
+				routeTaskFuture.addDoneListener(new Runnable() {
+
+					@Override
+					public void run() {
+						try {
+							RouteParameters routeParameters = routeTaskFuture.get();
+							// Add a stop for origin and destination
+							routeParameters.getStops().add(origin);
+							routeParameters.getStops().add(destination);
+							// We want the task to return driving directions and routes
+							routeParameters.setReturnDirections(true);
+							routeParameters.setDirectionsDistanceTextUnits(
+									DirectionDistanceTextUnits.IMPERIAL);
+							routeParameters.setOutputSpatialReference(MapFragment.mMapView.getSpatialReference());
+
+							final ListenableFuture<RouteResult> routeResFuture = mRouteTask
+									.solveAsync(routeParameters);
+							routeResFuture.addDoneListener(new Runnable() {
+								@Override
+								public void run() {
+									try {
+										RouteResult routeResult = routeResFuture.get();
+										// Show route results
+										showRoute(routeResult, origin.getGeometry(), destination.getGeometry());
+										// Dismiss progress dialog
+										mProgressDialog.dismiss();
+
+									} catch (InterruptedException e) {
+										e.printStackTrace();
+										mProgressDialog.dismiss();
+										Toast.makeText(getActivity(),
+												getString(R.string.routingFailed),
+												Toast.LENGTH_LONG).show();
+									} catch (ExecutionException e) {
+										e.printStackTrace();
+										mProgressDialog.dismiss();
+										Toast.makeText(getActivity(),
+												"We're sorry, we couldn't find a route",
+												Toast.LENGTH_LONG).show();
+									}
+								}
+							});
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						} catch (ExecutionException e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		}
 	}
 }
