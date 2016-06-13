@@ -9,9 +9,9 @@ On Start                               | Select Basemaps
 ## Features
 * Dynamically switch basemaps
 * Place search
+* Routing
 * Geocode addresses
 * Reverse geocode
-* Route
 * Sign in to ArcGIS account
 
 ## App Type Hierarchy

@@ -26,16 +26,16 @@ package com.esri.android.mapsapp.basemaps;
 
 import android.graphics.Bitmap;
 
-import com.esri.core.portal.PortalItem;
+import com.esri.arcgisruntime.portal.PortalItem;
 
 public class BasemapItem {
 
-  public PortalItem item;
+	public PortalItem item;
 
-  public Bitmap itemThumbnail;
+	public Bitmap itemThumbnail;
 
-  public BasemapItem(PortalItem item, Bitmap bt) {
-    this.item = item;
-    this.itemThumbnail = bt;
-  }
+	public BasemapItem(PortalItem item, Bitmap bt) {
+		this.item = item;
+		itemThumbnail = bt;
+	}
 }

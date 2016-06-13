@@ -24,10 +24,14 @@
 
 package com.esri.android.mapsapp;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,268 +45,260 @@ import android.widget.TextView;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.android.mapsapp.util.TaskExecutor;
-import com.esri.core.portal.Portal;
-import com.esri.core.portal.PortalItem;
-import com.esri.core.portal.PortalItemType;
-import com.esri.core.portal.PortalUser;
-import com.esri.core.portal.PortalUserContent;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
+import com.esri.arcgisruntime.concurrent.ListenableFuture;
+import com.esri.arcgisruntime.portal.Portal;
+import com.esri.arcgisruntime.portal.PortalItem;
+import com.esri.arcgisruntime.portal.PortalItemType;
+import com.esri.arcgisruntime.portal.PortalUser;
+import com.esri.arcgisruntime.portal.PortalUserContent;
 
 /**
- * Implements the view that shows the user's maps. Tapping on a map will open it.
+ * Implements the view that shows the user's maps. Tapping on a map will open
+ * it.
  */
 public class ContentBrowserFragment extends Fragment implements OnClickListener {
 
-  public final static String TAG = ContentBrowserFragment.class.getSimpleName();
+	public final static String TAG = ContentBrowserFragment.class.getSimpleName();
+	private static final String TAG_FETCH_MAPS_PROGRESS_DIALOG = "TAG_FETCH_MAPS_PROGRESS_DIALOG";
+	private GridView mMapGrid;
+	private View mNoMapsInfo;
+	private List<PortalItem> mMaps;
+	private ProgressDialogFragment mProgressDialog;
 
-  private GridView mMapGrid;
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		View view = inflater.inflate(R.layout.content_browser_fragment_layout, null);
 
-  private View mNoMapsInfo;
+		mMapGrid = (GridView) view.findViewById(R.id.content_browser_fragment_gridview);
+		mMapGrid.setVisibility(View.GONE);
 
-  private List<PortalItem> mMaps;
+		mNoMapsInfo = view.findViewById(R.id.content_browser_fragment_no_maps_layout);
+		mNoMapsInfo.setVisibility(View.GONE);
 
-  @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    View view = inflater.inflate(R.layout.content_browser_fragment_layout, null);
+		View refreshButton = view.findViewById(R.id.content_browser_fragment_refresh_button);
+		refreshButton.setOnClickListener(this);
 
-    mMapGrid = (GridView) view.findViewById(R.id.content_browser_fragment_gridview);
-    mMapGrid.setVisibility(View.GONE);
+		if (mMaps == null || mMaps.isEmpty()) {
+			// fetch the user's maps
+			fetchMyMaps();
+		} else {
+			refreshView();
+		}
 
-    mNoMapsInfo = view.findViewById(R.id.content_browser_fragment_no_maps_layout);
-    mNoMapsInfo.setVisibility(View.GONE);
+		return view;
+	}
 
-    View refreshButton = view.findViewById(R.id.content_browser_fragment_refresh_button);
-    refreshButton.setOnClickListener(this);
+	@Override
+	public void onClick(View view) {
+		switch (view.getId()) {
+			case R.id.map_item_linearlayout :
+				// a map item has been clicked - open it
+				ViewHolder viewHolder = (ViewHolder) view.getTag();
+				((MapsAppActivity) getActivity()).showMap(viewHolder.portalItem.getId(), null);
+				break;
+			case R.id.content_browser_fragment_refresh_button :
+				// re-fetch maps
+				fetchMyMaps();
+				break;
+		}
+	}
 
-    if (mMaps == null || mMaps.isEmpty()) {
-      // fetch the user's maps
-      fetchMyMaps();
-    } else {
-      refreshView();
-    }
+	/**
+	 * Fetches the user's maps from the portal.
+	 */
+	private void fetchMyMaps() {
+		// Show a progress dialog while we retrieve web maps...
+		mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.fetching_maps));
+		mProgressDialog.show(getActivity().getFragmentManager(), TAG_FETCH_MAPS_PROGRESS_DIALOG);
 
-    return view;
-  }
+		final List<PortalItem> webMapItems = new ArrayList<>();
+		try {
+			// Get the Portal the user is signed in to.
+			Portal portal = AccountManager.getInstance().getPortal();
+			if (portal != null) {
+				// Get user content from the portal
+				PortalUser portalUser = portal.getPortalUser();
 
-  @Override
-  public void onClick(View view) {
-    switch (view.getId()) {
-      case R.id.map_item_linearlayout:
-        // a map item has been clicked - open it
-        ViewHolder viewHolder = (ViewHolder) view.getTag();
-        ((MapsAppActivity) getActivity()).showMap(viewHolder.portalItem.getItemId(), null);
-        break;
-      case R.id.content_browser_fragment_refresh_button:
-        // re-fetch maps
-        fetchMyMaps();
-        break;
-    }
-  }
+				final ListenableFuture<PortalUserContent> contentFuture = portalUser.fetchContentAsync();
+				// Filter returned content for WEBMAP items
+				contentFuture.addDoneListener(new Runnable() {
 
-  /**
-   * Fetches the user's maps from the portal.
-   */
-  private void fetchMyMaps() {
-    new FetchMapsTask().execute();
-  }
+					@Override
+					public void run() {
+						try {
+							final PortalUserContent content = contentFuture.get();
+							List<PortalItem> rootItems = content != null ? content.getItems() : null;
+							if (rootItems != null) {
+								// only select items of type WEBMAP
+								for (PortalItem item : rootItems) {
+									if (item.getType() == PortalItemType.WEBMAP) {
+										webMapItems.add(item);
+									}
+								}
+							}
+							mMaps = webMapItems;
+							// Show the web maps in the grid view
+							refreshView();
 
-  /**
-   * Refreshes the GridView that shows the maps.
-   */
-  private void refreshView() {
-    if (mMaps == null || mMaps.isEmpty()) {
-      mMapGrid.setVisibility(View.GONE);
-      mNoMapsInfo.setVisibility(View.VISIBLE);
-    } else {
-      mMapGrid.setVisibility(View.VISIBLE);
-      mNoMapsInfo.setVisibility(View.GONE);
+							// Dismiss the progress dialog
+							mProgressDialog.dismiss();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 
-      BaseAdapter mapGridAdapter = (BaseAdapter) mMapGrid.getAdapter();
-      if (mapGridAdapter == null) {
-        mapGridAdapter = new MapGridAdapter();
-        mMapGrid.setAdapter(mapGridAdapter);
-      } else {
-        mapGridAdapter.notifyDataSetChanged();
-      }
-    }
-  }
+		}
+	}
 
-  /**
-   * Fetches the maps from the user's root folder asynchronously.
-   */
-  private class FetchMapsTask extends AsyncTask<Void, Void, List<PortalItem>> {
+	/**
+	 * Refreshes the GridView that shows the maps.
+	 */
+	private void refreshView() {
+		if (mMaps == null || mMaps.isEmpty()) {
+			mMapGrid.setVisibility(View.GONE);
+			mNoMapsInfo.setVisibility(View.VISIBLE);
+		} else {
+			mMapGrid.setVisibility(View.VISIBLE);
+			mNoMapsInfo.setVisibility(View.GONE);
 
-    private static final String TAG_FETCH_MAPS_PROGRESS_DIALOG = "TAG_FETCH_MAPS_PROGRESS_DIALOG";
+			BaseAdapter mapGridAdapter = (BaseAdapter) mMapGrid.getAdapter();
+			if (mapGridAdapter == null) {
+				mapGridAdapter = new MapGridAdapter();
+				mMapGrid.setAdapter(mapGridAdapter);
+			} else {
+				mapGridAdapter.notifyDataSetChanged();
+			}
+		}
+	}
 
-    private ProgressDialogFragment mProgressDialog;
+	/**
+	 * Populates the ContentBrowserFragment's GridView with the user's maps.
+	 */
+	private class MapGridAdapter extends BaseAdapter {
 
-    @Override
-    protected void onPreExecute() {
-      super.onPreExecute();
+		@Override
+		public int getCount() {
+			return mMaps.size();
+		}
 
-      mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.fetching_maps));
-      mProgressDialog.show(getActivity().getFragmentManager(), TAG_FETCH_MAPS_PROGRESS_DIALOG);
-    }
+		@Override
+		public Object getItem(int position) {
+			return mMaps.get(position);
+		}
 
-    @Override
-    protected List<PortalItem> doInBackground(Void... params) {
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
 
-      final List<PortalItem> webMapItems = new ArrayList<>();
-      try {
-        // fetch the user's maps from the portal
-        Portal portal = AccountManager.getInstance().getPortal();
-        if (portal != null) {
-          PortalUser portalUser = portal.fetchUser();
-          PortalUserContent content = portalUser != null ? portalUser.fetchContent() : null;
-          List<PortalItem> rootItems = content != null ? content.getItems() : null;
-          if (rootItems != null) {
-            // only select items of type WEBMAP
-            for (PortalItem item : rootItems) {
-              if (item.getType() == PortalItemType.WEBMAP) {
-                webMapItems.add(item);
-              }
-            }
-          }
-        }
-      } catch (Exception e) {
-        // fetching content failed
-      }
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View view = convertView;
+			ViewHolder viewHolder;
+			if (view == null) {
+				viewHolder = new ViewHolder();
+				view = getActivity().getLayoutInflater().inflate(R.layout.map_item_layout, null);
+				view.setOnClickListener(ContentBrowserFragment.this);
+				view.setTag(viewHolder);
 
-      return webMapItems;
-    }
+				viewHolder.title = (TextView) view.findViewById(R.id.map_item_title_textView);
+				viewHolder.thumbnailImageView = (ImageView) view.findViewById(R.id.map_item_thumbnail_imageView);
+			} else {
+				viewHolder = (ViewHolder) view.getTag();
+			}
 
-    @Override
-    protected void onPostExecute(List<PortalItem> items) {
-      super.onPostExecute(items);
+			PortalItem portalItem = mMaps.get(position);
 
-      mMaps = items;
-      refreshView();
+			viewHolder.title.setText(portalItem.getTitle());
+			viewHolder.thumbnailImageView.setImageResource(R.drawable.ic_map_thumbnail); // use
+																							// default
+																							// thumbnail
+																							// temporarily
+			viewHolder.portalItem = portalItem;
+			viewHolder.fetchTumbnail();
 
-      mProgressDialog.dismiss();
-    }
-  }
+			return view;
+		}
+	}
 
-  /**
-   * Populates the ContentBrowserFragment's GridView with the user's maps.
-   */
-  private class MapGridAdapter extends BaseAdapter {
+	/**
+	 * View holder for a PortalItem. Also supports fetching the thumbnail for
+	 * the PortalItem.
+	 */
+	private class ViewHolder {
+		TextView title;
 
-    @Override
-    public int getCount() {
-      return mMaps.size();
-    }
+		ImageView thumbnailImageView;
 
-    @Override
-    public Object getItem(int position) {
-      return mMaps.get(position);
-    }
+		PortalItem portalItem;
 
-    @Override
-    public long getItemId(int position) {
-      return position;
-    }
+		Future<Void> thumbnailFetchTask;
 
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-      View view = convertView;
-      ViewHolder viewHolder;
-      if (view == null) {
-        viewHolder = new ViewHolder();
-        view = getActivity().getLayoutInflater().inflate(R.layout.map_item_layout, null);
-        view.setOnClickListener(ContentBrowserFragment.this);
-        view.setTag(viewHolder);
+		/**
+		 * Cancels any pending thumbnail fetch task and fetches a new thumbnail
+		 * for the corresponding PortalItem, unless a cached thumbnail already
+		 * exists.
+		 */
+		void fetchTumbnail() {
+			if (thumbnailFetchTask != null) {
+				thumbnailFetchTask.cancel(true);
+			}
 
-        viewHolder.title = (TextView) view.findViewById(R.id.map_item_title_textView);
-        viewHolder.thumbnailImageView = (ImageView) view.findViewById(R.id.map_item_thumbnail_imageView);
-      } else {
-        viewHolder = (ViewHolder) view.getTag();
-      }
+			thumbnailFetchTask = TaskExecutor.getInstance().getThreadPool()
+					.submit(new FetchPortalItemThumbnailTask(this));
+		}
+	}
 
-      PortalItem portalItem = mMaps.get(position);
+	/**
+	 * Fetches the thumbnail of a PortalItem and sets it into the corresponding
+	 * ImageView. Handles task cancellation by checking for the thread's
+	 * interrupted state.
+	 */
+	private class FetchPortalItemThumbnailTask implements Callable<Void> {
 
-      viewHolder.title.setText(portalItem.getTitle());
-      viewHolder.thumbnailImageView.setImageResource(R.drawable.ic_map_thumbnail); // use default thumbnail temporarily
-      viewHolder.portalItem = portalItem;
-      viewHolder.fetchTumbnail();
+		private final ViewHolder mViewHolder;
 
-      return view;
-    }
-  }
+		public FetchPortalItemThumbnailTask(ViewHolder viewHolder) {
+			mViewHolder = viewHolder;
+		}
 
-  /**
-   * View holder for a PortalItem. Also supports fetching the thumbnail for the PortalItem.
-   */
-  private class ViewHolder {
-    TextView title;
+		@Override
+		public Void call() throws Exception {
+			byte[] thumbnailBytes = null;
 
-    ImageView thumbnailImageView;
+			// check if task has been cancelled
+			if (Thread.currentThread().isInterrupted()) {
+				throw new InterruptedException();
+			}
 
-    PortalItem portalItem;
+			if (mViewHolder != null) {
+				thumbnailBytes = mViewHolder.portalItem.getThumbnailData();
+			}
 
-    Future<Void> thumbnailFetchTask;
+			// check if task has been cancelled
+			if (Thread.currentThread().isInterrupted()) {
+				throw new InterruptedException();
+			}
 
-    /**
-     * Cancels any pending thumbnail fetch task and fetches a new thumbnail for the corresponding PortalItem, unless a
-     * cached thumbnail already exists.
-     */
-    void fetchTumbnail() {
-      if (thumbnailFetchTask != null) {
-        thumbnailFetchTask.cancel(true);
-      }
+			if (thumbnailBytes != null && thumbnailBytes.length > 0) {
+				BitmapFactory.Options options = new BitmapFactory.Options();
+				options.inPurgeable = true;
+				final Bitmap bmp = BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length, options);
 
-      thumbnailFetchTask = TaskExecutor.getInstance().getThreadPool().submit(new FetchPortalItemThumbnailTask(this));
-    }
-  }
+				getActivity().runOnUiThread(new Runnable() {
 
-  /**
-   * Fetches the thumbnail of a PortalItem and sets it into the corresponding ImageView. Handles task cancellation by
-   * checking for the thread's interrupted state.
-   */
-  private class FetchPortalItemThumbnailTask implements Callable<Void> {
+					@Override
+					public void run() {
+						mViewHolder.thumbnailImageView.setImageBitmap(bmp);
+					}
+				});
+			}
 
-    private final ViewHolder mViewHolder;
-
-    public FetchPortalItemThumbnailTask(ViewHolder viewHolder) {
-      mViewHolder = viewHolder;
-    }
-
-    @Override
-    public Void call() throws Exception {
-      byte[] thumbnailBytes = null;
-
-      // check if task has been cancelled
-      if (Thread.currentThread().isInterrupted()) {
-        throw new InterruptedException();
-      }
-
-      if (mViewHolder != null) {
-        thumbnailBytes = mViewHolder.portalItem.fetchThumbnail();
-      }
-
-      // check if task has been cancelled
-      if (Thread.currentThread().isInterrupted()) {
-        throw new InterruptedException();
-      }
-
-      if (thumbnailBytes != null && thumbnailBytes.length > 0) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPurgeable = true;
-        final Bitmap bmp = BitmapFactory.decodeByteArray(thumbnailBytes, 0, thumbnailBytes.length, options);
-
-        getActivity().runOnUiThread(new Runnable() {
-
-          @Override
-          public void run() {
-            mViewHolder.thumbnailImageView.setImageBitmap(bmp);
-          }
-        });
-      }
-
-      return null;
-    }
-  }
+			return null;
+		}
+	}
 }

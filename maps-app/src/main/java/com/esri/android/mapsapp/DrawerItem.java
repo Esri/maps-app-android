@@ -31,29 +31,28 @@ import android.widget.LinearLayout;
  * Represents an item in the navigation drawer list.
  */
 public class DrawerItem {
-  public interface OnClickListener {
-    void onClick();
-  }
+	private final OnClickListener mListener;
+	private final LinearLayout mView;
 
-  private final OnClickListener mListener;
+	public DrawerItem(LinearLayout view, OnClickListener listener) {
+		mView = view;
+		mListener = listener;
+	}
 
-  private final LinearLayout mView;
+	/**
+	 * Invokes the OnClickListener registered with this DrawerItem.
+	 */
+	public void onClicked() {
+		if (mListener != null) {
+			mListener.onClick();
+		}
+	}
 
-  public DrawerItem(LinearLayout view, OnClickListener listener) {
-    mView = view;
-    mListener = listener;
-  }
+	public View getView() {
+		return mView;
+	}
 
-  /**
-   * Invokes the OnClickListener registered with this DrawerItem.
-   */
-  public void onClicked() {
-    if (mListener != null) {
-      mListener.onClick();
-    }
-  }
-
-  public View getView() {
-    return mView;
-  }
+	public interface OnClickListener {
+		void onClick();
+	}
 }
