@@ -304,18 +304,16 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				} else {
 
 					fab.setImageResource(android.R.drawable.ic_menu_mylocation);
-					if (mMapView.getMapRotation() != 0) {
-						mCompass.setVisibility(View.VISIBLE);
-						mCompass.setRotationAngle(mMapView.getMapRotation());
-					} else {
-						mCompass.setVisibility(View.GONE);
+					mCompass.setRotationAngle(0);
+					final ListenableFuture<Boolean> setViewpointListener = mMapView.setViewpointRotationAsync(0);
+					try {
+						setViewpointListener.get();
+					} catch (InterruptedException | ExecutionException e) {
+						e.printStackTrace();
 					}
 					mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.OFF);
 					mIsInCompassMode = false;
 				}
-				Log.i(MapFragment.TAG, "Auto pan mode is " + mLocationDisplay.getAutoPanMode().name());
-				Log.i(MapFragment.TAG,"Compass rotation is " + mCompass.getRotation());
-				Log.i(MapFragment.TAG, "Map rotation is " + MapFragment.mMapView.getMapRotation());
 			}
 
 		});

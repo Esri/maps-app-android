@@ -35,6 +35,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.view.View;
+import com.esri.android.mapsapp.MapFragment;
 import com.esri.android.mapsapp.R;
 
 /**
@@ -93,8 +94,7 @@ public class Compass extends View implements SensorEventListener {
 	 */
 	public void setRotationAngle(double angle) {
 		// Save the new rotation angle.
-		mAngle = (float) angle;
-
+		mAngle = (float) MapFragment.mMapView.getMapRotation();
 		// Force the compass to re-paint itself.
 		postInvalidate();
 	}
