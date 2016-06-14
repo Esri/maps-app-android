@@ -25,24 +25,29 @@
 package com.esri.android.mapsapp.account;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.esri.android.mapsapp.MapFragment;
 import com.esri.android.mapsapp.R;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.android.mapsapp.util.StringUtils;
+import com.esri.arcgisruntime.io.JsonEmbeddedException;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalInfo;
 import com.esri.arcgisruntime.portal.PortalUser;
 import com.esri.arcgisruntime.security.AuthenticationManager;
 import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
+import org.apache.http.client.HttpResponseException;
 
 /**
  * Implements the sign in UX to ArcGIS portal accounts. Handles sign in to OAuth
@@ -91,14 +96,17 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 
 	@Override
 	public void onClick(View view) {
+    final Activity activity = this;
 		switch (view.getId()) {
 			case R.id.sign_in_activity_continue_button :
 				// determine what type of authentication is required to sign in
 				// to the specified portal
 				mPortalUrl = mPortalUrlEditText.getText().toString().trim();
-				if (!mPortalUrl.startsWith(HTTP)) {
-					mPortalUrl = HTTP + mPortalUrl;
-				}
+        if (mPortalUrl.startsWith(HTTP)) {
+          mPortalUrl = mPortalUrl.replace(HTTP, HTTPS);
+        }else{
+          mPortalUrl = HTTPS + mPortalUrl;
+        }
 				final Portal portal = new Portal(mPortalUrl);
 				portal.addDoneLoadingListener(new Runnable() {
 					@Override
@@ -108,11 +116,19 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 							if (portalInformation.isSupportsOAuth()) {
 								signInWithOAuth();
 							}
-						}
+						}else{
+              String errorMessage = portal.getLoadError().getMessage();
+              String message = "Error accessing " + mPortalUrl + ". " + errorMessage +".";
+              Integer errorCode = getErrorCode(portal.getLoadError());
+              if (errorCode != null){
+                message = message + " Error code " + errorCode.toString();
+              }
+              Toast.makeText(activity, message, Toast.LENGTH_LONG).show();
+              Log.e(TAG, message);
+            }
 					}
 				});
 				portal.loadAsync();
-				Log.i(TAG, "Finished handling CONTINUE click in SignIn Activity");
 				break;
 			case R.id.sign_in_activity_cancel_button :
 				finish();
@@ -153,7 +169,6 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 			Log.i(TAG, "Already signed into to Portal.");
 			return;
 		}
-		Log.i(TAG, "Signing in with OAuth...");
 		final ProgressDialogFragment mProgressDialog;
 		String clientId = getString(R.string.client_id);
 
@@ -162,7 +177,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 			return;
 		}
 		// default handler
-
+		final Activity activity = this;
 		final Portal portal = new Portal(mPortalUrl, true);
 		mProgressDialog = ProgressDialogFragment.newInstance(getString(R.string.verifying_portal));
 		mProgressDialog.show(getFragmentManager(), TAG_PROGRESS_DIALOG);
@@ -175,10 +190,26 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 																			// 'ArcGIS
 																			// Online'
 					PortalUser user = portal.getPortalUser();
-					Log.i(TAG, portalName + " , user = " + user.getUserName());
 					mProgressDialog.dismiss();
 					AccountManager.getInstance().setPortal(portal);
-					Log.i(TAG, "Portal has been set in 'SignInActivity'");
+					finish();
+				}else {
+          mProgressDialog.dismiss();
+          Throwable t = portal.getLoadError();
+          Integer errorCode = getErrorCode(t);
+          String errorMessage = portal.getLoadError().getMessage();
+          String message = "Portal error: " + errorMessage;
+          if (errorCode!=null){
+            // Append error message with relevant error code.
+            errorMessage = message + " Error code " + errorCode.toString();
+            //403 thrown when user hits Cancel in Auth Popup window so we don't display a toast.
+            if (errorCode.intValue()!=403){
+              Toast.makeText(activity, errorMessage, Toast.LENGTH_LONG).show();
+            }
+          }else{ // No error code
+            Toast.makeText(activity, errorMessage, Toast.LENGTH_LONG).show();
+          }
+          Log.e(TAG, "Error signing in to portal: " + errorMessage );
 					finish();
 				}
 			}
@@ -186,5 +217,19 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 		portal.loadAsync();
 
 	}
+  /**
+   * Helper method that returns an error code from an http response
+   * @param t Throwable
+   * @return Integer representing error code
+   */
+  private Integer getErrorCode(Throwable t){
+    Integer error = null;
+    if (t instanceof JsonEmbeddedException){
+      error = ((JsonEmbeddedException)t).getCode();
+    } else if (t instanceof HttpResponseException){
+      error= ((HttpResponseException) t).getStatusCode();
+    }
+    return error;
+  }
 
 }

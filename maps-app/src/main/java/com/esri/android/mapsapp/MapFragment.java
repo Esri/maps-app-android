@@ -370,6 +370,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			if (mCompass != null){
 				mCompass.start();
 			}
+			hideKeyboard();
 
 		}
 	}
