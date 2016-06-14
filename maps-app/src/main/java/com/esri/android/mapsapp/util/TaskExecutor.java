@@ -32,23 +32,23 @@ import java.util.concurrent.Executors;
  */
 public class TaskExecutor {
 
-  private static final int POOL_SIZE = 3;
+	private static final int POOL_SIZE = 3;
 
-  private static TaskExecutor sInstance;
-  
-  private ExecutorService mPool = Executors.newFixedThreadPool(POOL_SIZE);
+	private static TaskExecutor sInstance;
 
-  private TaskExecutor() {
-  }
+	private final ExecutorService mPool = Executors.newFixedThreadPool(POOL_SIZE);
 
-  public static TaskExecutor getInstance() {
-    if (sInstance == null) {
-      sInstance = new TaskExecutor();
-    }
-    return sInstance;
-  }
+	private TaskExecutor() {
+	}
 
-  public ExecutorService getThreadPool() {
-    return mPool;
-  }
+	public static TaskExecutor getInstance() {
+		if (sInstance == null) {
+			sInstance = new TaskExecutor();
+		}
+		return sInstance;
+	}
+
+	public ExecutorService getThreadPool() {
+		return mPool;
+	}
 }

@@ -9,43 +9,69 @@ Read developer setup instructions [here](https://github.com/Esri/maps-app-androi
 ### My Location
 See your location on the map
 
-Turn on your device's gps and launch the app! If you browse on the map and would like to go back to your location tap the gps icon located in the top-right corner.
+Turn on your device's gps and launch the app! If you browse on the map and would like to go back to your location tap the GPS floating action button located in the bottom-right corner.
 
-![](my-location.png)
+![] (assets/home.png)
 
 ### Place search
-Search for addresses, points of interests, administrative place names, postal codes, or x/y coordinates.  
+Search for addresses, points of interests, administrative place names, postal codes, or x/y coordinates.  As you type, the app will provide hints in the search box.
 
-Long press on the map to get the adress of that point or you can simply search for a place on map by typing in address, postal code, x/y coordinates, place name. The result will be highlighted on the map.
+![] (assets/hints.png)
 
-![](place-search.png)
+Choosing one of the search hints will show the location in the map with a red symbol marker.
 
-### Driving Directions
-Generate turn-by-turn directions between two places with distance and estimated drive time.  
+Long press on the map to get the adress of that point and a magnifier will be displayed to help pinpoint your desired target location. The result will be highlighted on the map.
 
-You can use the result of **Place Search** to get the route from your location to your destination by simply tapping on  ![screen shot 2015-06-18 at 3 35 06 pm](https://cloud.githubusercontent.com/assets/12648228/8243836/b1f0ce5e-15cf-11e5-8d3b-8e28a7eb0fa7.png). To get detailed driving directions just tap on ![screen shot 2015-06-18 at 3 38 40 pm](https://cloud.githubusercontent.com/assets/12648228/8243890/27cb1896-15d0-11e5-9a85-3da51ffcc32a.png) to get turn by turn instructions.
- 
-If you want to search for a route from 'Location A' to 'Location B', you can tap on the ![screen shot 2015-06-18 at 3 35 06 pm](https://cloud.githubusercontent.com/assets/12648228/8243836/b1f0ce5e-15cf-11e5-8d3b-8e28a7eb0fa7.png) icon in the search bar. 
- 
-Enter your Location and tap on **Get Route** to see the driving directions from one location to another. 
-![screen shot 2015-06-18 at 3 48 00 pm](https://cloud.githubusercontent.com/assets/12648228/8244025/7062a0f0-15d1-11e5-8506-5fa40402316b.png)
+![](assets/magnifier.png)
 
-![](driving-directions.png)
+![](assets/magnifier_loc.png)
+
+### Routing
+Routing requires requires credits and will require you to login into your organization's ArcGIS Online account. After searching for a location, the route to it from your current location can be mapped by pressing the routing icon to the right of the search box.  You'll be prompted for authentication credentials the first time your ask for a route.
+
+![](assets/route_auth.png)
+
+The route is shown with travel time and distance in meters.  
+
+![](assets/route.png)
+
+Tapping on the three-headed arrow in the route result dialog will display driving directions.
+
+![](assets/directions.png)
+
+To clear the route, tap the 'X' in the route result dialog.  You can route between any two locations by clicking the route icon without having first searched for a location.  This will bring up a routing dialog where you can either use your current location as the origin or type in another address.  Type in the address of your destination and click 'Get Route'.
+
+![](assets/route_dialog.png)
+
 ### Switch basemaps
 Choose from a wide range of basemaps including Streets, Topography, World Imagery, etc.  
 
 You can switch the basemaps by swiping left from the edge of your device and selecting **Switch Basemap** from the options.
 
-![](switch-basemap.png)
+![](assets/switch-basemap.png)
 
-### Measure tool
-Calculate distance or area in multiple units that are extendible.  
-
-Swipe left from the left edge of your device to open the drawer. Select **Measure** from the the options. Press ![screen shot 2015-06-18 at 3 54 23 pm](https://cloud.githubusercontent.com/assets/12648228/8244122/52deeab0-15d2-11e5-8d4e-c36b8b177213.png) to select your geometry type, unit and you are good to go. Just tap on the locations to view the distance or area. 
-
-![](measure.png)
 
 ### Sign into ArcGIS
-Sign into your ArcGIS account to add custom maps from your organization.
+Tap on the drawer to sign into your ArcGIS account where you can view custom maps from your organization.
 
-![](sign-in.png)
+![](assets/drawer.png)
+
+Tapping the Sign In will launch a URL navigator where you can enter your organization's ArcGIS Online URL.
+
+![](assets/url.png)
+
+You'll be prompted for credentials....
+
+![](assets/auth.png)
+
+Once authenticated, you'll see a number of portal items that can be loaded in to the Map-app.  
+
+![](assets/portal_content.png)
+
+If you have any web maps in your portal, they will be shown in the list view after clicking on 'My Maps'.  You may also have additional basemaps to choose from.
+
+![](assets/my_maps.png)
+
+
+
+
