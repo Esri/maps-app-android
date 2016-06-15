@@ -87,12 +87,7 @@ import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.Basemap;
 import com.esri.arcgisruntime.mapping.Map;
 import com.esri.arcgisruntime.mapping.Viewpoint;
-import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
-import com.esri.arcgisruntime.mapping.view.Graphic;
-import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
-import com.esri.arcgisruntime.mapping.view.LocationDisplay;
-import com.esri.arcgisruntime.mapping.view.MapView;
-import com.esri.arcgisruntime.mapping.view.WrapAroundMode;
+import com.esri.arcgisruntime.mapping.view.*;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
 import com.esri.arcgisruntime.security.AuthenticationManager;
@@ -268,6 +263,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				// add graphics layer
 				addGraphicLayers();
 
+        // synchronize the compass icon as the map changes
+				mMapView.addVisibleAreaChangedListener(new VisibleAreaChangedListener() {
+					@Override public void visibleAreaChanged(VisibleAreaChangedEvent visibleAreaChangedEvent) {
+						mCompass.setRotationAngle(((MapView)visibleAreaChangedEvent.getSource()).getMapRotation());
+					}
+				});
 			}
 		}
 
@@ -285,39 +286,39 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private void setClickListenerForFloatingActionButton(final MapView mapView) {
 		final FloatingActionButton fab = (FloatingActionButton) mMapContainer.findViewById(R.id.fab);
 		fab.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				mLocationDisplay = mapView.getLocationDisplay();
-				// Pan to location
-				mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.DEFAULT);
+      @Override
+      public void onClick(View v) {
+        mLocationDisplay = mapView.getLocationDisplay();
+        // Pan to location
+        mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.DEFAULT);
 
+        final String currentMode = mLocationDisplay.getAutoPanMode().name();
+        // Toggle compass mode
+        if (!mIsInCompassMode) {
+          fab.setImageResource(R.drawable.ic_action_compass_mode);
+          mCompass.setVisibility(View.VISIBLE);
+          mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.COMPASS);
+          mIsInCompassMode = true;
 
-				final String currentMode = mLocationDisplay.getAutoPanMode().name();
-				// Toggle compass mode
-				if (!mIsInCompassMode){
-					fab.setImageResource(R.drawable.ic_action_compass_mode);
-					mCompass.start();
-					mCompass.setVisibility(View.VISIBLE);
-					mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.COMPASS);
-					mIsInCompassMode = true;
-
-				} else {
-
-					fab.setImageResource(android.R.drawable.ic_menu_mylocation);
-					mCompass.setRotationAngle(0);
-					final ListenableFuture<Boolean> setViewpointListener = mMapView.setViewpointRotationAsync(0);
-					try {
-						setViewpointListener.get();
-					} catch (InterruptedException | ExecutionException e) {
-						e.printStackTrace();
-					}
-					mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.OFF);
-					mIsInCompassMode = false;
-				}
-			}
-
-		});
-	}
+        } else {
+          // turn of the pan mode before setting compass back to 0
+          mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.OFF);
+          mIsInCompassMode = false;
+          fab.setImageResource(android.R.drawable.ic_menu_mylocation);
+          final ListenableFuture<Boolean> setViewpointListener = mMapView.setViewpointRotationAsync(0);
+          setViewpointListener.addDoneListener(new Runnable() {
+            @Override public void run() {
+              try {
+                setViewpointListener.get();
+              } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+              }
+            }
+          });
+        }
+      }
+    });
+  }
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -365,9 +366,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			 if (mIsInCompassMode) {
 				 mMapView.getLocationDisplay().startAsync();
 			 }
-			if (mCompass != null){
-				mCompass.start();
-			}
 
 		}
 	}
