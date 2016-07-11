@@ -270,10 +270,19 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	}
 
 	/**
-	 * The floating action button toggles location tracking. When location
-	 * tracking is on, the compass is shown in the upper right of the map view.
-	 * When location tracking is off, the compass is shown if the map is not
-	 * oriented north (0 degrees).
+	 * The compass and Location FAB should behave as described below.
+	 *
+	 * Compass:
+	 *
+	 * Whenever the map is not orientated North (non-zero bearing) the compass appears
+	 * When the compass is clicked, the map orients back to north (zero bearing),
+	 * the default orientation and the compass fades away, or after a short duration disappears.
+	 *
+	 * Location FAB:
+	 *
+	 * Tapping on location button should switch between NAVIGATION & OFF (default)
+	 * When in NAVIGATION mode orientation should be with respect to device.
+	 * When in 'OFF' mode orientation should return to North.
 	 *
 	 * @param mapView
 	 */
@@ -283,29 +292,17 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			@Override
 			public void onClick(View v) {
 				mLocationDisplay = mapView.getLocationDisplay();
-				// Pan to location
-				mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.DEFAULT);
 
-
-				final String currentMode = mLocationDisplay.getAutoPanMode().name();
-				// Toggle compass mode
-				if (!mIsInCompassMode){
+				// Toggle Auto Pan Mode
+				if (mLocationDisplay.getAutoPanMode().equals(LocationDisplay.AutoPanMode.OFF) || (mLocationDisplay.getAutoPanMode().equals(LocationDisplay.AutoPanMode.DEFAULT))){
 					fab.setImageResource(R.drawable.ic_action_compass_mode);
-					mCompass.start();
-					mCompass.setVisibility(View.VISIBLE);
-					mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.COMPASS);
+					mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.NAVIGATION);
 					mIsInCompassMode = true;
 
-				} else {
-
+				} else { // Turn pan mode off
 					fab.setImageResource(android.R.drawable.ic_menu_mylocation);
-					if (mMapView.getMapRotation() != 0) {
-						mCompass.setVisibility(View.VISIBLE);
-						mCompass.setRotationAngle(mMapView.getMapRotation());
-					} else {
-						mCompass.setVisibility(View.GONE);
-					}
 					mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.OFF);
+					mCompass.setVisibility(View.GONE);
 					mIsInCompassMode = false;
 				}
 				Log.i(MapFragment.TAG, "Auto pan mode is " + mLocationDisplay.getAutoPanMode().name());
@@ -344,8 +341,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			 if (mIsInCompassMode) {
 				 mMapView.getLocationDisplay().stop();
 			 }
-			//mMapViewState = mMapView.
-
 
 			mMapView.pause();
 		}
@@ -1611,7 +1606,13 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		@Override
 		public boolean onRotate (MotionEvent e, double angle){
 			super.onRotate(e,angle);
-
+			// Show the compass if we're not pointed north
+			if (mMapView.getMapRotation()!= 0){
+				mCompass.setVisibility(View.VISIBLE);
+				mCompass.setRotationAngle(mMapView.getMapRotation());
+			}else{
+				mCompass.setVisibility(View.GONE);
+			}
 			return true;
 		}
 
