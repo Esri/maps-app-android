@@ -24,6 +24,7 @@
 
 package com.esri.android.mapsapp;
 
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -92,6 +93,7 @@ import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
 import com.esri.arcgisruntime.security.AuthenticationManager;
 import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
+import com.esri.arcgisruntime.security.OAuthConfiguration;
 import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.tasks.geocode.GeocodeParameters;
@@ -224,6 +226,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			mPortalItemId = args.getString(KEY_PORTAL_ITEM_ID);
 			mBasemapPortalItemId = args.getString(KEY_BASEMAP_ITEM_ID);
 		}
+
+
 		DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(
 				getActivity());
 		AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
@@ -287,7 +291,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * Location FAB:
 	 *
 	 * Tapping on location button should switch between NAVIGATION & OFF (default)
-	 * When in NAVIGATION mode orientation should be with respect to device.
+	 * When in NAVIGATION mode orientation should be with respect to device. (In COMPASS mode).  It
+	 * follows the direction the device travels in.
 	 * When in 'OFF' mode orientation should return to North.
 	 * @param mapView
 	 */
@@ -296,17 +301,18 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		fab.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {
-				mLocationDisplay = mapView.getLocationDisplay();
 
+				mLocationDisplay = mapView.getLocationDisplay();
+				Log.i("AUTOPAN", mLocationDisplay.getAutoPanMode().name());
 				// Toggle AutoPanMode
-				if (mLocationDisplay.getAutoPanMode().equals(LocationDisplay.AutoPanMode.OFF) ||
-						(mLocationDisplay.getAutoPanMode().equals(LocationDisplay.AutoPanMode.DEFAULT))) {
+				if (!mIsInCompassMode) {
 					fab.setImageResource(R.drawable.ic_action_compass_mode);
 					mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.NAVIGATION);
 					mIsInCompassMode = true;
+					mCompass.setVisibility(View.GONE);
 				} else { // Turn pan mode off 
 					fab.setImageResource(android.R.drawable.ic_menu_mylocation);
-					mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.OFF);
+					mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.DEFAULT);
 					mCompass.setVisibility(View.GONE);
 					mIsInCompassMode = false;
 				}
@@ -1296,6 +1302,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// make a difference.
 		// Read more about routing services (here)
 		String routeTaskURL = getString(R.string.routingservice_url);
+
+
 		mRouteTask = new RouteTask(routeTaskURL);
 		mEndLocationName = destinationName;
 		Log.i(TAG, mRouteTask.getUrl());
