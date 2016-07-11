@@ -87,12 +87,7 @@ import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.Basemap;
 import com.esri.arcgisruntime.mapping.Map;
 import com.esri.arcgisruntime.mapping.Viewpoint;
-import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
-import com.esri.arcgisruntime.mapping.view.Graphic;
-import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
-import com.esri.arcgisruntime.mapping.view.LocationDisplay;
-import com.esri.arcgisruntime.mapping.view.MapView;
-import com.esri.arcgisruntime.mapping.view.WrapAroundMode;
+import com.esri.arcgisruntime.mapping.view.*;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
 import com.esri.arcgisruntime.security.AuthenticationManager;
@@ -270,7 +265,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			}
 		}
-
+		hideKeyboard();
 		return mMapContainer;
 	}
 
@@ -354,12 +349,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			mMapView.pause();
 		}
+		hideKeyboard();
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-
 		// Start the MapView and LocationDisplayManager running again
 		if (mMapView != null) {
 			mMapView.resume();
@@ -370,9 +365,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			if (mCompass != null){
 				mCompass.start();
 			}
-			hideKeyboard();
-
 		}
+		hideKeyboard();
 	}
 	@Override
 	public void onDestroyView(){
@@ -390,7 +384,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		outState.putString(KEY_PORTAL_ITEM_ID, mPortalItemId);
 		outState.putString(KEY_BASEMAP_ITEM_ID, mBasemapPortalItemId);
 	}
-
 	/**
 	 * Loads a WebMap and creates a MapView from it which is set into the
 	 * fragment's layout.
@@ -926,10 +919,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
    * Hides soft keyboard
    */
   protected void hideKeyboard() {
-		mSearchview.clearFocus();
 		InputMethodManager inputManager = (InputMethodManager) getActivity()
 				.getSystemService(Context.INPUT_METHOD_SERVICE);
-		inputManager.hideSoftInputFromWindow(mSearchview.getWindowToken(), 0);
+		inputManager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
 	}
 
 	private void displaySearchResult(Point resultPoint, String address) {
@@ -1283,6 +1275,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			}
 
 		});
+
+		hideKeyboard();
 
 	}
 
@@ -1690,6 +1684,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 										showRoute(routeResult, origin.getGeometry(), destination.getGeometry());
 										// Dismiss progress dialog
 										mProgressDialog.dismiss();
+
 
 									} catch (InterruptedException e) {
 										e.printStackTrace();
