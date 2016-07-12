@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- TODO: add your OAuth Client ID here-->
+    <string name="client_id">SET_YOUR_OWN_CLIENT_ID_HERE</string>
+    <string name="username">YOUR_PORTAL_USERNAME</string>
+    <string name="password">YOUR_PORTAL_PASSWORD</string>
+    <string name="testPartialName">vo</string>
+
+</resources>

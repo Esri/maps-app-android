@@ -24,6 +24,7 @@
 
 package com.esri.android.mapsapp;
 
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -87,16 +88,12 @@ import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.Basemap;
 import com.esri.arcgisruntime.mapping.Map;
 import com.esri.arcgisruntime.mapping.Viewpoint;
-import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
-import com.esri.arcgisruntime.mapping.view.Graphic;
-import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
-import com.esri.arcgisruntime.mapping.view.LocationDisplay;
-import com.esri.arcgisruntime.mapping.view.MapView;
-import com.esri.arcgisruntime.mapping.view.WrapAroundMode;
+import com.esri.arcgisruntime.mapping.view.*;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
 import com.esri.arcgisruntime.security.AuthenticationManager;
 import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
+import com.esri.arcgisruntime.security.OAuthConfiguration;
 import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.tasks.geocode.GeocodeParameters;
@@ -229,6 +226,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			mPortalItemId = args.getString(KEY_PORTAL_ITEM_ID);
 			mBasemapPortalItemId = args.getString(KEY_BASEMAP_ITEM_ID);
 		}
+
+
 		DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(
 				getActivity());
 		AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
@@ -268,6 +267,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				// add graphics layer
 				addGraphicLayers();
 
+        // synchronize the compass icon as the map changes
+				mMapView.addVisibleAreaChangedListener(new VisibleAreaChangedListener() {
+					@Override public void visibleAreaChanged(VisibleAreaChangedEvent visibleAreaChangedEvent) {
+						mCompass.setRotationAngle(((MapView)visibleAreaChangedEvent.getSource()).getMapRotation());
+					}
+				});
 			}
 		}
 
@@ -275,51 +280,48 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	}
 
 	/**
-	 * The floating action button toggles location tracking. When location
-	 * tracking is on, the compass is shown in the upper right of the map view.
-	 * When location tracking is off, the compass is shown if the map is not
-	 * oriented north (0 degrees).
+	 * The compass and Location FAB should behave as described below.
 	 *
+	 * Compass:
+	 *
+	 * Whenever the map is not orientated North (non-zero bearing) the compass appears
+	 * When the compass is clicked, the map orients back to north (zero bearing),
+	 * the default orientation and the compass fades away, or after a short duration disappears.
+	 *
+	 * Location FAB:
+	 *
+	 * Tapping on location button should switch between NAVIGATION & OFF (default)
+	 * When in NAVIGATION mode orientation should be with respect to device. (In COMPASS mode).  It
+	 * follows the direction the device travels in.
+	 * When in 'OFF' mode orientation should return to North.
 	 * @param mapView
 	 */
 	private void setClickListenerForFloatingActionButton(final MapView mapView) {
 		final FloatingActionButton fab = (FloatingActionButton) mMapContainer.findViewById(R.id.fab);
 		fab.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
+      @Override
+      public void onClick(View v) {
+
 				mLocationDisplay = mapView.getLocationDisplay();
-				// Pan to location
-				mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.DEFAULT);
-
-
-				final String currentMode = mLocationDisplay.getAutoPanMode().name();
-				// Toggle compass mode
-				if (!mIsInCompassMode){
+				Log.i("AUTOPAN", mLocationDisplay.getAutoPanMode().name());
+				// Toggle AutoPanMode
+				if (!mIsInCompassMode) {
 					fab.setImageResource(R.drawable.ic_action_compass_mode);
-					mCompass.start();
-					mCompass.setVisibility(View.VISIBLE);
-					mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.COMPASS);
+					mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.NAVIGATION);
 					mIsInCompassMode = true;
-
-				} else {
-
+					mCompass.setVisibility(View.GONE);
+				} else { // Turn pan mode off 
 					fab.setImageResource(android.R.drawable.ic_menu_mylocation);
-					if (mMapView.getMapRotation() != 0) {
-						mCompass.setVisibility(View.VISIBLE);
-						mCompass.setRotationAngle(mMapView.getMapRotation());
-					} else {
-						mCompass.setVisibility(View.GONE);
-					}
-					mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.OFF);
+					mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.DEFAULT);
+					mCompass.setVisibility(View.GONE);
 					mIsInCompassMode = false;
 				}
 				Log.i(MapFragment.TAG, "Auto pan mode is " + mLocationDisplay.getAutoPanMode().name());
 				Log.i(MapFragment.TAG,"Compass rotation is " + mCompass.getRotation());
 				Log.i(MapFragment.TAG, "Map rotation is " + MapFragment.mMapView.getMapRotation());
 			}
-
-		});
-	}
+    });
+  }
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -367,9 +369,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			 if (mIsInCompassMode) {
 				 mMapView.getLocationDisplay().startAsync();
 			 }
-			if (mCompass != null){
-				mCompass.start();
-			}
 
 		}
 	}
@@ -527,7 +526,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			@Override
 			public void onClick(View v) {
 				mCompass.setVisibility(View.GONE);
-				mMapView.setRotation(0f);
+				mMapView.setViewpointRotationAsync(0);
 			}
 		});
 
@@ -1303,6 +1302,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// make a difference.
 		// Read more about routing services (here)
 		String routeTaskURL = getString(R.string.routingservice_url);
+
+
 		mRouteTask = new RouteTask(routeTaskURL);
 		mEndLocationName = destinationName;
 		Log.i(TAG, mRouteTask.getUrl());
@@ -1616,7 +1617,13 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		@Override
 		public boolean onRotate (MotionEvent e, double angle){
 			super.onRotate(e,angle);
-
+			// Show the compass if map isn't oriented towards north
+			if (mMapView.getMapRotation() != 0){
+				mCompass.setVisibility(View.VISIBLE);
+				mCompass.setRotationAngle(mMapView.getMapRotation());
+			}else{
+				mCompass.setVisibility(View.GONE);
+			}
 			return true;
 		}
 
