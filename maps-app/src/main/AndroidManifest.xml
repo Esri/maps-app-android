@@ -16,6 +16,7 @@
         <activity
             android:name="com.esri.android.mapsapp.MapsAppActivity"
             android:configChanges="orientation|screenSize"
+            android:windowSoftInputMode="stateAlwaysHidden"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

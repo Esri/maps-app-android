@@ -33,14 +33,12 @@ import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.*;
 
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
@@ -174,7 +172,28 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 			}
 		}
 	}
+	@Override
+	public void onResume() {
+		super.onResume();
 
+		getView().setFocusableInTouchMode(true);
+		getView().requestFocus();
+		getView().setOnKeyListener(new View.OnKeyListener() {
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK) {
+					// handle back button's click listener
+					dismiss();
+					return true;
+				}
+				return false;
+			}
+		});
+
+	}
+	private void dismiss(){
+		getActivity().getFragmentManager().popBackStack();
+	}
 	/**
 	 * Populates the ContentBrowserFragment's GridView with the user's maps.
 	 */

@@ -17,7 +17,7 @@
     <string name="continue_label">Continue</string>
     <string name="cancel">Cancel</string>
     <string name="verifying_portal">Verifying portal</string>
-    <string name="portal_url_hint">e.g., http://www.arcgis.com</string>
+    <string name="portal_url_hint">http://www.arcgis.com</string>
     <string name="failed_sign_in">Failed to sign in.</string>
 
     <!-- content browser -->
