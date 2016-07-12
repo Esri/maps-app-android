@@ -526,7 +526,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			@Override
 			public void onClick(View v) {
 				mCompass.setVisibility(View.GONE);
-				mMapView.setRotation(0f);
+				mMapView.setViewpointRotationAsync(0);
 			}
 		});
 
