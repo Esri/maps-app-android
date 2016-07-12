@@ -24,11 +24,6 @@
 
 package com.esri.android.mapsapp;
 
-import java.net.MalformedURLException;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
@@ -88,12 +83,18 @@ import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.mapping.Basemap;
 import com.esri.arcgisruntime.mapping.Map;
 import com.esri.arcgisruntime.mapping.Viewpoint;
-import com.esri.arcgisruntime.mapping.view.*;
+import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
+import com.esri.arcgisruntime.mapping.view.Graphic;
+import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
+import com.esri.arcgisruntime.mapping.view.LocationDisplay;
+import com.esri.arcgisruntime.mapping.view.MapView;
+import com.esri.arcgisruntime.mapping.view.VisibleAreaChangedEvent;
+import com.esri.arcgisruntime.mapping.view.VisibleAreaChangedListener;
+import com.esri.arcgisruntime.mapping.view.WrapAroundMode;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
 import com.esri.arcgisruntime.security.AuthenticationManager;
 import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
-import com.esri.arcgisruntime.security.OAuthConfiguration;
 import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.tasks.geocode.GeocodeParameters;
@@ -109,6 +110,10 @@ import com.esri.arcgisruntime.tasks.route.RouteParameters;
 import com.esri.arcgisruntime.tasks.route.RouteResult;
 import com.esri.arcgisruntime.tasks.route.RouteTask;
 import com.esri.arcgisruntime.tasks.route.Stop;
+
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Implements the view that shows the map.
@@ -363,13 +368,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Start the MapView and LocationDisplayManager running again
 		if (mMapView != null) {
 			mMapView.resume();
-			// TODO: Anything else to do here?
 			 if (mIsInCompassMode) {
 				 mMapView.getLocationDisplay().startAsync();
 			 }
-			if (mCompass != null){
-				mCompass.start();
-			}
 		}
 		hideKeyboard();
 	}
