@@ -88,7 +88,7 @@ public class AccountManager {
 	 */
 	public Portal getAGOLPortal() {
 		if (mAGOLPortal == null) {
-			mAGOLPortal = new Portal(AGOL_PORTAL_URL, null);
+			mAGOLPortal = new Portal(AGOL_PORTAL_URL);
 		}
 		return mAGOLPortal;
 	}
