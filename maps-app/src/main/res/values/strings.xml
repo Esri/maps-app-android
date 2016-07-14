@@ -26,7 +26,7 @@
     <string name="no_maps">No maps</string>
 
     <!-- webmap urls -->
-    <string name="default_basemap_url">http://www.arcgis.com/home/item.html?id=26888b0c21a44eb1ba2f26d1eb7981fe</string>
+    <string name="default_basemap_url">http://www.arcgis.com/home/item.html?id=d5e02a0c1f2b4ec399823fdd3c2fdebd</string>
 
     <!-- geocode service -->
     <string name="geocode_url">http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer</string>

@@ -250,7 +250,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			} else {
 				String defaultBaseMapURL = getString(R.string.default_basemap_url);
-				mMap = new ArcGISMap(defaultBaseMapURL);
+				mBasemap = new Basemap(defaultBaseMapURL);
+				mMap = new ArcGISMap(mBasemap);
 
         MapFragment.mMapView = (MapView) mMapContainer.findViewById(R.id.map);
 
