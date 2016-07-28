@@ -2,7 +2,7 @@
 <resources>
 
     <!-- TODO: add your OAuth Client ID here-->
-    <string name="client_id">YOUR_CLIENT_ID</string>
+    <string name="client_id">STV3sRWfJQxqvspH</string>
     <string name="username">YOUR_PORTAL_USERNAME</string>
     <string name="password">YOUR_PORTAL_PASSWORD</string>
     <string name="testPartialName">vo</string>

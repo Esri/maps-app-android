@@ -26,6 +26,7 @@ package com.esri.android.mapsapp.basemaps;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import android.app.DialogFragment;
 import android.content.DialogInterface;
@@ -33,24 +34,18 @@ import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 
-import android.widget.SimpleCursorAdapter;
-import com.esri.android.mapsapp.MapFragment;
 import com.esri.android.mapsapp.R;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.basemaps.BasemapsAdapter.BasemapsAdapterClickListener;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
-import com.esri.arcgisruntime.portal.Portal;
-import com.esri.arcgisruntime.portal.PortalGroup;
-import com.esri.arcgisruntime.portal.PortalInfo;
-import com.esri.arcgisruntime.portal.PortalItem;
-import com.esri.arcgisruntime.portal.PortalQueryParams;
-import com.esri.arcgisruntime.portal.PortalQueryResultSet;
+import com.esri.arcgisruntime.portal.*;
 
 /**
  * Implements the dialog that provides a collection of basemaps to the user.
@@ -60,13 +55,13 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 	private static final String TAG = "BasemapsDialogFragment";
 	private static final String TAG_BASEMAP_SEARCH_PROGRESS_DIALOG = "TAG_BASEMAP_SEARCH_PROGRESS_DIALOG";
 	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
-	private final List<PortalItem> mBasemapResult = new ArrayList<PortalItem>();
+	private final List<PortalItem> mPortalItems = new ArrayList<PortalItem>();
 	private ProgressDialogFragment mProgressDialog;
 	private BasemapsDialogListener mBasemapsDialogListener;
 	private BasemapsAdapter mBasemapsAdapter;
 	private ArrayList<BasemapItem> mBasemapItemList;
-
-
+	private static final String PUBLIC_BASEMAPS = "public_basemaps";
+	private static final String PRIVATE_BASEMAPS = "private_basemaps";
 
 	// Mandatory empty constructor for fragment manager to recreate fragment
 	// after it's destroyed
@@ -135,43 +130,55 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 	}
 
 	/**
-	 * Fetch basemaps using ListenableFuture pattern
+	 * Fetch basemaps from local cache or portal
 	 */
 	private void fetchBasemapItems() {
 		// Show a progress dialog
 		mProgressDialog.show(getActivity().getFragmentManager(), TAG_BASEMAP_SEARCH_PROGRESS_DIALOG);
-
+		List<BasemapItem> cachedContents = null;
+		// If user is signed in, check if we've already
+		// downloaded their basemaps
 		if (AccountManager.getInstance().isSignedIn()) {
-			getBasemapsFromUserPortal();
-		} else {
-			getBasemapsFromAGOL();
+			if(itemsLoadedFromCache(PRIVATE_BASEMAPS)){
+				mProgressDialog.dismiss();
+				return;
+			}else{
+				getBasemapsFromUserPortal();
+			}
+		} else { // user is not signed in, but have
+			// they previously retrieved public
+			// basemaps from AGOL
+			if(itemsLoadedFromCache(PUBLIC_BASEMAPS)){
+				mProgressDialog.dismiss();
+				return;
+			}else{ // get basemaps from AGOL
+				final Portal portal = AccountManager.getInstance().getAGOLPortal();
+				if (portal.getPortalInfo() == null){
+					portal.addDoneLoadingListener(new Runnable() {
+						@Override public void run() {
+							loadBasemapsFromAGOL(portal);
+						}
+					});
+					portal.loadAsync();
+				}else{
+					loadBasemapsFromAGOL(portal);
+				}
+			}
 		}
 	}
 
-	/**
-	 * Creates a query string to fetch basemap portal items from arcgis.com.
-	 */
-	private String createDefaultQueryString() {
-		String query;
+	private boolean itemsLoadedFromCache(String cacheName){
 
-		String[] mBasemapIds = {"d5e02a0c1f2b4ec399823fdd3c2fdebd", // topographic
-				"716b600dbbac433faa4bec9220c76b3a", // imagery with labels
-				"1970c1995b8f44749f4b9b6e81b5ba45", // dark gray canvas
-				"8bf7167d20924cbf8e25e7b11c7c502c", // streets
-				"2adf08a4a1a84834a773805a6e86f69e", // Oceans
-				"149a9bb14d604bd18f4597b21c19fac7" // Gray
-		};
-
-		StringBuilder str = new StringBuilder();
-		for (int i = 0; i < mBasemapIds.length; i++) {
-			str.append("id:").append(mBasemapIds[i]);
-			if (i < mBasemapIds.length - 1) {
-				str.append(" OR ");
-			}
+		if (PersistBasemaps.getInstance().storage.get(cacheName) != null){
+			List<BasemapItem> cachedItems = PersistBasemaps.getInstance().storage.get(cacheName);
+			Log.i(TAG, "Getting items " + cacheName + " " + cachedItems.size());
+			mBasemapItemList.clear();
+			mBasemapItemList.addAll(cachedItems);
+			mBasemapsAdapter.notifyDataSetChanged();
+			return true;
+		}else{
+			return false;
 		}
-		query = str.toString();
-
-		return query;
 	}
 
 	/*
@@ -212,9 +219,10 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 							public void run() {
 								try {
 									PortalQueryResultSet<PortalItem> items = contentFuture.get();
-									mBasemapResult.addAll(items.getResults());
+									mPortalItems.addAll(items.getResults());
 									getBasemapThumbnails();
-
+									PersistBasemaps.getInstance().storage.put(PRIVATE_BASEMAPS,mBasemapItemList);
+									Log.i(TAG, "Persisting " + PRIVATE_BASEMAPS + " wtih " + mBasemapItemList.size() + " items");
 								} catch (Exception e) {
 									mProgressDialog.dismiss();
 									e.printStackTrace();
@@ -230,41 +238,65 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 		});
 	}
 
-	/*
-	 * Get basemap content from ArcGISOnline and assemble basemap items for the
-	 * view
-	 */
-	private void getBasemapsFromAGOL() {
-		Portal portal = AccountManager.getInstance().getAGOLPortal();
-
-		// Create a PortalQueryParams to query for items in basemap group
-		PortalQueryParams queryParams = new PortalQueryParams();
-		queryParams.setSortField("name").setSortOrder(PortalQueryParams.SortOrder.ASCENDING);
-		queryParams.setQuery(createDefaultQueryString());
-
-		// Find items that match the query
-		final ListenableFuture<PortalQueryResultSet<PortalItem>> itemFuture = portal.findItemsAsync(queryParams);
-		// Once async call has completed, get the associated thumbnails
-		itemFuture.addDoneListener(new Runnable() {
-			@Override
-			public void run() {
+	private void loadBasemapsFromAGOL(final Portal portal) {
+		//Provides information about a portal as seen by the current user, anonymous or logged in. 
+		PortalInfo portalInfo = portal.getPortalInfo();
+		// Get the query string for items in basemap group 
+		String baseMapQueryString = portalInfo.getBasemapGalleryGroupQuery();
+		//Create query parameters suitable for finding content or groups contained in a portal 
+		PortalQueryParams queryParams = new PortalQueryParams(baseMapQueryString);
+		// Limit query to publicly available items
+		queryParams.setCanSearchPublic(true);
+		final ListenableFuture<PortalQueryResultSet<PortalGroup>> groupFuture = portal.findGroupsAsync(queryParams);
+		// Listen for completion
+		groupFuture.addDoneListener(new Runnable() {
+			@Override public void run() {
 				try {
-					PortalQueryResultSet<PortalItem> baseMapItems = itemFuture.get();
-					mBasemapResult.addAll(baseMapItems.getResults());
-					getBasemapThumbnails();
-				} catch (Exception itemE) {
-					mProgressDialog.dismiss();
-					itemE.printStackTrace();
+					PortalQueryResultSet<PortalGroup> groupResults = groupFuture.get();
+					if (groupResults.getResults().isEmpty()) {
+						// Handle UI response for empty results
+					} else {
+						PortalGroup basemapGroup = groupResults.getResults().get(0);
+						String groupId = basemapGroup.getId();
+						// Build a new query param object to retrieve basemaps for given group
+						PortalQueryParams basemapQuery = new PortalQueryParams();
+						basemapQuery.setQuery(PortalItemType.WEBMAP, groupId, null);
+						basemapQuery.setCanSearchPublic(true);
+						// Set sort order on basemap name 
+						basemapQuery.setSortField("name").setSortOrder(PortalQueryParams.SortOrder.ASCENDING);
+						// Find items that match the query
+						final ListenableFuture<PortalQueryResultSet<PortalItem>> itemFuture = portal.findItemsAsync(basemapQuery);
+						// Once async call has completed, get the associated thumbnails
+						itemFuture.addDoneListener(new Runnable() {
+							@Override public void run() {
+								try {
+									PortalQueryResultSet<PortalItem> baseMapItems = itemFuture.get();
+									mPortalItems.addAll(baseMapItems.getResults());
+									getBasemapThumbnails();
+									PersistBasemaps.getInstance().storage.put(PUBLIC_BASEMAPS,mBasemapItemList);
+									Log.i(TAG, "Persisting " + PUBLIC_BASEMAPS + " wtih " + mBasemapItemList.size() + " items");
+								} catch (Exception itemE) {
+									mProgressDialog.dismiss();
+									itemE.printStackTrace();
+								}
+							}
+						});
+					}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					e.printStackTrace();
 				}
 			}
 		});
 	}
 
 	/**
-	 * Get thumbnails asycnchronously and build the adapter item for the view
+	 * Get thumbnails asycnchronously and populate the dialog
+	 * adapter with basemap items as thumbnails are retrieved.
 	 */
 	private void getBasemapThumbnails() {
-		for (final PortalItem item : mBasemapResult) {
+		for (final PortalItem item : mPortalItems) {
 			if (item.getThumbnailFileName() != null) {
 				final ListenableFuture<byte[]> futureThumbnail = item.fetchThumbnailAsync();
 				futureThumbnail.addDoneListener(new Runnable() {
@@ -292,6 +324,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 		}
 		mProgressDialog.dismiss();
 	}
+	// If basemap item is persisted do not go out to service to fetch them again
 
 	/**
 	 * A callback interface that all activities containing this fragment must
@@ -306,5 +339,4 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 		 */
 		void onBasemapChanged(String itemId);
 	}
-
 }
