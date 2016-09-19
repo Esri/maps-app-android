@@ -387,7 +387,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 			textView.setText(AccountManager.getInstance().getPortalUser().getFullName());
 
 			textView = (TextView) userInfoView.findViewById(R.id.drawer_item_username_textview);
-			textView.setText(AccountManager.getInstance().getPortalUser().getUserName());
+			textView.setText(AccountManager.getInstance().getPortalUser().getUsername());
 
 			item = new DrawerItem(userInfoView, null);
 			mDrawerItems.add(item);

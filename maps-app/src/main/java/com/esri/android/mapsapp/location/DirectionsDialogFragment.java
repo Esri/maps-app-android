@@ -149,7 +149,7 @@ public class DirectionsDialogFragment extends DialogFragment {
 			TextView textView = (TextView) v.findViewById(R.id.directions_text_textview);
 			textView.setText(direction.getDirectionText());
 			textView = (TextView) v.findViewById(R.id.directions_length_textview);
-			String lengthString = String.format("%.1f mi", direction.getLength());
+			String lengthString = String.format("%.1f meters", direction.getLength());
 			textView.setText(lengthString);
 			return v;
 		}

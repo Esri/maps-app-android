@@ -74,6 +74,7 @@ import com.esri.android.mapsapp.location.RoutingDialogFragment;
 import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogListener;
 import com.esri.android.mapsapp.tools.Compass;
 import com.esri.android.mapsapp.util.TaskExecutor;
+import com.esri.arcgisruntime.UnitSystem;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.geometry.Envelope;
 import com.esri.arcgisruntime.geometry.Geometry;
@@ -96,7 +97,6 @@ import com.esri.arcgisruntime.tasks.geocode.LocatorTask;
 import com.esri.arcgisruntime.tasks.geocode.ReverseGeocodeParameters;
 import com.esri.arcgisruntime.tasks.geocode.SuggestParameters;
 import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
-import com.esri.arcgisruntime.tasks.route.DirectionDistanceTextUnits;
 import com.esri.arcgisruntime.tasks.route.DirectionManeuver;
 import com.esri.arcgisruntime.tasks.route.Route;
 import com.esri.arcgisruntime.tasks.route.RouteParameters;
@@ -273,7 +273,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				});
 			}
 		}
-		hideKeyboard();
 		return mMapContainer;
 	}
 
@@ -352,7 +351,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			mMapView.pause();
 		}
-		hideKeyboard();
+
 	}
 
 	@Override
@@ -365,7 +364,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				 mMapView.getLocationDisplay().startAsync();
 			 }
 		}
-		hideKeyboard();
 	}
 	@Override
 	public void onDestroyView(){
@@ -446,7 +444,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private void setMapView(final MapView mapView) {
 
 		mMapView = mapView;
-		mMapView.setLogoVisible(true);
 		mMapView.setWrapAroundMode(WrapAroundMode.ENABLE_WHEN_SUPPORTED);
 
 		// Creating an inflater
@@ -467,8 +464,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		// Show current location
 		mLocationDisplay = mapView.getLocationDisplay();
-		mLocationDisplay.startAsync();
 		mLocationDisplay.setAutoPanMode(LocationDisplay.AutoPanMode.RECENTER);
+		mLocationDisplay.startAsync();
+
 		mLocationDisplay.setInitialZoomScale(50000);
 
 		// Handle any location changes
@@ -912,16 +910,8 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		}
 		// Display the result
 		displaySearchResult(resultPoint, address);
-		hideKeyboard();
 	}
-  /**
-   * Hides soft keyboard
-   */
-  protected void hideKeyboard() {
-		InputMethodManager inputManager = (InputMethodManager) getActivity()
-				.getSystemService(Context.INPUT_METHOD_SERVICE);
-		inputManager.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
-	}
+
 
 	private void displaySearchResult(Point resultPoint, String address) {
 
@@ -981,8 +971,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	public void onSearchButtonClicked(final String address) {
 
 		Log.i(TAG, " #### Submitted address " + address);
-		// Hide virtual keyboard
-		hideKeyboard();
 
 		// Remove any previous graphics and routes
 		resetGraphicsLayers();
@@ -1275,7 +1263,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		});
 
-		hideKeyboard();
 
 	}
 
@@ -1458,7 +1445,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mRouteLayer.getGraphics().add(endGraphic);
 
 		// Zoom to the extent of the entire route with a padding
-		mMapView.setViewpointGeometryWithPaddingAsync(shape, 400);
+		mMapView.setViewpointGeometryAsync(shape,400);
 
 		// Save routing directions so user can display them later
 		mRoutingDirections = route.getDirectionManeuvers();
@@ -1662,7 +1649,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			} else {
 				final ListenableFuture<RouteParameters> routeTaskFuture = mRouteTask
-						.generateDefaultParametersAsync();
+						.createDefaultParametersAsync();
 				// Add a done listener that uses the returned route parameters
 				// to build up a specific request for the route we need
 				routeTaskFuture.addDoneListener(new Runnable() {
@@ -1676,12 +1663,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 							routeParameters.getStops().add(destination);
 							// We want the task to return driving directions and routes
 							routeParameters.setReturnDirections(true);
-							routeParameters.setDirectionsDistanceTextUnits(
-									DirectionDistanceTextUnits.IMPERIAL);
 							routeParameters.setOutputSpatialReference(MapFragment.mMapView.getSpatialReference());
 
 							final ListenableFuture<RouteResult> routeResFuture = mRouteTask
-									.solveAsync(routeParameters);
+									.solveRouteAsync(routeParameters);
 							routeResFuture.addDoneListener(new Runnable() {
 								@Override
 								public void run() {
