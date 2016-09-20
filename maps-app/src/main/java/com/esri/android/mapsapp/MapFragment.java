@@ -1,4 +1,4 @@
-/* Copyright 2016 Esri
+/* Copyright 1995-2016 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,9 @@
 
 package com.esri.android.mapsapp;
 
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
@@ -53,7 +56,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.ImageButton;
@@ -74,17 +76,24 @@ import com.esri.android.mapsapp.location.RoutingDialogFragment;
 import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogListener;
 import com.esri.android.mapsapp.tools.Compass;
 import com.esri.android.mapsapp.util.TaskExecutor;
-import com.esri.arcgisruntime.UnitSystem;
+
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.geometry.Envelope;
 import com.esri.arcgisruntime.geometry.Geometry;
 import com.esri.arcgisruntime.geometry.Point;
 import com.esri.arcgisruntime.geometry.SpatialReference;
 import com.esri.arcgisruntime.loadable.LoadStatus;
-import com.esri.arcgisruntime.mapping.Basemap;
 import com.esri.arcgisruntime.mapping.ArcGISMap;
+import com.esri.arcgisruntime.mapping.Basemap;
 import com.esri.arcgisruntime.mapping.Viewpoint;
-import com.esri.arcgisruntime.mapping.view.*;
+import com.esri.arcgisruntime.mapping.view.DefaultMapViewOnTouchListener;
+import com.esri.arcgisruntime.mapping.view.Graphic;
+import com.esri.arcgisruntime.mapping.view.GraphicsOverlay;
+import com.esri.arcgisruntime.mapping.view.LocationDisplay;
+import com.esri.arcgisruntime.mapping.view.MapView;
+import com.esri.arcgisruntime.mapping.view.ViewpointChangedEvent;
+import com.esri.arcgisruntime.mapping.view.ViewpointChangedListener;
+import com.esri.arcgisruntime.mapping.view.WrapAroundMode;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
 import com.esri.arcgisruntime.security.AuthenticationManager;
@@ -103,10 +112,6 @@ import com.esri.arcgisruntime.tasks.route.RouteParameters;
 import com.esri.arcgisruntime.tasks.route.RouteResult;
 import com.esri.arcgisruntime.tasks.route.RouteTask;
 import com.esri.arcgisruntime.tasks.route.Stop;
-
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Implements the view that shows the map.
@@ -144,7 +149,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 	private static final String ROUTE = "Route";
 
-	private static final String REVERSE_GECODE = "Reverse Geocode";
+	private static final String REVERSE_GEOCODE = "Reverse Geocode";
 	// The circle area specified by search_radius and input lat/lon serves
 	// searching purpose.
 	// It is also used to construct the extent which map zooms to after the
@@ -816,7 +821,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			mGeocodeParams.setMaxResults(2);
 			mGeocodeParams.setOutputSpatialReference(mMapView.getSpatialReference());
 		}
-		if (TYPE.contentEquals(REVERSE_GECODE)) {
+		if (TYPE.contentEquals(REVERSE_GEOCODE)) {
 			mReverseGeocodeParams = new ReverseGeocodeParameters();
 			mReverseGeocodeParams.setOutputSpatialReference(mMapView.getSpatialReference());
 
@@ -1476,7 +1481,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		showProgressDialog(getString(R.string.reverse_geocoding), TAG_REVERSE_GEOCODING_PROGRESS_DIALOG);
 
 		// Provision reverse geocode parameers
-		locatorParams(REVERSE_GECODE);
+		locatorParams(REVERSE_GEOCODE);
 		// Pass in the point and geocode parameters to the reverse geocode method
 		final ListenableFuture<List<GeocodeResult>> reverseFuture = mLocator.reverseGeocodeAsync(point,
 				mReverseGeocodeParams);
