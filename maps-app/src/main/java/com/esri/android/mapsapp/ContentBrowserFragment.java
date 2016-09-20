@@ -92,7 +92,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 			case R.id.map_item_linearlayout :
 				// a map item has been clicked - open it
 				ViewHolder viewHolder = (ViewHolder) view.getTag();
-				((MapsAppActivity) getActivity()).showMap(viewHolder.portalItem.getId(), null);
+				((MapsAppActivity) getActivity()).showMap(viewHolder.portalItem.getItemId(), null);
 				break;
 			case R.id.content_browser_fragment_refresh_button :
 				// re-fetch maps
@@ -115,7 +115,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 			Portal portal = AccountManager.getInstance().getPortal();
 			if (portal != null) {
 				// Get user content from the portal
-				PortalUser portalUser = portal.getPortalUser();
+				PortalUser portalUser = portal.getUser();
 
 				final ListenableFuture<PortalUserContent> contentFuture = portalUser.fetchContentAsync();
 				// Filter returned content for WEBMAP items

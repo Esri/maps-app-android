@@ -74,7 +74,7 @@ public class AccountManager {
 		mPortal = portal;
 
 		try {
-			mPortalUser = mPortal != null ? mPortal.getPortalUser() : null;
+			mPortalUser = mPortal != null ? mPortal.getUser() : null;
 			mPortalInfo = mPortal != null ? mPortal.getPortalInfo() : null;
 		} catch (Exception e) {
 			e.printStackTrace();

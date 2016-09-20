@@ -186,7 +186,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 					String portalName = portalInformation.getPortalName(); // Returns
 																			// 'ArcGIS
 																			// Online'
-					PortalUser user = portal.getPortalUser();
+					PortalUser user = portal.getUser();
 					mProgressDialog.dismiss();
 					AccountManager.getInstance().setPortal(portal);
 					finish();
