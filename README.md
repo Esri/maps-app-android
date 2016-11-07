@@ -135,6 +135,156 @@ mLocator.addDoneLoadingListener(new Runnable() {
 mLocator.loadAsync();
 ```
 
+## Geocoding
+Once a suggestion in the list has been selected by the user, the suggested address is geocoded using the geocodeAsync method of the LocatorTask. Along with the address, specific [geocoding parameters](https://developers.arcgis.com/android/beta/guide/search-for-places-geocoding-.htm#ESRI_SECTION2_48C5C281B21B4BF1BBBDBCEA71F105B9) can be set to tune the results. For example, in the maps app, we set the preferred location and refine that further by setting a boundary of the area to search for matching addresses.
+```
+mGeocodeParams = new GeocodeParameters();
+// Set max results and spatial reference
+mGeocodeParams.setMaxResults(2);
+mGeocodeParams.setOutputSpatialReference(mMapView.getSpatialReference());
+// Use the centre of the current map extent as the location
+mGeocodeParams.setSearchArea(calculateSearchArea());
+mGeocodeParams.setPreferredSearchLocation(mLocation);
+```
+```
+ListenableFuture> locFuture = mLocator.geocodeAsync(matchedAddress, mGeocodeParams);
+// Attach a done listener that executes upon completion of the async call
+locFuture.addDoneListener(new Runnable() {
+    @Override
+        public void run() {
+          try {
+            List locationResults = locFuture.get();
+          showSuggestedPlace(locationResults, address);
+          } catch (Exception e) {
+            dealWithException(e);
+       }
+    }
+});
+```
+
+## Reverse Geocoding
+The Map App uses the built-in map magnifier to help users fine tune a location on the map for reverse geocoding. The magnifier appears after a long-press on the map view. Once the long-press is released, the map point is reverse geocoded.
+
+We’ve extended the DefaultMapViewOnTouchListener and implemented logic for onUp motion event.
+
+```
+@Override
+public boolean onUp(MotionEvent motionEvent) {
+    if (mLongPressEvent != null) {
+        // This is the end of a long-press that will have displayed the magnifier.  Get the graphic
+        // coordinates for the motion event.
+        android.graphics.Point mapPoint = new android.graphics.Point((int) motionEvent.getX(),
+            (int) motionEvent.getY());
+        Point point = mMapView.screenToLocation(mapPoint);
+        // Reverse geocode the point
+       reverseGeocode(point);
+
+       // Remove any previous graphics
+       resetGraphicsLayers();
+    }
+    return true;
+}
+```
+The corresponding reverse geocode method:
+
+```
+private void reverseGeocode(Point point) {
+    // Pass in the point and geocode parameters to the reverse geocode method
+    final ListenableFuture> reverseFuture = mLocator.reverseGeocodeAsync(point,
+        mReverseGeocodeParams);
+    // Attach a done listener that shows the results upon completion of the async call
+    reverseFuture.addDoneListener(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          List results = reverseFuture.get();
+          // Process and display results
+          showReverseGeocodeResult(results);
+        } catch (Exception e) {
+          dealWithException(e);
+        }
+      }
+    });
+    return true;
+}
+```
+
+## Route
+Getting navigation directions in the maps-app is just as easy in the [Runtime SDK](https://developers.arcgis.com/features/directions/) as it is on [ArcGIS Online](http://doc.arcgis.com/en/arcgis-online/use-maps/get-directions.htm). You can [customize](http://doc.arcgis.com/en/arcgis-online/administer/configure-services.htm#ESRI_SECTION1_567C344D5DEE444988CA2FE5193F3CAD) your navigation services for your organization, add new travel modes that better reflect your organization’s workflows, or remove travel modes that are not suitable for your organization’s workflows.
+
+Navigating from point to point in the Map App is enabled in two ways. In either scenario, the origin and destination must be geocoded before routing can be attempted. In the maps-app, routing requires you to provide credentials to your Portal or ArcGIS Online organization. As mentioned earlier in the Identity section above, we use the DefaultAuthenticationChallengeHandler to manage the authentication process.
+
+```
+// As soon as the route task is instantiated, an authentication challenge is issued.
+mRouteTask = new RouteTask("http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer");
+```
+You can instantiate a new RouteParameters object by using the generateDefaultParametersAsync() method on your RouteTask object. Using this method will set the appropriate default settings for routing. Add the stops and request route directions, specifying the units of measure for the directions.
+
+```
+/**
+   * A helper class for solving routes
+   */
+  private class RouteSolver implements Runnable{
+    private final Stop origin;
+
+    private final Stop destination;
+
+    public RouteSolver(Point start, Point end){
+      origin = new Stop(start);
+      destination = new Stop(end);
+    }
+    @Override
+    public void run (){
+      LoadStatus status = mRouteTask.getLoadStatus();
+      // Has the route task loaded successfully?
+      if (status == LoadStatus.FAILED_TO_LOAD) {    
+        // We may want to try reloading it  --> mRouteTask.retryLoadAsync();
+      } else {
+        final ListenableFuture routeTaskFuture = mRouteTask
+            .generateDefaultParametersAsync();
+        // Add a done listener that uses the returned route parameters
+        // to build up a specific request for the route we need
+        routeTaskFuture.addDoneListener(new Runnable() {
+
+          @Override
+          public void run() {
+            try {
+              RouteParameters routeParameters = routeTaskFuture.get();
+              // Add a stop for origin and destination
+              routeParameters.getStops().add(origin);
+              routeParameters.getStops().add(destination);
+              // We want the task to return driving directions and routes
+              routeParameters.setReturnDirections(true);
+              routeParameters.setDirectionsDistanceTextUnits(
+                  DirectionDistanceTextUnits.IMPERIAL);
+              routeParameters.setOutputSpatialReference(MapFragment.mMapView.getSpatialReference());
+
+              final ListenableFuture routeResFuture = mRouteTask
+                  .solveAsync(routeParameters);
+              routeResFuture.addDoneListener(new Runnable() {
+                @Override
+                public void run() {
+                  try {
+                    RouteResult routeResult = routeResFuture.get();
+                    // Show route results
+                    showRoute(routeResult, origin.getGeometry(), destination.getGeometry());
+
+                  } catch (Exception e) {
+                    dealWithException(e);
+                  }
+                }
+              });
+            } catch (Exception e) {
+              dealWithException(e);
+            }
+          }
+        });
+      }
+    }
+  }
+  ```
+
+
 ## Features
 * Dynamically switch basemaps
 * Place search
