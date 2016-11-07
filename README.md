@@ -59,6 +59,8 @@ The Maps App leverages the ArcGIS [identity](https://developers.arcgis.com/authe
 
 The process of accessing token secured services with a challenge handler is illustrated in the following diagram.
 
+![](https://github.com/Esri/maps-app-android/blob/maps-app-doc/maps-app/assets/identity.png)
+
 1. A request is made to a secured resource.
 2. The portal responds with an unauthorized access error.
 3. A challenge handler associated with the identity manager is asked to provide a credential for the portal.
@@ -107,6 +109,8 @@ You can also provision your own [custom geocode service](https://doc.arcgis.com/
 ## Place Suggestions
 
 Typing the first few letters of a place into the Map App search box (e.g. “Voodoo Doughnut”) shows a number of suggestions near the device’s location
+
+![] (https://github.com/Esri/maps-app-android/blob/maps-app-doc/maps-app/assets/suggest.png)
 
 ```
 // Attach a listener to the locator task since the LocatorTask may or may not be loaded the
@@ -165,6 +169,10 @@ locFuture.addDoneListener(new Runnable() {
 ## Reverse Geocoding
 The Map App uses the built-in map magnifier to help users fine tune a location on the map for reverse geocoding. The magnifier appears after a long-press on the map view. Once the long-press is released, the map point is reverse geocoded.
 
+On long press                          | Reverse geocode result
+:-------------------------------------:|:-------------------------------------:
+![](https://github.com/Esri/maps-app-android/blob/maps-app-doc/maps-app/assets/reverse_geocode.png)              | ![](https://github.com/Esri/maps-app-android/blob/maps-app-doc/maps-app/assets/reverse_geocode2.png)
+
 We’ve extended the DefaultMapViewOnTouchListener and implemented logic for onUp motion event.
 
 ```
@@ -218,7 +226,7 @@ Navigating from point to point in the Map App is enabled in two ways. In either 
 // As soon as the route task is instantiated, an authentication challenge is issued.
 mRouteTask = new RouteTask("http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer");
 ```
-You can instantiate a new RouteParameters object by using the generateDefaultParametersAsync() method on your RouteTask object. Using this method will set the appropriate default settings for routing. Add the stops and request route directions, specifying the units of measure for the directions.
+You can instantiate a new RouteParameters object by using the generateDefaultParametersAsync() method on your RouteTask object. Using this method will set the appropriate default settings for routing, add the stops and request route directions, and allow the units of measure for the directions to be specified.
 
 ```
 /**
@@ -283,15 +291,8 @@ You can instantiate a new RouteParameters object by using the generateDefaultPar
     }
   }
   ```
-
-
-## Features
-* Dynamically switch basemaps
-* Place search
-* Routing
-* Geocode addresses
-* Reverse geocode
-* Sign in to ArcGIS account
+The resulting route is shown:
+![](https://github.com/Esri/maps-app-android/blob/maps-app-doc/maps-app/assets/route.png)
 
 ## Development Instructions
 This Maps App repo is an Android Studio Project and App Module that can be directly cloned and imported into Android Studio.
