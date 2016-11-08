@@ -27,6 +27,7 @@ import android.Manifest.permission;
 import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.test.InstrumentationRegistry;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback;
 import android.support.v4.content.ContextCompat;
@@ -35,6 +36,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.*;
 import com.esri.android.mapsapp.MapsAppActivity;
+import com.esri.android.mapsapp.R;
 import com.esri.android.mapsapp.R.id;
 import com.esri.android.mapsapp.R.string;
 import com.robotium.solo.Solo;
@@ -81,6 +83,8 @@ public class MapAppRobotiumTests extends ActivityInstrumentationTestCase2 implem
       Log.i(MapAppRobotiumTests.TAG, "Seeking permissions");
       requestWritePermission();
     }
+
+
     getActivity();
   }
 
@@ -89,6 +93,7 @@ public class MapAppRobotiumTests extends ActivityInstrumentationTestCase2 implem
     //tearDown() is run after a test case has finished.
     //finishOpenedActivities() will finish all the activities that have been opened during the test execution.
     solo.finishOpenedActivities();
+    super.tearDown();
   }
 
   /**
@@ -128,8 +133,8 @@ public class MapAppRobotiumTests extends ActivityInstrumentationTestCase2 implem
     // Drawer
     solo.clickOnImageButton(0);
     solo.takeScreenshot("drawer");
-    Assert.assertTrue(solo.searchText("Sign In"));
-    solo.searchText("Switch Basemap");
+    Assert.assertTrue(solo.searchText(solo.getString(string.signin)));
+    solo.searchText(solo.getString(string.switch_basemap));
     solo.setNavigationDrawer(Solo.CLOSED);
 
     // Dismiss the drawer
@@ -149,8 +154,9 @@ public class MapAppRobotiumTests extends ActivityInstrumentationTestCase2 implem
     solo.clickOnImageButton(0);
 
     // Click on "Switch Basemap"
-    solo.clickOnText("Switch Basemap");
+    solo.clickOnText(solo.getString(string.switch_basemap));
 
+    Assert.assertTrue(solo.waitForText("Select Base Map"));
     // Search for the item with "Ligth Gray Canvas"
     View basemapView = solo.getView(id.basemap_gridview);
     Assert.assertTrue(solo.waitForView(basemapView));
@@ -183,7 +189,7 @@ public class MapAppRobotiumTests extends ActivityInstrumentationTestCase2 implem
     Assert.assertTrue(solo.waitForView(mapView));
 
     // Get the text field for inputting place names or addresses
-    EditText editText = solo.getEditText("Search",true);
+    EditText editText = solo.getEditText(solo.getString(string.search),true);
     Assert.assertNotNull(editText);
 
     // Type in a few letters, assumes at
@@ -211,7 +217,7 @@ public class MapAppRobotiumTests extends ActivityInstrumentationTestCase2 implem
     Assert.assertNotNull(searchText);
 
     // Use a local address near you...
-    solo.typeText(searchText, "1005 W Burnside Ave Portland OR");
+    solo.typeText(searchText, solo.getString(string.localAddressNearYou));
 
     solo.sleep(4000);
     solo.pressSoftKeyboardSearchButton();
@@ -231,11 +237,11 @@ public class MapAppRobotiumTests extends ActivityInstrumentationTestCase2 implem
     Assert.assertTrue(solo.waitForView(mapView));
 
     // Get the text field for inputting place names or addresses
-    final EditText searchText = solo.getEditText("Search", true);
+    final EditText searchText = solo.getEditText(solo.getString(string.search), true);
     Assert.assertNotNull(searchText);
 
     // Use a local address near you...
-    solo.typeText(searchText, "1005 W Burnside Ave Portland OR");
+    solo.typeText(searchText, solo.getString(string.localAddressNearYou));
 
     solo.sleep(3000);
     solo.pressSoftKeyboardSearchButton();
@@ -254,10 +260,11 @@ public class MapAppRobotiumTests extends ActivityInstrumentationTestCase2 implem
     solo.sleep(3000);
 
     // Fill in auth
-    EditText userName = solo.getEditText("Username");
-    solo.typeText(userName, getActivity().getString(string.username));
-    EditText password = solo.getEditText("Password");
-    solo.typeText(password, getActivity().getString(string.password));
+    EditText userName = solo.getEditText(solo.getString(string.usernameLabel));
+
+    solo.typeText(userName, solo.getString(R.string.username));
+    EditText password = solo.getEditText(solo.getString(string.passwordLabel));
+    solo.typeText(password, solo.getString(R.string.password));
 
     // Hit the Log In button
     solo.clickOnButton(1);

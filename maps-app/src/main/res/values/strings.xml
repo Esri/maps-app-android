@@ -98,6 +98,11 @@
     <string name="geo_locate_error">Geocode failed on address</string>
     <string name="no_route_found">No route could be found</string>
     <string name="location_not_foud">We\'re sorry, we couldn\'t find a location with the name</string>
+    <string name="signin">Sign In</string>
+    <string name="switch_basemap">Switch Basemap</string>
+    <string name="search">Search</string>
+    <string name="usernameLabel">Username</string>
+    <string name="passwordLabel">Password</string>
 
 
 </resources>

@@ -80,7 +80,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setStyle(DialogFragment.STYLE_NORMAL, 0);
+		setStyle(DialogFragment.STYLE_NORMAL,R.style.CustomDialog);
 
 	}
 
@@ -108,10 +108,6 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 		return view;
 	}
 
-	@Override
-	public void onResume() {
-		super.onResume();
-	}
 
 	@Override
 	public void onBasemapItemClicked(int position) {
@@ -119,14 +115,6 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 
 		String itemId = mBasemapItemList.get(position).item.getItemId();
 		mBasemapsDialogListener.onBasemapChanged(itemId);
-	}
-
-	@Override
-	public void onCancel(DialogInterface dialog) {
-		// the progress dialog has been canceled - cancel pending basemap search
-		// task
-		// TODO: Anything to cancel?
-
 	}
 
 	/**
