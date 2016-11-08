@@ -170,6 +170,14 @@ If there are changes made in the Original repository, you can sync the fork to k
 3. ```git checkout master``` to checkout your fork's local master branch.
 4. ```git merge upstream/master``` to sync your local `master' branch with `upstream/master`. **Note**: Your local changes will be retained and your fork's master branch will be in sync with the upstream repository.
 
+### Testing With Robotium
+The project includes a small suite of Robotium tests that test various features of the application.  The Robotium tests for the maps-app will run best on an attached device, rather than in the emulator.  You will need to adjust the values in the app_settings.xml file to reflect your specific auth credentials and any local addresses the tests use.  Use the following steps to configure your environment for running the tests.
+
+1.  Attach a non-emulated Android device to your computer.
+2.  Ensure location services are enabled on the Android device.
+3.  Ensure you have internet connectivity on the Android device.
+4.  Change the following entries in your values/app_settings.xml (username, password, testPartialName, localAddressNearYou).
+5.  Right-click on the MapAppRobotiumTests.java file in Android Studio and select Run 'MapAppRobotiumTests'.
 
 ## Requirements
 * [JDK 6 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
@@ -182,6 +190,7 @@ If there are changes made in the Original repository, you can sync the fork to k
 * [Google+](https://plus.google.com/+esri/posts)
 * [twitter@ArcGISRuntime](https://twitter.com/ArcGISRuntime)
 * [twitter@esri](http://twitter.com/esri)
+* [Robotium](https://github.com/RobotiumTech/robotium) and [Robotium Javadoc](http://recorder.robotium.com/javadoc/)
 
 ## Issues
 Find a bug or want to request a new feature enhancement?  Let us know by submitting an issue.
