@@ -106,12 +106,7 @@ import com.esri.arcgisruntime.tasks.geocode.LocatorTask;
 import com.esri.arcgisruntime.tasks.geocode.ReverseGeocodeParameters;
 import com.esri.arcgisruntime.tasks.geocode.SuggestParameters;
 import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
-import com.esri.arcgisruntime.tasks.route.DirectionManeuver;
-import com.esri.arcgisruntime.tasks.route.Route;
-import com.esri.arcgisruntime.tasks.route.RouteParameters;
-import com.esri.arcgisruntime.tasks.route.RouteResult;
-import com.esri.arcgisruntime.tasks.route.RouteTask;
-import com.esri.arcgisruntime.tasks.route.Stop;
+import com.esri.arcgisruntime.tasks.networkanalysis.*;
 
 /**
  * Implements the view that shows the map.

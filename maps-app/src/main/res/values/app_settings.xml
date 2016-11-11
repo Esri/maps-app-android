@@ -6,4 +6,5 @@
     <string name="username">YOUR_PORTAL_USERNAME</string>
     <string name="password">YOUR_PORTAL_PASSWORD</string>
     <string name="testPartialName">vo</string>
+    <string name="redirect_uri">my-maps-app://auth</string>
 </resources>

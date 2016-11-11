@@ -45,8 +45,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.esri.android.mapsapp.R;
-import com.esri.arcgisruntime.tasks.route.DirectionManeuver;
-import com.esri.arcgisruntime.tasks.route.DirectionManeuverType;
+import com.esri.arcgisruntime.tasks.networkanalysis.DirectionManeuver;
+import com.esri.arcgisruntime.tasks.networkanalysis.DirectionManeuverType;
 
 public class DirectionsDialogFragment extends DialogFragment {
 
@@ -236,13 +236,13 @@ public class DirectionsDialogFragment extends DialogFragment {
 				case STAIRS :
 				case DOOR_PASSAGE :
 				default :
-					Log.w(TAG, maneuver.name() + "not supported");
+					Log.w("Maneuver not supported", maneuver.name() + "not supported");
 					return null;
 			}
 			try {
 				return context.getResources().getDrawable(id);
 			} catch (NotFoundException e) {
-				Log.w(TAG, "No drawable found for" + maneuver.name());
+				Log.w("Exception", "No drawable found for" + maneuver.name());
 				return null;
 			}
 		}

@@ -260,10 +260,10 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 						String groupId = basemapGroup.getGroupId();
 						// Build a new query param object to retrieve basemaps for given group
 						PortalQueryParameters basemapQuery = new PortalQueryParameters();
-						basemapQuery.setQuery(PortalItemType.WEBMAP, groupId, null);
+						basemapQuery.setQuery(PortalItem.Type.WEBMAP, groupId, null);
 						basemapQuery.setCanSearchPublic(true);
 						// Set sort order on basemap name 
-						basemapQuery.setSortField("name").setSortOrder(PortalQuerySortOrder.ASCENDING);
+						basemapQuery.setSortField("name").setSortOrder(PortalQueryParameters.SortOrder.ASCENDING);
 						// Find items that match the query
 						final ListenableFuture<PortalQueryResultSet<PortalItem>> itemFuture = portal.findItemsAsync(basemapQuery);
 						// Once async call has completed, get the associated thumbnails
