@@ -71,8 +71,8 @@ The process of accessing token secured services with a challenge handler is illu
 The DefaultAuthenticationChallengeHandler class takes care of steps 1-6 in the diagram above. For an application to use this pattern, follow these [guides](https://developers.arcgis.com/authentication/signing-in-arcgis-online-users/) to register your app.
 ```
 // Add these two lines to your Android fragment or activity
-DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(getActivity());
-AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
+OAuthConfiguration oAuthConfiguration = new OAuthConfiguration(mPortalUrl, clientId, redirectUri);
+AuthenticationManager.addOAuthConfiguration(oAuthConfiguration);
 ```
 
 Any time a secured service issues an authentication challenge, the DefaultAuthenticationChallengeHandler and the corresponding DefaultOAuthIntentReceiver work together to broker the authentication transaction. In addition to the two lines above, the Android manifest.xml file must define a DefaultOAuthIntentReceiver that receives intents once a user has entered their credentials.
