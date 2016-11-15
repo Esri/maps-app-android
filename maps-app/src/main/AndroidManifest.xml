@@ -45,8 +45,8 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data android:scheme="maps-app"/>
+                <!-- Replace this value with the appropriate scheme for your version of the map app -->
+                <data android:scheme="YOUR_SCHEME"/>
             </intent-filter>
         </activity>
     </application>
