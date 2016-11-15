@@ -86,10 +86,12 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 
 		// Set up an authentication handler(OAuth) to be used when loading remote resources or services.
 		// The client id and redirect uri is obtained by registering your own version of this app (https://developers.arcgis.com/authentication/#).
-
+		DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(
+				this);
 		try {
 			OAuthConfiguration oAuthConfiguration = new OAuthConfiguration(mPortalUrl,getString( R.string.client_id), getString(
 								R.string.redirect_uri));
+			AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
 			AuthenticationManager.addOAuthConfiguration(oAuthConfiguration);
 		} catch (MalformedURLException e) {
 			Log.i(TAG,"OAuth problem : " + e.getMessage());

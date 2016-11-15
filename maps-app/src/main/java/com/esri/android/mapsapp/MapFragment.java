@@ -24,6 +24,7 @@
 
 package com.esri.android.mapsapp;
 
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -98,6 +99,7 @@ import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
 import com.esri.arcgisruntime.security.AuthenticationManager;
 import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
+import com.esri.arcgisruntime.security.OAuthConfiguration;
 import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.tasks.geocode.GeocodeParameters;
@@ -225,10 +227,18 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			mBasemapPortalItemId = args.getString(KEY_BASEMAP_ITEM_ID);
 		}
 
+		try {
+			OAuthConfiguration oAuthConfiguration = new OAuthConfiguration("https://www.arcgis.com",getString( R.string.client_id), getString(
+          R.string.redirect_uri));
+			DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(
+					getActivity());
+			AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
+			AuthenticationManager.addOAuthConfiguration(oAuthConfiguration);
+		} catch (MalformedURLException e) {
+			Log.i(TAG,"OAuth problem : " + e.getMessage());
+			Toast.makeText(getActivity(), "The was a problem authenticating against the portal.", Toast.LENGTH_LONG).show();
+		}
 
-		DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(
-				getActivity());
-		AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
 
 	}
 
