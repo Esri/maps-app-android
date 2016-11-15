@@ -1,14 +1,14 @@
 <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/maps_app_activity_drawer_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+                                        android:id="@+id/maps_app_activity_drawer_layout"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent">
 
     <!-- The main content view -->
 
     <FrameLayout
         android:id="@+id/maps_app_activity_content_frame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"/>
     <!-- The navigation drawer -->
 
     <ListView
@@ -20,6 +20,6 @@
         android:background="@color/colorPrimary"
         android:choiceMode="singleChoice"
         android:divider="@color/colorDivider"
-        android:dividerHeight="1px" />
+        android:dividerHeight="1px"/>
 
 </android.support.v4.widget.DrawerLayout>
