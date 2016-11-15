@@ -144,7 +144,7 @@ mLocator.loadAsync();
 * Sign in to ArcGIS account
 
 ## Development Instructions
-This Maps App repo is an Android Studio Project and App Module that can be directly cloned and imported into Android Studio.
+This Maps App repo is an Android Studio Project and App Module that can be directly cloned and imported into Android Studio.  You will need to login to [ArcGIS for Developers](https://developers.arcgis.com/) and [register](https://developers.arcgis.com/applications/#/) your app.  Once you've registered your version of this app, set the client id and redirect uri in the applications app_settings.xml file.  Remember to also adjust your Android Manifest file to reflect the correct schema (based on your redirect uri) for the DefaultOAuthIntentReceiver.
 
 ### Fork the repo
 **Fork** the [Maps App Android](https://github.com/Esri/maps-app-android/fork) repo
