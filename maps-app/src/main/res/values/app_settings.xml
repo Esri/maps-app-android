@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <!-- TODO: add your OAuth Client ID here-->
     <string name="client_id">YOUR_CLIENT_ID</string>
+    <!--TODO: add your redirect uri associated with your registered app -->
+    <string name="redirect_uri">YOUR_REDIRECT_URI</string>
+    <!-- The following values are used in the Robotium tests only -->
     <string name="username">YOUR_PORTAL_USERNAME</string>
     <string name="password">YOUR_PORTAL_PASSWORD</string>
     <string name="testPartialName">vo</string>
-    <string name="redirect_uri">YOUR_REDIRECT_URI</string>
 </resources>
