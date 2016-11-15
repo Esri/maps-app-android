@@ -144,7 +144,40 @@ mLocator.loadAsync();
 * Sign in to ArcGIS account
 
 ## Development Instructions
-This Maps App repo is an Android Studio Project and App Module that can be directly cloned and imported into Android Studio.  You will need to login to [ArcGIS for Developers](https://developers.arcgis.com/) and [register](https://developers.arcgis.com/applications/#/) your app.  Once you've registered your version of this app, set the client id and redirect uri in the applications app_settings.xml file.  Remember to also adjust your Android Manifest file to reflect the correct schema (based on your redirect uri) for the DefaultOAuthIntentReceiver.
+This Maps App repo is an Android Studio Project and App Module that can be directly cloned and imported into Android Studio. In addition, you'll need to login to [ArcGIS for Developers](https://developers.arcgis.com/) and [register](https://developers.arcgis.com/applications/#/) your app.  Once you've registered your version of this app, set the client id and redirect uri in the applications app_settings.xml file.  
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TODO: add your OAuth Client ID here-->
+    <string name="client_id">YOUR_CLIENT_ID</string>
+    <!--TODO: add your redirect uri associated with your registered app -->
+    <string name="redirect_uri">YOUR_REDIRECT_URI</string>
+    <!-- The following values are used in the Robotium tests only -->
+    <string name="username">YOUR_PORTAL_USERNAME</string>
+    <string name="password">YOUR_PORTAL_PASSWORD</string>
+    <string name="testPartialName">vo</string>
+    
+</resources>
+```
+
+
+Remember to also adjust your Android Manifest file to reflect the correct schema (based on your redirect uri) for the DefaultOAuthIntentReceiver.  For example, if your redirect uri is ```my-maps-app://auth``` then your scheme would be ```my-maps-app```.
+
+```xml
+    ...
+    <activity
+       android:name="com.esri.arcgisruntime.security.DefaultOAuthIntentReceiver"
+       android:label="OAuthIntentReceiver"
+       android:launchMode="singleTask">
+       <intent-filter>
+           <action android:name="android.intent.action.VIEW"/>
+           <category android:name="android.intent.category.DEFAULT"/>
+           <category android:name="android.intent.category.BROWSABLE"/>
+           <!-- Replace this value with the appropriate scheme for your version of the map app -->
+           <data android:scheme="YOUR_SCHEME"/>
+        </intent-filter>
+     </activity>
+```
 
 ### Fork the repo
 **Fork** the [Maps App Android](https://github.com/Esri/maps-app-android/fork) repo
