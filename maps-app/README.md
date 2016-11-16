@@ -49,3 +49,6 @@ Swipe left from the left edge of your device to open the drawer. Select **Measur
 Sign into your ArcGIS account to add custom maps from your organization.
 
 ![](sign-in.png)
+
+## App Type Hierarchy
+![Type Hierarchy](TypeHierarchy.jpg)
