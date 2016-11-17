@@ -45,12 +45,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.esri.android.mapsapp.R;
-import com.esri.arcgisruntime.tasks.route.DirectionManeuver;
-import com.esri.arcgisruntime.tasks.route.DirectionManeuverType;
+import com.esri.arcgisruntime.tasks.networkanalysis.DirectionManeuver;
+import com.esri.arcgisruntime.tasks.networkanalysis.DirectionManeuverType;
 
 public class DirectionsDialogFragment extends DialogFragment {
 
-	private static final String TAG = "DirectionsDialogFragment";
+	private static final String TAG = "DirectionsDialogFrag";
 	DirectionsDialogListener mDirectionsDialogListener;
 	List<DirectionManeuver> mRoutingDirections;
 

@@ -24,6 +24,7 @@
 
 package com.esri.android.mapsapp;
 
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -98,6 +99,7 @@ import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
 import com.esri.arcgisruntime.security.AuthenticationManager;
 import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
+import com.esri.arcgisruntime.security.OAuthConfiguration;
 import com.esri.arcgisruntime.symbology.PictureMarkerSymbol;
 import com.esri.arcgisruntime.symbology.SimpleLineSymbol;
 import com.esri.arcgisruntime.tasks.geocode.GeocodeParameters;
@@ -106,12 +108,7 @@ import com.esri.arcgisruntime.tasks.geocode.LocatorTask;
 import com.esri.arcgisruntime.tasks.geocode.ReverseGeocodeParameters;
 import com.esri.arcgisruntime.tasks.geocode.SuggestParameters;
 import com.esri.arcgisruntime.tasks.geocode.SuggestResult;
-import com.esri.arcgisruntime.tasks.route.DirectionManeuver;
-import com.esri.arcgisruntime.tasks.route.Route;
-import com.esri.arcgisruntime.tasks.route.RouteParameters;
-import com.esri.arcgisruntime.tasks.route.RouteResult;
-import com.esri.arcgisruntime.tasks.route.RouteTask;
-import com.esri.arcgisruntime.tasks.route.Stop;
+import com.esri.arcgisruntime.tasks.networkanalysis.*;
 
 /**
  * Implements the view that shows the map.
@@ -230,10 +227,17 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			mBasemapPortalItemId = args.getString(KEY_BASEMAP_ITEM_ID);
 		}
 
-
-		DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(
-				getActivity());
-		AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
+		try {
+			OAuthConfiguration oAuthConfiguration = new OAuthConfiguration("https://www.arcgis.com",getString( R.string.client_id), getString(
+					R.string.redirect_uri));
+			DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(
+					getActivity());
+			AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
+			AuthenticationManager.addOAuthConfiguration(oAuthConfiguration);
+		} catch (MalformedURLException e) {
+			Log.i(TAG,"OAuth problem : " + e.getMessage());
+			Toast.makeText(getActivity(), "The was a problem authenticating against the portal.", Toast.LENGTH_LONG).show();
+		}
 
 	}
 

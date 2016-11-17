@@ -46,7 +46,6 @@ import com.esri.android.mapsapp.util.TaskExecutor;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;
-import com.esri.arcgisruntime.portal.PortalItemType;
 import com.esri.arcgisruntime.portal.PortalUser;
 import com.esri.arcgisruntime.portal.PortalUserContent;
 
@@ -129,7 +128,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 							if (rootItems != null) {
 								// only select items of type WEBMAP
 								for (PortalItem item : rootItems) {
-									if (item.getType() == PortalItemType.WEBMAP) {
+									if (item.getType() == PortalItem.Type.WEBMAP) {
 										webMapItems.add(item);
 									}
 								}
