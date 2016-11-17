@@ -7,7 +7,18 @@
  * Sign into an ArcGIS account
  
 ## Development Instructions
-This Maps App repo is an Android Studio Project and App Module that can be directly cloned and imported into Android Studio.
+This Maps App repo is an Android Studio Project and App Module that can be directly cloned and imported into Android Studio. In addition, you'll need to login to [ArcGIS for Developers](https://developers.arcgis.com/) and [register](https://developers.arcgis.com/applications/#/) your app.  Once you've registered your version of this app, set the client id  in the applications app_settings.xml file.  
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TODO: add your OAuth Client ID here-->
+    <string name="client_id">YOUR_CLIENT_ID</string>
+    <!-- The following values are used in the Robotium tests only -->
+    <string name="username">YOUR_PORTAL_USERNAME</string>
+    <string name="password">YOUR_PORTAL_PASSWORD</string>
+    <string name="testPartialName">vo</string>
+</resources>
+```
 
 ### Fork the repo
 **Fork** the [Maps App Android](https://github.com/Esri/maps-app-android/fork) repo
