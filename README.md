@@ -1,4 +1,11 @@
-
+## Features		
+ * Dynamically switch basemaps		
+ * Place search		
+ * Routing		
+ * Geocode addresses		
+ * Reverse geocode		
+ * Sign into an ArcGIS account
+ 
 ## Development Instructions
 This Maps App repo is an Android Studio Project and App Module that can be directly cloned and imported into Android Studio.
 
