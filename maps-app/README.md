@@ -59,7 +59,7 @@ The Maps App leverages the ArcGIS [identity](https://developers.arcgis.com/authe
 
 The process of accessing token secured services with a challenge handler is illustrated in the following diagram.
 
-![](https://github.com/Esri/maps-app-android/blob/maps-app-doc/maps-app/assets/identity.png)
+![](assets/identity.png)
 
 1. A request is made to a secured resource.
 2. The portal responds with an unauthorized access error.
@@ -110,7 +110,7 @@ You can also provision your own [custom geocode service](https://doc.arcgis.com/
 
 Typing the first few letters of a place into the Map App search box (e.g. “Voodoo Doughnut”) shows a number of suggestions near the device’s location
 
-![] (https://github.com/Esri/maps-app-android/blob/maps-app-doc/maps-app/assets/suggest.png)
+![] (assets/suggest.png)
 
 ```
 // Attach a listener to the locator task since the LocatorTask may or may not be loaded the
@@ -171,7 +171,7 @@ The Map App uses the built-in map magnifier to help users fine tune a location o
 
 On long press                          | Reverse geocode result
 :-------------------------------------:|:-------------------------------------:
-![](https://github.com/Esri/maps-app-android/blob/maps-app-doc/maps-app/assets/reverse_geocode.png)              | ![](https://github.com/Esri/maps-app-android/blob/maps-app-doc/maps-app/assets/reverse_geocode2.png)
+![](assets/reverse_geocode.png)              | ![](assets/reverse_geocode2.png)
 
 We’ve extended the DefaultMapViewOnTouchListener and implemented logic for onUp motion event.
 
@@ -292,4 +292,4 @@ You can instantiate a new RouteParameters object by using the generateDefaultPar
   }
   ```
 The resulting route is shown:
-![](https://github.com/Esri/maps-app-android/blob/maps-app-doc/maps-app/assets/route.png)
+![](assets/route.png)
