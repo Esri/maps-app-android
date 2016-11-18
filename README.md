@@ -7,18 +7,44 @@
  * Sign into an ArcGIS account
  
 ## Development Instructions
-This Maps App repo is an Android Studio Project and App Module that can be directly cloned and imported into Android Studio. In addition, you'll need to login to [ArcGIS for Developers](https://developers.arcgis.com/) and [register](https://developers.arcgis.com/applications/#/) your app.  Once you've registered your version of this app, set the client id  in the applications app_settings.xml file.  
+This Maps App repo is an Android Studio Project and App Module that can be directly cloned and imported into Android Studio. In addition, you'll need to follow the steps below to obtain your client id and redirect uri. Both are required for leveraging all the features of the app.
+
+* Login to [ArcGIS for Developers](https://developers.arcgis.com/) and [register](https://developers.arcgis.com/applications/#/) your app.  
+
+![](Register1.png)
+* Once you've registered your version of the maps-app, grab a copy of the client id from the registration and set the client id in the applications app_settings.xml file.  
+
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- TODO: add your OAuth Client ID here-->
     <string name="client_id">YOUR_CLIENT_ID</string>
+    <!-- This redirect URI is the default value for https://www.arcgis.com -->
+    <string name="redirect_uri">my-ags-app://auth</string>
     <!-- The following values are used in the Robotium tests only -->
     <string name="username">YOUR_PORTAL_USERNAME</string>
     <string name="password">YOUR_PORTAL_PASSWORD</string>
     <string name="testPartialName">vo</string>
 </resources>
 ```
+* As part of the registration process, add a redirect uri for your app.  Navigate to the Redirect URIs section at the bottom of the registration page and set the redirect uri to `my-ags-app://auth`.  This redirect uri is the default redirect for `https://www.arcgis.com`.
+
+![](Register2.png)
+* Note that the scheme for the `DefaultOAuthIntentReceiver` in the Android Manifest file is derived from the redirect uri.
+```xml
+        <activity
+            android:name="com.esri.arcgisruntime.security.DefaultOAuthIntentReceiver"
+            android:label="OAuthIntentReceiver"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data android:scheme="my-ags-app"/>
+            </intent-filter>
+        </activity>
+ ```
 
 ### Fork the repo
 **Fork** the [Maps App Android](https://github.com/Esri/maps-app-android/fork) repo
