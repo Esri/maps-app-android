@@ -70,8 +70,10 @@ The process of accessing token secured services with a challenge handler is illu
 
 The DefaultAuthenticationChallengeHandler class takes care of steps 1-6 in the diagram above. For an application to use this pattern, follow these [guides](https://developers.arcgis.com/authentication/signing-in-arcgis-online-users/) to register your app.
 ```
-// Add these two lines to your Android fragment or activity
-OAuthConfiguration oAuthConfiguration = new OAuthConfiguration(mPortalUrl, clientId, redirectUri);
+// Add these four lines to your Android fragment or activity
+OAuthConfiguration oAuthConfiguration = new OAuthConfiguration("https://www.arcgis.com",clientId, redirectUri);
+DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(this);
+AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
 AuthenticationManager.addOAuthConfiguration(oAuthConfiguration);
 ```
 
