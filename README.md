@@ -1,3 +1,7 @@
+# Maps-App Android
+
+This repo provides an example app for Android devices called Maps App that can be used as as starter for your organizations mapping app built with [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/android/).  You can use the Maps App as is, or extend it using the ArcGIS Runtime SDK for Android.
+
 ## Features		
  * Dynamically switch basemaps		
  * Place search		
