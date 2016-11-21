@@ -44,7 +44,10 @@ import com.esri.arcgisruntime.portal.PortalInfo;
 import com.esri.arcgisruntime.portal.PortalUser;
 import com.esri.arcgisruntime.security.AuthenticationManager;
 import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
+import com.esri.arcgisruntime.security.OAuthConfiguration;
 import org.apache.http.client.HttpResponseException;
+
+import java.net.MalformedURLException;
 
 /**
  * Implements the sign in UX to ArcGIS portal accounts. Handles sign in to OAuth
@@ -84,10 +87,17 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 		// Set up an authentication handler
 		// to be used when loading remote
 		// resources or services.
-		// TODO: Explain more about how this works.
-		DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(
-				this);
-		AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
+		try {
+			OAuthConfiguration oAuthConfiguration = new OAuthConfiguration("https://www.arcgis.com",getString( R.string.client_id), getString(
+					R.string.redirect_uri));
+			DefaultAuthenticationChallengeHandler authenticationChallengeHandler = new DefaultAuthenticationChallengeHandler(
+					this);
+			AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeHandler);
+			AuthenticationManager.addOAuthConfiguration(oAuthConfiguration);
+		} catch (MalformedURLException e) {
+			Log.i(TAG,"OAuth problem : " + e.getMessage());
+			Toast.makeText(this, "The was a problem authenticating against the portal.", Toast.LENGTH_LONG).show();
+		}
 
 	}
 

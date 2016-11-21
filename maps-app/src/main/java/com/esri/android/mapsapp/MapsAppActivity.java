@@ -38,6 +38,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -75,7 +77,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 
 	private static final int PERMISSION_REQUEST_LOCATION = 0;
 	private static final int REQUEST_LOCATION_SETTINGS = 1;
-	private static final int REQUEST_AIRPLANE_MODE = 2;
+	private static final int REQUEST_WIFI_SETTINGS = 2;
 	private static final int REQUEST_ARCGIS_CRED = 3;
 	private static final String TAG = MapsAppActivity.class.getSimpleName();
 	public static DrawerLayout mDrawerLayout;
@@ -128,24 +130,24 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	}
 
 	/*
-	 * Prompt user to turn location and wireless if needed
+	 * Prompt user to turn on location tracking and wireless if needed
 	 */
 	private void checkSettings() {
-		boolean airplaneMode = isAirplaneModeOn(getApplicationContext());
+		// Is GPS enabled?
 		boolean gpsEnabled = locationTrackingEnabled();
-		// If GPS is not enabled OR the phone is in airplane mode
-		// show a dialog asking user to enable location tracking
-		if (airplaneMode) {
-			Intent airplaneIntent = new Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS);
-			showDialog(airplaneIntent, REQUEST_AIRPLANE_MODE, getString(R.string.wireless_off));
-		} else { // Airplane mode off
-			if (!gpsEnabled) { // gps off
-				Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-				showDialog(gpsIntent, REQUEST_LOCATION_SETTINGS, getString(R.string.location_tracking_off));
-			} else {
-				setView();
-			}
+		// Is there internet connectivity?
+		boolean internetConnected = internetConnectivity();
+
+		if (gpsEnabled && internetConnected) {
+			setView();
+		}else if (!gpsEnabled) {
+			Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+			showDialog(gpsIntent, REQUEST_LOCATION_SETTINGS, getString(R.string.location_tracking_off));
+		}else if(!internetConnected)	{
+			Intent internetIntent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+			showDialog(internetIntent, REQUEST_WIFI_SETTINGS, getString(R.string.wireless_off));
 		}
+
 	}
 
 	/**
@@ -183,7 +185,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == REQUEST_AIRPLANE_MODE || requestCode == REQUEST_LOCATION_SETTINGS) {
+		if (requestCode == REQUEST_WIFI_SETTINGS || requestCode == REQUEST_LOCATION_SETTINGS) {
 			checkSettings();
 		}else if (requestCode == REQUEST_ARCGIS_CRED){
 			Log.i(TAG, "Browser returned...");
@@ -484,6 +486,16 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 		LocationManager locationManager = (LocationManager) getApplicationContext()
 				.getSystemService(Context.LOCATION_SERVICE);
 		return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+	}
+
+	private boolean internetConnectivity(){
+		ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo wifi = connManager.getActiveNetworkInfo();
+		if (wifi == null){
+			return false;
+		}else {
+			return wifi.isConnected();
+		}
 	}
 
 	/**
