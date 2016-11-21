@@ -6,11 +6,12 @@ android {
 
     defaultConfig {
         applicationId "com.esri.android.mapsapp"
-        minSdkVersion 16
+        minSdkVersion 17
         targetSdkVersion 25
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
 
-    packagingOptions{
+    packagingOptions {
         exclude 'META-INF/LGPL2.1'
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/NOTICE'
@@ -22,15 +23,32 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+    useLibrary 'org.apache.http.legacy'
 }
 
 dependencies {
     // android support libraries
     compile 'com.android.support:support-v4:25.0.1'
     compile 'com.android.support:appcompat-v7:25.0.1'
+    compile 'com.android.support:cardview-v7:25.0.1'
     compile 'com.android.support:design:25.0.1'
-    // ArcGIS Android 10.2.7 API
-    compile 'com.esri.arcgis.android:arcgis-android:10.2.8-1'
+
+    // ArcGIS Android API
+    compile 'com.esri.arcgisruntime:arcgis-android:100.0.0'
     // square libs
     compile 'com.jakewharton:butterknife:6.1.0'
+
+    // Android Testing Support Library's runner and rules
+    androidTestCompile "com.android.support.test:runner:$rootProject.ext.runnerVersion"
+    androidTestCompile "com.android.support.test:rules:$rootProject.ext.runnerVersion"
+
+    // Espresso UI Testing
+    androidTestCompile "com.android.support.test.espresso:espresso-core:$rootProject.ext.espressoVersion"
+    androidTestCompile ("com.android.support.test.espresso:espresso-contrib:$rootProject.ext.espressoVersion") {
+        exclude module: 'recyclerview-v7'
+    }
+    // Robotium dependencies
+    androidTestCompile 'com.jayway.android.robotium:robotium-solo:5.5.4'
+
+    compile group: 'org.apache.httpcomponents' , name: 'httpclient-android' , version: '4.3.5.1'
 }

@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_alignParentLeft="true"
-    android:layout_alignWithParentIfMissing="true"
-    android:layout_centerInParent="true"
-    android:layout_gravity="center"
-    android:background="@drawable/map_results_ribbon_item_selector"
-    android:paddingLeft="5dp"
-    android:paddingRight="5dp" >
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignWithParentIfMissing="true"
+                android:layout_centerInParent="true"
+                android:layout_gravity="center"
+                android:background="@drawable/map_results_ribbon_item_selector"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp">
 
     <ImageView
         android:id="@+id/directions_maneuver_imageview"
@@ -17,10 +17,10 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_gravity="center"
+        android:contentDescription="@string/directions_maneuver"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
-        android:visibility="visible"
-        android:contentDescription="@string/directions_maneuver"/>
+        android:visibility="visible"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,7 +28,7 @@
         android:layout_gravity="center"
         android:layout_marginRight="@dimen/route_overview_layout_margin"
         android:layout_toRightOf="@+id/directions_maneuver_imageview"
-        android:orientation="vertical" >
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/directions_text_textview"
@@ -40,7 +40,7 @@
             android:text="These are the directions and they may be more than one line"
             android:textColor="@color/colorTextPrimary"
             android:textSize="@dimen/route_overview_text_size"
-            tools:ignore="HardcodedText" />
+            tools:ignore="HardcodedText"/>
 
         <TextView
             android:id="@+id/directions_length_textview"
@@ -52,7 +52,7 @@
             android:text="19.3 km"
             android:textColor="@color/colorTextSecondary"
             android:textSize="@dimen/route_overview_text_size"
-            tools:ignore="HardcodedText" />
+            tools:ignore="HardcodedText"/>
     </LinearLayout>
 
 </RelativeLayout>

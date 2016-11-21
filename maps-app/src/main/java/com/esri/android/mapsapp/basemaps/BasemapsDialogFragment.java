@@ -24,270 +24,307 @@
 
 package com.esri.android.mapsapp.basemaps;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import com.esri.android.mapsapp.R;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.basemaps.BasemapsAdapter.BasemapsAdapterClickListener;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
-import com.esri.core.portal.Portal;
-import com.esri.core.portal.PortalGroup;
-import com.esri.core.portal.PortalInfo;
-import com.esri.core.portal.PortalItem;
-import com.esri.core.portal.PortalQueryParams;
-import com.esri.core.portal.PortalQueryParams.PortalQuerySortOrder;
-import com.esri.core.portal.PortalQueryResultSet;
-
-import java.util.ArrayList;
+import com.esri.arcgisruntime.concurrent.ListenableFuture;
+import com.esri.arcgisruntime.portal.*;
 
 /**
  * Implements the dialog that provides a collection of basemaps to the user.
  */
 public class BasemapsDialogFragment extends DialogFragment implements BasemapsAdapterClickListener, OnCancelListener {
 
-  private static final String TAG = "BasemapsDialogFragment";
+	private static final String TAG = "BasemapsDialogFragment";
+	private static final String TAG_BASEMAP_SEARCH_PROGRESS_DIALOG = "TAG_BASEMAP_SEARCH_PROGRESS_DIALOG";
+	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
+	private final List<PortalItem> mPortalItems = new ArrayList<PortalItem>();
+	private ProgressDialogFragment mProgressDialog;
+	private BasemapsDialogListener mBasemapsDialogListener;
+	private BasemapsAdapter mBasemapsAdapter;
+	private ArrayList<BasemapItem> mBasemapItemList;
+	private static final String PUBLIC_BASEMAPS = "public_basemaps";
+	private static final String PRIVATE_BASEMAPS = "private_basemaps";
 
-  private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
+	// Mandatory empty constructor for fragment manager to recreate fragment
+	// after it's destroyed
+	public BasemapsDialogFragment() {
+	}
 
-  /**
-   * A callback interface that all activities containing this fragment must implement, to receive a new basemap from
-   * this fragment.
-   */
-  public interface BasemapsDialogListener {
-    /**
-     * Called when a basemap is selected.
-     * 
-     * @param itemId portal item id of the selected basemap
-     */
-    void onBasemapChanged(String itemId);
-  }
+	/**
+	 * Sets listener for selection of new basemap.
+	 *
+	 * @param listener
+	 */
+	public void setBasemapsDialogListener(BasemapsDialogListener listener) {
+		mBasemapsDialogListener = listener;
+	}
 
-  private BasemapsDialogListener mBasemapsDialogListener;
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setStyle(DialogFragment.STYLE_NORMAL,R.style.CustomDialog);
 
-  private BasemapsAdapter mBasemapsAdapter;
+	}
 
-  private ArrayList<BasemapItem> mBasemapItemList;
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		getDialog().setTitle(R.string.title_basemaps_dialog);
 
-  private BasemapSearchAsyncTask mPendingBasemapSearch;
+		// Inflate basemaps grid layout and setup list and adapter to back it
+		GridView view = (GridView) inflater.inflate(R.layout.grid_layout, container, false);
+		mBasemapItemList = new ArrayList<>();
+		mBasemapsAdapter = new BasemapsAdapter(getActivity(), mBasemapItemList, this);
+		view.setAdapter(mBasemapsAdapter);
 
-  // Mandatory empty constructor for fragment manager to recreate fragment after it's destroyed
-  public BasemapsDialogFragment() {
-  }
+		// Show progress dialog
+		mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.fetching_basemaps));
+		// set the target fragment to receive cancel notification
+		mProgressDialog.setTargetFragment(this, REQUEST_CODE_PROGRESS_DIALOG);
 
-  /**
-   * Sets listener for selection of new basemap.
-   * 
-   * @param listener
-   */
-  public void setBasemapsDialogListener(BasemapsDialogListener listener) {
-    mBasemapsDialogListener = listener;
-  }
+		// If no basemaps yet, execute search for available basemaps and
+		// populate the grid with them.
+		if (mBasemapItemList.size() == 0) {
 
-  @Override
-  public void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setStyle(DialogFragment.STYLE_NORMAL, 0);
-  }
+			fetchBasemapItems();
+		}
+		return view;
+	}
 
-  @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-    getDialog().setTitle(R.string.title_basemaps_dialog);
 
-    // Inflate basemaps grid layout and setup list and adapter to back it
-    GridView view = (GridView) inflater.inflate(R.layout.grid_layout, container, false);
-    mBasemapItemList = new ArrayList<>();
-    mBasemapsAdapter = new BasemapsAdapter(getActivity(), mBasemapItemList, this);
-    view.setAdapter(mBasemapsAdapter);
-    return view;
-  }
+	@Override
+	public void onBasemapItemClicked(int position) {
+		dismiss();
 
-  @Override
-  public void onResume() {
-    super.onResume();
+		String itemId = mBasemapItemList.get(position).item.getItemId();
+		mBasemapsDialogListener.onBasemapChanged(itemId);
+	}
 
-    // If no basemaps yet, execute AsyncTask to search for available basemaps and populate the grid with them.
-    // Note we do this here rather than in onCreateView() because otherwise the progress dialog doesn't show
-    if (mBasemapItemList.size() == 0) {
-      if (mPendingBasemapSearch != null) {
-        mPendingBasemapSearch.cancel(true);
-      }
+	/**
+	 * Fetch basemaps from local cache or portal
+	 */
+	private void fetchBasemapItems() {
+		// Show a progress dialog
+		mProgressDialog.show(getActivity().getFragmentManager(), TAG_BASEMAP_SEARCH_PROGRESS_DIALOG);
+		List<BasemapItem> cachedContents = null;
+		// If user is signed in, check if we've already
+		// downloaded their basemaps
+		if (AccountManager.getInstance().isSignedIn()) {
+			if(itemsLoadedFromCache(PRIVATE_BASEMAPS)){
+				mProgressDialog.dismiss();
+				return;
+			}else{
+				getBasemapsFromUserPortal();
+			}
+		} else { // user is not signed in, but have
+			// they previously retrieved public
+			// basemaps from AGOL
+			if(itemsLoadedFromCache(PUBLIC_BASEMAPS)){
+				mProgressDialog.dismiss();
+				return;
+			}else{ // get basemaps from AGOL
+				final Portal portal = AccountManager.getInstance().getAGOLPortal();
+				if (portal.getPortalInfo() == null){
+					portal.addDoneLoadingListener(new Runnable() {
+						@Override public void run() {
+							loadBasemapsFromAGOL(portal);
+						}
+					});
+					portal.loadAsync();
+				}else{
+					loadBasemapsFromAGOL(portal);
+				}
+			}
+		}
+	}
 
-      mPendingBasemapSearch = new BasemapSearchAsyncTask();
-      mPendingBasemapSearch.execute();
-    }
+	private boolean itemsLoadedFromCache(String cacheName){
 
-  }
+		if (PersistBasemaps.getInstance().storage.get(cacheName) != null){
+			List<BasemapItem> cachedItems = PersistBasemaps.getInstance().storage.get(cacheName);
+			Log.i(TAG, "Getting items " + cacheName + " " + cachedItems.size());
+			mBasemapItemList.clear();
+			mBasemapItemList.addAll(cachedItems);
+			mBasemapsAdapter.notifyDataSetChanged();
+			return true;
+		}else{
+			return false;
+		}
+	}
 
-  @Override
-  public void onBasemapItemClicked(int position) {
-    dismiss();
+	/*
+	 * Get basemap content from user's portal
+	 */
+	private void getBasemapsFromUserPortal() {
+		// we are signed in - fetch the basemaps of the user's portal
+		final Portal portal = AccountManager.getInstance().getPortal();
+		PortalInfo portalInfo = AccountManager.getInstance().getPortalInfo();
 
-    String itemId = mBasemapItemList.get(position).item.getItemId();
-    mBasemapsDialogListener.onBasemapChanged(itemId);
-  }
+		PortalQueryParameters queryParams = new PortalQueryParameters();
 
-  @Override
-  public void onCancel(DialogInterface dialog) {
-    // the progress dialog has been canceled - cancel pending basemap search task
-    if (mPendingBasemapSearch != null) {
-      mPendingBasemapSearch.cancel(true);
-    }
-  }
+		// get the query string to fetch the portal
+		// group that defines the portal's basemaps
+		queryParams.setQuery(portalInfo.getBasemapGalleryGroupQuery());
 
-  /**
-   * This class provides an AsyncTask that fetches info about available basemaps on a background thread and displays a
-   * grid containing these on the UI thread.
-   */
-  private class BasemapSearchAsyncTask extends AsyncTask<Void, Void, Void> {
-    private static final String TAG_BASEMAP_SEARCH_PROGRESS_DIALOG = "TAG_BASEMAP_SEARCH_PROGRESS_DIALOG";
+		// Use a listenable future for retrieving search results from portal
+		final ListenableFuture<PortalQueryResultSet<PortalGroup>> groupFuture = portal.findGroupsAsync(queryParams);
+		groupFuture.addDoneListener(new Runnable() {
+			@Override
 
-    private Exception mException;
+			public void run() {
 
-    private ProgressDialogFragment mProgressDialog;
+				try {
+					PortalQueryResultSet<PortalGroup> basemapGroupResult = groupFuture.get();
+					if (basemapGroupResult != null && basemapGroupResult.getResults() != null
+							&& !basemapGroupResult.getResults().isEmpty()) {
 
-    public BasemapSearchAsyncTask() {
-    }
+						PortalGroup group = basemapGroupResult.getResults().get(0);
 
-    @Override
-    protected void onPreExecute() {
-      mProgressDialog = ProgressDialogFragment.newInstance(getActivity().getString(R.string.fetching_basemaps));
-      // set the target fragment to receive cancel notification
-      mProgressDialog.setTargetFragment(BasemapsDialogFragment.this, REQUEST_CODE_PROGRESS_DIALOG);
-      mProgressDialog.show(getActivity().getFragmentManager(), TAG_BASEMAP_SEARCH_PROGRESS_DIALOG);
-    }
+						PortalQueryParameters basemapQueryParams = new PortalQueryParameters();
+						basemapQueryParams.setQueryForItemsInGroup(group.getGroupId());
 
-    @Override
-    protected Void doInBackground(Void... params) {
-      // Fetch basemaps on background thread
-      mException = null;
-      try {
-        fetchBasemapItems();
-      } catch (Exception e) {
-        mException = e;
-      }
-      return null;
-    }
+						final ListenableFuture<PortalQueryResultSet<PortalItem>> contentFuture = portal
+								.findItemsAsync(basemapQueryParams);
+						contentFuture.addDoneListener(new Runnable() {
+							@Override
+							public void run() {
+								try {
+									PortalQueryResultSet<PortalItem> items = contentFuture.get();
+									mPortalItems.addAll(items.getResults());
+									getBasemapThumbnails();
+									PersistBasemaps.getInstance().storage.put(PRIVATE_BASEMAPS,mBasemapItemList);
+									Log.i(TAG, "Persisting " + PRIVATE_BASEMAPS + " wtih " + mBasemapItemList.size() + " items");
+								} catch (Exception e) {
+									mProgressDialog.dismiss();
+									e.printStackTrace();
+								}
 
-    @Override
-    protected void onPostExecute(Void result) {
-      // Display results on UI thread
-      mProgressDialog.dismiss();
-      if (mException != null) {
-        Log.w(TAG, "BasemapSearchAsyncTask failed with:");
-        mException.printStackTrace();
-        Toast.makeText(getActivity(), getString(R.string.basemapSearchFailed), Toast.LENGTH_LONG).show();
-        dismiss();
-        return;
-      }
-      // Success - update grid with results
-      mBasemapsAdapter.notifyDataSetChanged();
-    }
+							}
+						});
+					}
+				} catch (Exception ie) {
+					ie.printStackTrace();
+				}
+			}
+		});
+	}
 
-    @Override
-    protected void onCancelled(Void result) {
-      // Dismiss the whole dialog if this task is cancelled
-      dismiss();
-    }
+	private void loadBasemapsFromAGOL(final Portal portal) {
+		//Provides information about a portal as seen by the current user, anonymous or logged in. 
+		PortalInfo portalInfo = portal.getPortalInfo();
+		// Get the query string for items in basemap group 
+		String baseMapQueryString = portalInfo.getBasemapGalleryGroupQuery();
+		//Create query parameters suitable for finding content or groups contained in a portal 
+		PortalQueryParameters queryParams = new PortalQueryParameters(baseMapQueryString);
+		// Limit query to publicly available items
+		queryParams.setCanSearchPublic(true);
+		final ListenableFuture<PortalQueryResultSet<PortalGroup>> groupFuture = portal.findGroupsAsync(queryParams);
+		// Listen for completion
+		groupFuture.addDoneListener(new Runnable() {
+			@Override public void run() {
+				try {
+					PortalQueryResultSet<PortalGroup> groupResults = groupFuture.get();
+					if (groupResults.getResults().isEmpty()) {
+						// Handle UI response for empty results
+					} else {
+						PortalGroup basemapGroup = groupResults.getResults().get(0);
+						String groupId = basemapGroup.getGroupId();
+						// Build a new query param object to retrieve basemaps for given group
+						PortalQueryParameters basemapQuery = new PortalQueryParameters();
+						basemapQuery.setQuery(PortalItem.Type.WEBMAP, groupId, null);
+						basemapQuery.setCanSearchPublic(true);
+						// Set sort order on basemap name 
+						basemapQuery.setSortField("name").setSortOrder(PortalQueryParameters.SortOrder.ASCENDING);
+						// Find items that match the query
+						final ListenableFuture<PortalQueryResultSet<PortalItem>> itemFuture = portal.findItemsAsync(basemapQuery);
+						// Once async call has completed, get the associated thumbnails
+						itemFuture.addDoneListener(new Runnable() {
+							@Override public void run() {
+								try {
+									PortalQueryResultSet<PortalItem> baseMapItems = itemFuture.get();
+									mPortalItems.addAll(baseMapItems.getResults());
+									getBasemapThumbnails();
+									PersistBasemaps.getInstance().storage.put(PUBLIC_BASEMAPS,mBasemapItemList);
+									Log.i(TAG, "Persisting " + PUBLIC_BASEMAPS + " wtih " + mBasemapItemList.size() + " items");
+								} catch (Exception itemE) {
+									mProgressDialog.dismiss();
+									itemE.printStackTrace();
+								}
+							}
+						});
+					}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
 
-    /**
-     * Fetches basemaps from the user's portal if signed in, otherwise from arcgis.com portal.
-     * 
-     * @throws Exception
-     */
-    private void fetchBasemapItems() throws Exception {
+	/**
+	 * Get thumbnails asycnchronously and populate the dialog
+	 * adapter with basemap items as thumbnails are retrieved.
+	 */
+	private void getBasemapThumbnails() {
+		for (final PortalItem item : mPortalItems) {
+			if (item.getThumbnailFileName() != null) {
+				final ListenableFuture<byte[]> futureThumbnail = item.fetchThumbnailAsync();
+				futureThumbnail.addDoneListener(new Runnable() {
 
-      PortalQueryResultSet<PortalItem> basemapResult = null;
+					@Override
+					public void run() {
+						try {
+							byte[] itemThumbnailData = futureThumbnail.get();
+							if (itemThumbnailData != null && itemThumbnailData.length > 0) {
+								// Decode thumbnail and add this item to list
+								// for display
+								Bitmap bitmap = BitmapFactory.decodeByteArray(itemThumbnailData, 0,
+										itemThumbnailData.length);
+								BasemapItem portalItemData = new BasemapItem(item, bitmap);
+								mBasemapItemList.add(portalItemData);
+								// Update grid with results
+								mBasemapsAdapter.notifyDataSetChanged();
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+		}
+		mProgressDialog.dismiss();
+	}
+	// If basemap item is persisted do not go out to service to fetch them again
 
-      if (AccountManager.getInstance().isSignedIn()) {
-        // we are signed in - fetch the basemaps of the user's portal
-        Portal portal = AccountManager.getInstance().getPortal();
-        PortalInfo portalInfo = AccountManager.getInstance().getPortalInfo();
-
-        PortalQueryParams queryParams = new PortalQueryParams();
-
-        // get the query string to fetch the portal group that defines the portal's basemaps
-        queryParams.setQuery(portalInfo.getBasemapGalleryGroupQuery());
-
-        PortalQueryResultSet<PortalGroup> basemapGroupResult = portal.findGroups(queryParams);
-        if (basemapGroupResult != null && basemapGroupResult.getResults() != null
-            && !basemapGroupResult.getResults().isEmpty()) {
-
-          PortalGroup group = basemapGroupResult.getResults().get(0);
-
-          PortalQueryParams basemapQueryParams = new PortalQueryParams();
-          basemapQueryParams.setQueryForItemsInGroup(group.getGroupId());
-
-          basemapResult = portal.findItems(basemapQueryParams);
-        }
-      } else {
-        // we are not signed in - fetch a selection of basemaps from arcgis.com
-        Portal portal = AccountManager.getInstance().getAGOLPortal();
-
-        // Create a PortalQueryParams to query for items in basemap group
-        PortalQueryParams queryParams = new PortalQueryParams();
-        queryParams.setSortField("name").setSortOrder(PortalQuerySortOrder.ASCENDING);
-        queryParams.setQuery(createDefaultQueryString());
-
-        // Find items that match the query
-        basemapResult = portal.findItems(queryParams);
-      }
-
-      if (isCancelled() || basemapResult == null || basemapResult.getResults() == null) {
-        return;
-      }
-
-      // Loop through query results
-      for (PortalItem item : basemapResult.getResults()) {
-        // Fetch item thumbnail from server
-        byte[] data = item.fetchThumbnail();
-        if (isCancelled()) {
-          return;
-        }
-        if (data != null) {
-          // Decode thumbnail and add this item to list for display
-          Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-          BasemapItem portalItemData = new BasemapItem(item, bitmap);
-          mBasemapItemList.add(portalItemData);
-        }
-      }
-    }
-
-    /**
-     * Creates a query string to fetch basemap portal items from arcgis.com.
-     */
-    private String createDefaultQueryString() {
-      String query;
-
-      String[] mBasemapIds = { "d5e02a0c1f2b4ec399823fdd3c2fdebd", // topographic
-          "716b600dbbac433faa4bec9220c76b3a", // imagery with labels
-          "b834a68d7a484c5fb473d4ba90d35e71", // open street map
-          "8bf7167d20924cbf8e25e7b11c7c502c", // streets
-          "2adf08a4a1a84834a773805a6e86f69e", // Oceans
-          "149a9bb14d604bd18f4597b21c19fac7" // Gray
-      };
-
-      StringBuilder str = new StringBuilder();
-      for (int i = 0; i < mBasemapIds.length; i++) {
-        str.append("id:").append(mBasemapIds[i]);
-        if (i < mBasemapIds.length - 1) {
-          str.append(" OR ");
-        }
-      }
-      query = str.toString();
-
-      return query;
-    }
-  }
+	/**
+	 * A callback interface that all activities containing this fragment must
+	 * implement, to receive a new basemap from this fragment.
+	 */
+	public interface BasemapsDialogListener {
+		/**
+		 * Called when a basemap is selected.
+		 *
+		 * @param itemId
+		 *            portal item id of the selected basemap
+		 */
+		void onBasemapChanged(String itemId);
+	}
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Maps App</string>
+    <string name="app_name">Maps App Quartz</string>
     <string name="basemap_thumbnail">basemap thumbnail</string>
 
     <!-- navigation drawer -->
@@ -17,7 +17,7 @@
     <string name="continue_label">Continue</string>
     <string name="cancel">Cancel</string>
     <string name="verifying_portal">Verifying portal</string>
-    <string name="portal_url_hint">e.g., http://www.arcgis.com</string>
+    <string name="portal_url_hint">http://www.arcgis.com</string>
     <string name="failed_sign_in">Failed to sign in.</string>
 
     <!-- content browser -->
@@ -32,7 +32,8 @@
     <string name="geocode_url">http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer</string>
 
     <!-- route service -->
-    <string name="routingservice_url">http://sampleserver3.arcgisonline.com/ArcGIS/rest/services/Network/USA/NAServer/Route</string>
+    <!--string name="routingservice_url">http://sampleserver6.arcgisonline.com/arcgis/rest/services/NetworkAnalysis/SanDiego/NAServer/Route</string-->
+    <string name="routingservice_url">https://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/</string>
 
     <!-- place search hint -->
     <string name="address">Place name or address</string>
@@ -71,10 +72,10 @@
     <string name="swap_addresses">Interchange the addresses</string>
     <string name="routing_title">Routing</string>
     <string name="clearText">Clear Text</string>
-    
+
     <!-- Routing Dialog Fragment -->
-	<string name="to">TO </string>
-	<string name="from">FROM </string>
+    <string name="to">TO </string>
+    <string name="from">FROM </string>
 
     <!-- ImageView content Descriptions -->
     <string name="icon_for_searchResult">Icon indicating Search</string>
@@ -88,5 +89,20 @@
 
     <!-- floating action button -->
     <string name="imagebutton_content_desc">Turn GPS on/off</string>
+
+    <!-- Toast/alert  strings-->
+    <string name="location_tracking_off">Location tracking is required for this app.  Do you want modify the location options?</string>
+    <string name="wireless_off">An internet connection is needed for this app. Do you want to modify the wireless settings?</string>
+    <string name="open_location_options">Yes</string>
+    <string name="icon_for_navigation_menue"/>
+    <string name="geo_locate_error">Geocode failed on address</string>
+    <string name="no_route_found">No route could be found</string>
+    <string name="location_not_foud">We\'re sorry, we couldn\'t find a location with the name</string>
+    <string name="signin">Sign In</string>
+    <string name="switch_basemap">Switch Basemap</string>
+    <string name="search">Search</string>
+    <string name="usernameLabel">Username</string>
+    <string name="passwordLabel">Password</string>
+
 
 </resources>

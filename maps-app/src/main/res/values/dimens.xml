@@ -73,4 +73,6 @@
     <dimen name="fab_margin_right">16dp</dimen>
     <dimen name="fab_margin_bottom">16dp</dimen>
 
+    <dimen name="cardview_vertical_margin">5dip</dimen>
+
 </resources>

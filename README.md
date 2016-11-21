@@ -1,21 +1,54 @@
-maps-app-android
-=======================
-This repo provides a template app for Android devices called Maps App that can be used as as starter for your organizations mapping app built with [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/android/).  You can use the Maps App as is, or extend it as a navigational mapping app using Runtime SDK for Android.
+# Maps-App Android
 
-On Start                               | Select Basemaps
-:-------------------------------------:|:-------------------------------------:
-![On Start](maps-app.png)              | ![Basemap](maps-app-basemap.png)
+This repo provides an example app for Android devices called Maps App that can be used as as starter for your organizations mapping app built with [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/android/).  You can use the Maps App as is, or extend it using the ArcGIS Runtime SDK for Android.
 
-## Features
-* Dynamically switch basemaps
-* Place search
-* Geocode addresses
-* Reverse geocode
-* Route
-* Sign in to ArcGIS account
-
+## Features		
+ * Dynamically switch basemaps		
+ * Place search		
+ * Routing		
+ * Geocode addresses		
+ * Reverse geocode		
+ * Sign into an ArcGIS account
+ 
 ## Development Instructions
-This Maps App repo is an Android Studio Project and App Module that can be directly cloned and imported into Android Studio.
+This Maps App repo is an Android Studio Project and App Module that can be directly cloned and imported into Android Studio. In addition, you'll need to follow the steps below to obtain your client id and redirect uri. Both are required for leveraging all the features of the app.
+
+* Login to [ArcGIS for Developers](https://developers.arcgis.com/) and [register](https://developers.arcgis.com/applications/#/) your app.  
+
+![](Register1.png)
+* Once you've registered your version of the maps-app, grab a copy of the client id from the registration and set the client id in the applications app_settings.xml file.  
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TODO: add your OAuth Client ID here-->
+    <string name="client_id">YOUR_CLIENT_ID</string>
+    <!-- This redirect URI is the default value for https://www.arcgis.com -->
+    <string name="redirect_uri">my-ags-app://auth</string>
+    <!-- The following values are used in the Robotium tests only -->
+    <string name="username">YOUR_PORTAL_USERNAME</string>
+    <string name="password">YOUR_PORTAL_PASSWORD</string>
+    <string name="testPartialName">vo</string>
+</resources>
+```
+* As part of the registration process, add a redirect uri for your app.  Navigate to the Redirect URIs section at the bottom of the registration page and set the redirect uri to `my-ags-app://auth`.  This redirect uri is the default redirect for `https://www.arcgis.com`.
+
+![](Register2.png)
+* Note that the scheme for the `DefaultOAuthIntentReceiver` in the Android Manifest file is derived from the redirect uri.
+```xml
+        <activity
+            android:name="com.esri.arcgisruntime.security.DefaultOAuthIntentReceiver"
+            android:label="OAuthIntentReceiver"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+
+                <data android:scheme="my-ags-app"/>
+            </intent-filter>
+        </activity>
+ ```
 
 ### Fork the repo
 **Fork** the [Maps App Android](https://github.com/Esri/maps-app-android/fork) repo
@@ -41,18 +74,28 @@ If there are changes made in the Original repository, you can sync the fork to k
 3. ```git checkout master``` to checkout your fork's local master branch.
 4. ```git merge upstream/master``` to sync your local `master' branch with `upstream/master`. **Note**: Your local changes will be retained and your fork's master branch will be in sync with the upstream repository.
 
+### Testing With Robotium
+The project includes a small suite of Robotium tests that test various features of the application.  The Robotium tests for the maps-app will run best on an attached device, rather than in the emulator.  You will need to adjust the values in the app_settings.xml file to reflect your specific auth credentials and any local addresses the tests use.  Use the following steps to configure your environment for running the tests.
+
+1.  Attach a non-emulated Android device to your computer.
+2.  Ensure location services are enabled on the Android device.
+3.  Ensure you have internet connectivity on the Android device.
+4.  Change the following entries in your values/app_settings.xml (username, password, testPartialName, localAddressNearYou).
+5.  Right-click on the MapAppRobotiumTests.java file in Android Studio and select Run 'MapAppRobotiumTests'.
 
 ## Requirements
 * [JDK 6 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 * [Android Studio](http://developer.android.com/sdk/index.html)
 
 ## Resources
+* [The Maps-App](https://github.com/Esri/maps-app-android/blob/maps-app-doc/maps-app/README.md)
 * [ArcGIS Runtime SDK for Android Developers Site](https://developers.arcgis.com/android/)
 * [ArcGIS Mobile Blog](http://blogs.esri.com/esri/arcgis/category/mobile/)
 * [ArcGIS Developer Blog](http://blogs.esri.com/esri/arcgis/category/developer/)
 * [Google+](https://plus.google.com/+esri/posts)
 * [twitter@ArcGISRuntime](https://twitter.com/ArcGISRuntime)
 * [twitter@esri](http://twitter.com/esri)
+* [Robotium](https://github.com/RobotiumTech/robotium) and [Robotium Javadoc](http://recorder.robotium.com/javadoc/)
 
 ## Issues
 Find a bug or want to request a new feature enhancement?  Let us know by submitting an issue.
