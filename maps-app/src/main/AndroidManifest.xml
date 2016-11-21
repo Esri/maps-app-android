@@ -46,7 +46,7 @@
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
 
-                <data android:scheme="my-maps-app"/>
+                <data android:scheme="my-ags-app"/>
             </intent-filter>
         </activity>
     </application>
