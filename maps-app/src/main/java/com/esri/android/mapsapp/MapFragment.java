@@ -78,6 +78,7 @@ import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogList
 import com.esri.android.mapsapp.tools.Compass;
 import com.esri.android.mapsapp.util.TaskExecutor;
 
+import com.esri.arcgisruntime.UnitSystem;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.geometry.Envelope;
 import com.esri.arcgisruntime.geometry.Geometry;
@@ -1673,7 +1674,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 							// We want the task to return driving directions and routes
 							routeParameters.setReturnDirections(true);
 							routeParameters.setOutputSpatialReference(MapFragment.mMapView.getSpatialReference());
-
+							routeParameters.setDirectionsDistanceUnits(UnitSystem.METRIC);
 							final ListenableFuture<RouteResult> routeResFuture = mRouteTask
 									.solveRouteAsync(routeParameters);
 							routeResFuture.addDoneListener(new Runnable() {
