@@ -150,9 +150,12 @@ public class MapAppRobotiumTests extends ActivityInstrumentationTestCase2 implem
    * can be selected from drawer
    */
   public void testLoadPublicBasemap(){
+    // Map view
+    View mapView = solo.getView(id.map);
+    Assert.assertTrue(solo.waitForView(mapView));
     // Open the drawer
     solo.clickOnImageButton(0);
-
+    solo.waitForText("Sign In");
     // Click on "Switch Basemap"
     solo.clickOnText(solo.getString(string.switch_basemap));
 
@@ -170,10 +173,7 @@ public class MapAppRobotiumTests extends ActivityInstrumentationTestCase2 implem
     solo.clickOnImage(0);
     Assert.assertTrue(solo.waitForDialogToClose());
 
-    View mapView = solo.getView(id.map);
-    Assert.assertTrue(solo.waitForView(mapView));
 
-    //
     solo.clickLongOnView(mapView, 3000);
     Assert.assertTrue(solo.waitForDialogToClose());
     solo.takeScreenshot("new_basemap");

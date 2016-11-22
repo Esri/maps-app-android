@@ -39,16 +39,15 @@ dependencies {
     compile 'com.jakewharton:butterknife:6.1.0'
 
     // Android Testing Support Library's runner and rules
-    androidTestCompile "com.android.support.test:runner:$rootProject.ext.runnerVersion"
-    androidTestCompile "com.android.support.test:rules:$rootProject.ext.runnerVersion"
-
-    // Espresso UI Testing
-    androidTestCompile "com.android.support.test.espresso:espresso-core:$rootProject.ext.espressoVersion"
-    androidTestCompile ("com.android.support.test.espresso:espresso-contrib:$rootProject.ext.espressoVersion") {
-        exclude module: 'recyclerview-v7'
+    androidTestCompile ("com.android.support.test:runner:$rootProject.ext.runnerVersion"){
+        exclude module: 'support-annotations'
     }
+    androidTestCompile ("com.android.support.test:rules:$rootProject.ext.runnerVersion"){
+        exclude module: 'support-annotations'
+    }
+
     // Robotium dependencies
-    androidTestCompile 'com.jayway.android.robotium:robotium-solo:5.5.4'
+    androidTestCompile 'com.jayway.android.robotium:robotium-solo:5.6.3'
 
     compile group: 'org.apache.httpcomponents' , name: 'httpclient-android' , version: '4.3.5.1'
 }
