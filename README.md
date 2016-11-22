@@ -88,7 +88,7 @@ The project includes a small suite of Robotium tests that test various features 
 * [Android Studio](http://developer.android.com/sdk/index.html)
 
 ## Resources
-* [The Maps-App](https://github.com/Esri/maps-app-android/blob/maps-app-doc/maps-app/README.md)
+* [The Maps-App](https://github.com/Esri/maps-app-android/blob/master/maps-app/README.md)
 * [ArcGIS Runtime SDK for Android Developers Site](https://developers.arcgis.com/android/)
 * [ArcGIS Mobile Blog](http://blogs.esri.com/esri/arcgis/category/mobile/)
 * [ArcGIS Developer Blog](http://blogs.esri.com/esri/arcgis/category/developer/)
