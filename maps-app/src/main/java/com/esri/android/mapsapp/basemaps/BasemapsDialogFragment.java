@@ -254,7 +254,22 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 						basemapQuery.setSortField("name").setSortOrder(PortalQueryParameters.SortOrder.ASCENDING);
 						// Find items that match the query
 						final ListenableFuture<PortalQueryResultSet<PortalItem>> itemFuture = portal.findItemsAsync(basemapQuery);
+						itemFuture.addDoneListener(new Runnable() {
+							@Override
+							public void run() {
+								try {
+									PortalQueryResultSet<PortalItem> items = itemFuture.get();
+									mPortalItems.addAll(items.getResults());
+									getBasemapThumbnails();
+									PersistBasemaps.getInstance().storage.put(PUBLIC_BASEMAPS,mBasemapItemList);
+									Log.i(TAG, "Persisting " + PUBLIC_BASEMAPS + " wtih " + mBasemapItemList.size() + " items");
+								} catch (Exception e) {
+									mProgressDialog.dismiss();
+									e.printStackTrace();
+								}
 
+							}
+						});
 					}
 				} catch (InterruptedException e) {
 					e.printStackTrace();
