@@ -1,4 +1,5 @@
-/* Copyright 1995-2014 Esri
+package com.esri.android.mapsapp.featuredcontent;
+/* Copyright 2016 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,20 +23,17 @@
  *
  */
 
-package com.esri.android.mapsapp.basemaps;
+import com.esri.android.mapsapp.basemaps.MapsAppItem;
 
-import android.graphics.Bitmap;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-import com.esri.arcgisruntime.portal.PortalItem;
+public class PersistFeaturedContent {
+  public static PersistFeaturedContent getInstance(){ return instance; }
 
-public class BasemapItem {
+  public final HashMap<String, ArrayList<MapsAppItem>> storage = new HashMap<>();
 
-	public PortalItem item;
+  private PersistFeaturedContent(){}
 
-	public Bitmap itemThumbnail;
-
-	public BasemapItem(PortalItem item, Bitmap bt) {
-		this.item = item;
-		itemThumbnail = bt;
-	}
+  private static final PersistFeaturedContent instance = new PersistFeaturedContent();
 }
