@@ -147,15 +147,16 @@ public class MapAppRobotiumTests extends ActivityInstrumentationTestCase2 implem
 
   /**
    * Test that publicly available basemaps
-   * can be selected from drawer
+   * can be selected from drawerR
    */
   public void testLoadPublicBasemap(){
     // Map view
     View mapView = solo.getView(id.map);
     Assert.assertTrue(solo.waitForView(mapView));
     // Open the drawer
-    solo.clickOnImageButton(0);
-    solo.waitForText("Sign In");
+    View drawer = solo.getView(id.btn_nav_menu);
+    solo.clickOnView(drawer);
+    solo.waitForText(solo.getString(string.switch_basemap));
     // Click on "Switch Basemap"
     solo.clickOnText(solo.getString(string.switch_basemap));
 
