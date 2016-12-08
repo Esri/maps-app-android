@@ -1,4 +1,4 @@
-/* Copyright 1995-2016 Esri
+/* Copyright 1995-2014 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,22 +24,18 @@
 
 package com.esri.android.mapsapp.basemaps;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import android.graphics.Bitmap;
 
-/**
- * singleton to persist BasemapItem data
- */
-public class PersistBasemaps {
+import com.esri.arcgisruntime.portal.PortalItem;
 
-  public static PersistBasemaps getInstance(){
-    return ourInstance;
-  }
+public class MapsAppItem {
 
-  public final HashMap<String, ArrayList<MapsAppItem>> storage = new HashMap<>();
+	public PortalItem item;
 
-  private PersistBasemaps(){}
+	public Bitmap itemThumbnail;
 
-  private static final PersistBasemaps ourInstance = new PersistBasemaps();
-
+	public MapsAppItem(PortalItem item, Bitmap bt) {
+		this.item = item;
+		itemThumbnail = bt;
+	}
 }

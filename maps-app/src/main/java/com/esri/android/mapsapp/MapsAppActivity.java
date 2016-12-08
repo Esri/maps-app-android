@@ -68,6 +68,8 @@ import butterknife.InjectView;
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.account.SignInActivity;
 import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
+import com.esri.android.mapsapp.featuredcontent.FeaturedContentFragment;
+import org.w3c.dom.Text;
 
 /**
  * Entry point into the Maps App.
@@ -472,6 +474,30 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 		});
 
 		mDrawerItems.add(item);
+
+		// Add the featured content item to the drawer
+		LinearLayout view_fc = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_layout,null) ;
+		TextView text_drawer_fc = (TextView) view_fc.findViewById(R.id.drawer_item_textview) ;
+		ImageView icon_drawer_fc = (ImageView) view_fc.findViewById(R.id.drawer_item_icon) ;
+		icon_drawer_fc.setImageResource(R.drawable.ic_collections_white_24px);
+		text_drawer_fc.setText("Featured Content");
+
+		item = new DrawerItem(view_fc, new DrawerItem.OnClickListener() {
+			@Override public void onClick() {
+				FeaturedContentFragment featuredContentFragment = new FeaturedContentFragment();
+				featuredContentFragment.setFeaturedContentListener(new FeaturedContentFragment.FeaturedContentListener() {
+					@Override public void onFeaturedContentChanged(String portalItemId) {
+						showMap(null, portalItemId);
+					}
+				});
+				featuredContentFragment.show(getFragmentManager(),null);
+				mDrawerLayout.closeDrawers();
+			}
+		});
+
+		mDrawerItems.add(item);
+
+
 
 		BaseAdapter adapter = (BaseAdapter) mDrawerList.getAdapter();
 		if (adapter == null) {

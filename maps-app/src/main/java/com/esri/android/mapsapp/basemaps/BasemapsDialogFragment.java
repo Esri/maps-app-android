@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -42,7 +41,7 @@ import android.widget.GridView;
 
 import com.esri.android.mapsapp.R;
 import com.esri.android.mapsapp.account.AccountManager;
-import com.esri.android.mapsapp.basemaps.BasemapsAdapter.BasemapsAdapterClickListener;
+import com.esri.android.mapsapp.basemaps.MapItemAdapter.MapItemClickListener;
 import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.portal.*;
@@ -50,7 +49,7 @@ import com.esri.arcgisruntime.portal.*;
 /**
  * Implements the dialog that provides a collection of basemaps to the user.
  */
-public class BasemapsDialogFragment extends DialogFragment implements BasemapsAdapterClickListener, OnCancelListener {
+public class BasemapsDialogFragment extends DialogFragment implements MapItemClickListener, OnCancelListener {
 
 	private static final String TAG = "BasemapsDialogFragment";
 	private static final String TAG_BASEMAP_SEARCH_PROGRESS_DIALOG = "TAG_BASEMAP_SEARCH_PROGRESS_DIALOG";
@@ -58,8 +57,8 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 	private final List<PortalItem> mPortalItems = new ArrayList<PortalItem>();
 	private ProgressDialogFragment mProgressDialog;
 	private BasemapsDialogListener mBasemapsDialogListener;
-	private BasemapsAdapter mBasemapsAdapter;
-	private ArrayList<BasemapItem> mBasemapItemList;
+	private MapItemAdapter mBasemapsAdapter;
+	private ArrayList<MapsAppItem> mBasemapItemList;
 	private static final String PUBLIC_BASEMAPS = "public_basemaps";
 	private static final String PRIVATE_BASEMAPS = "private_basemaps";
 
@@ -81,7 +80,6 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setStyle(DialogFragment.STYLE_NORMAL,R.style.CustomDialog);
-
 	}
 
 	@Override
@@ -91,7 +89,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 		// Inflate basemaps grid layout and setup list and adapter to back it
 		GridView view = (GridView) inflater.inflate(R.layout.grid_layout, container, false);
 		mBasemapItemList = new ArrayList<>();
-		mBasemapsAdapter = new BasemapsAdapter(getActivity(), mBasemapItemList, this);
+		mBasemapsAdapter = new MapItemAdapter(getActivity(), mBasemapItemList, this);
 		view.setAdapter(mBasemapsAdapter);
 
 		// Show progress dialog
@@ -110,7 +108,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 
 
 	@Override
-	public void onBasemapItemClicked(int position) {
+	public void onMapItemClicked(int position) {
 		dismiss();
 
 		String itemId = mBasemapItemList.get(position).item.getItemId();
@@ -123,7 +121,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 	private void fetchBasemapItems() {
 		// Show a progress dialog
 		mProgressDialog.show(getActivity().getFragmentManager(), TAG_BASEMAP_SEARCH_PROGRESS_DIALOG);
-		List<BasemapItem> cachedContents = null;
+		List<MapsAppItem> cachedContents = null;
 		// If user is signed in, check if we've already
 		// downloaded their basemaps
 		if (AccountManager.getInstance().isSignedIn()) {
@@ -158,7 +156,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 	private boolean itemsLoadedFromCache(String cacheName){
 
 		if (PersistBasemaps.getInstance().storage.get(cacheName) != null){
-			List<BasemapItem> cachedItems = PersistBasemaps.getInstance().storage.get(cacheName);
+			List<MapsAppItem> cachedItems = PersistBasemaps.getInstance().storage.get(cacheName);
 			Log.i(TAG, "Getting items " + cacheName + " " + cachedItems.size());
 			mBasemapItemList.clear();
 			mBasemapItemList.addAll(cachedItems);
@@ -299,7 +297,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 								// for display
 								Bitmap bitmap = BitmapFactory.decodeByteArray(itemThumbnailData, 0,
 										itemThumbnailData.length);
-								BasemapItem portalItemData = new BasemapItem(item, bitmap);
+								MapsAppItem portalItemData = new MapsAppItem(item, bitmap);
 								mBasemapItemList.add(portalItemData);
 								// Update grid with results
 								mBasemapsAdapter.notifyDataSetChanged();

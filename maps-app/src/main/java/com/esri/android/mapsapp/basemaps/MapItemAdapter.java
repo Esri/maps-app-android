@@ -38,19 +38,19 @@ import android.widget.TextView;
 
 import com.esri.android.mapsapp.R;
 
-public class BasemapsAdapter extends BaseAdapter {
+public class MapItemAdapter extends BaseAdapter {
 
-	BasemapsAdapterClickListener mOnClickListener;
+	MapItemClickListener mOnClickListener;
 	// need context to use it to construct view
 	Context mContext;
 	// hold onto a copy of all basemap items
-	List<BasemapItem> items;
+	List<MapsAppItem> items;
 
-	public BasemapsAdapter(Context c) {
+	public MapItemAdapter(Context c) {
 		mContext = c;
 	}
 
-	public BasemapsAdapter(Context c, ArrayList<BasemapItem> portalItems, BasemapsAdapterClickListener listener) {
+	public MapItemAdapter(Context c, ArrayList<MapsAppItem> portalItems, MapItemClickListener listener) {
 		mContext = c;
 		items = portalItems;
 		mOnClickListener = listener;
@@ -94,7 +94,7 @@ public class BasemapsAdapter extends BaseAdapter {
 		image.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(final View view) {
-				mOnClickListener.onBasemapItemClicked(position);
+				mOnClickListener.onMapItemClicked(position);
 			}
 		});
 
@@ -108,14 +108,14 @@ public class BasemapsAdapter extends BaseAdapter {
 	 * A callback interface that indicates when a basemap in the list has been
 	 * clicked.
 	 */
-	public interface BasemapsAdapterClickListener {
+	public interface MapItemClickListener {
 		/**
 		 * Callback for when a basemap list item is clicked.
 		 *
 		 * @param listPosition
 		 *            Position within the list of an item that has been clicked.
 		 */
-		void onBasemapItemClicked(int listPosition);
+		void onMapItemClicked(int listPosition);
 	}
 
 }
