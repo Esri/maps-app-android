@@ -536,4 +536,14 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 		}
 	}
 
+	/**
+	 * Kill the process id
+	 */
+	@Override
+	public void onDestroy()
+	{
+		android.os.Process.killProcess(android.os.Process.myPid());
+		super.onDestroy();
+	}
+
 }
