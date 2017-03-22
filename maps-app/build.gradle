@@ -29,7 +29,7 @@ dependencies {
     compile 'com.android.support:support-v4:25.3.0'
     compile 'com.android.support:appcompat-v7:25.3.0'
     compile 'com.android.support:design:25.3.0'
-    // ArcGIS Android 10.2.7 API
+    // ArcGIS Android 10.2.9 API
     compile 'com.esri.arcgis.android:arcgis-android:10.2.8-1'
     // square libs
     compile 'com.jakewharton:butterknife:6.1.0'
