@@ -4,14 +4,16 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.2'
+        classpath 'com.android.tools.build:gradle:2.3.3'
     }
 }
 
 allprojects {
     repositories {
         jcenter()
-        maven{ url 'https://esri.bintray.com/arcgis' }
+        maven {
+            url 'http://android:8080/artifactory/arcgis'
+        }
     }
 }
 // Define versions in a single place
