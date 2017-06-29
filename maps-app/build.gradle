@@ -34,7 +34,7 @@ dependencies {
     compile 'com.android.support:design:25.0.1'
 
     // ArcGIS Android API
-    compile 'com.esri.arcgisruntime:arcgis-android:100.1.0-1744'
+    compile 'com.esri.arcgisruntime:arcgis-android:100.1.0'
     // square libs
     compile 'com.jakewharton:butterknife:6.1.0'
 

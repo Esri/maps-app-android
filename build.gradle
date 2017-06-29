@@ -11,9 +11,8 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
-        maven {
-            url 'http://android:8080/artifactory/arcgis'
-        }
+        maven { url 'https://maven.google.com' }
+        maven{ url 'https://esri.bintray.com/arcgis' }
     }
 }
 // Define versions in a single place
