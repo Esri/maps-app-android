@@ -257,24 +257,6 @@ public class MapAppRobotiumTests extends ActivityInstrumentationTestCase2 implem
     // The progress dialog appears
     Assert.assertTrue(solo.waitForDialogToOpen());
 
-    // The auth window is shown
-    solo.sleep(3000);
-
-    // Fill in auth
-    EditText userName = solo.getEditText(solo.getString(string.usernameLabel));
-
-    solo.typeText(userName, solo.getString(R.string.username));
-    EditText password = solo.getEditText(solo.getString(string.passwordLabel));
-    solo.typeText(password, solo.getString(R.string.password));
-
-    // Hit the Log In button
-    solo.clickOnButton(1);
-    Log.i(MapAppRobotiumTests.TAG, " ****ROUTE**** Log In");
-
-    solo.sleep(3000);
-    // Wait for progress dialog dismissal
-    Assert.assertTrue(solo.waitForDialogToClose());
-    solo.takeScreenshot("routing");
   }
 
   private void requestWritePermission() {
