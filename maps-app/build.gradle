@@ -34,9 +34,10 @@ dependencies {
     implementation 'com.android.support:design:27.0.2'
 
     // ArcGIS Android API
-    implementation 'com.esri.arcgisruntime:arcgis-android:100.1.0'
+    implementation 'com.esri.arcgisruntime:arcgis-android:100.2.0-1911'
     // square libs
-    implementation 'com.jakewharton:butterknife:6.1.0'
+    compile 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
 
     // Android Testing Support Library's runner and rules
     androidTestCompile ("com.android.support.test:runner:$rootProject.ext.runnerVersion"){
