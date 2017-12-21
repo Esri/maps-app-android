@@ -40,15 +40,15 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
 
     // Android Testing Support Library's runner and rules
-    androidTestCompile ("com.android.support.test:runner:$rootProject.ext.runnerVersion"){
+    androidTestImplementation ("com.android.support.test:runner:$rootProject.ext.runnerVersion"){
         exclude module: 'support-annotations'
     }
-    androidTestCompile ("com.android.support.test:rules:$rootProject.ext.runnerVersion"){
+    androidTestImplementation ("com.android.support.test:rules:$rootProject.ext.runnerVersion"){
         exclude module: 'support-annotations'
     }
 
     // Robotium dependencies
-    androidTestCompile 'com.jayway.android.robotium:robotium-solo:5.6.3'
+    androidTestImplementation 'com.jayway.android.robotium:robotium-solo:5.6.3'
 
     implementation group: 'org.apache.httpcomponents' , name: 'httpclient-android' , version: '4.3.5.1'
 }
