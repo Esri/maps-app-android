@@ -62,8 +62,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 
 import com.esri.android.mapsapp.account.AccountManager;
 import com.esri.android.mapsapp.account.SignInActivity;
@@ -80,14 +80,13 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	private static final int REQUEST_WIFI_SETTINGS = 2;
 	private static final int REQUEST_ARCGIS_CRED = 3;
 	private static final String TAG = MapsAppActivity.class.getSimpleName();
-	public static DrawerLayout mDrawerLayout;
+	public  DrawerLayout mDrawerLayout;
 	private final List<DrawerItem> mDrawerItems = new ArrayList<>();
 	ContentBrowserFragment mBrowseFragment;
 	/**
 	 * The list of menu items in the navigation drawer
 	 */
-	@InjectView(R.id.maps_app_activity_left_drawer)
-	ListView mDrawerList;
+	@BindView(R.id.maps_app_activity_left_drawer) ListView mDrawerList;
 	private View mLayout;
 
 	/**
@@ -119,7 +118,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 		mLayout = findViewById(R.id.maps_app_activity_content_frame);
 
 
-		ButterKnife.inject(this);
+		ButterKnife.bind(this);
 
 		setupDrawer();
 

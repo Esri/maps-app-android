@@ -1296,7 +1296,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		String routeTaskURL = getString(R.string.routingservice_url);
 
 
-		mRouteTask = new RouteTask(routeTaskURL);
+		mRouteTask = new RouteTask(getActivity(),routeTaskURL);
 		mEndLocationName = destinationName;
 		Log.i(TAG, mRouteTask.getUri());
 		Point endPoint = null;
