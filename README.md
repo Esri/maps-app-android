@@ -4,7 +4,7 @@ This repo provides an example app for Android devices called Maps App that can b
 starter for your organizations mapping app built with [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/android/). 
  You can use the Maps App as is, or extend it using the ArcGIS Runtime SDK for Android.
  
- Visit Esri's[ **example app site** ](https://developers.arcgis.com/example-apps/maps-app-android/)to read more about this app and how the Runtime features are implemented.
+ Visit Esri's[ **example app site** ](https://developers.arcgis.com/example-apps/maps-app-android/?utm_source=github&utm_medium=web&utm_campaign=example_apps_maps_app_android)to read more about this app and how the Runtime features are implemented.
  Join our[ **GeoNet community** ](https://community.esri.com/groups/arcgis-example-apps)and keep up to date on the latest discussions about example-apps!
 
 
