@@ -5,18 +5,14 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath 'com.android.tools.build:gradle:3.3.1'
     }
 }
 
 allprojects {
     repositories {
         jcenter()
-       maven{ url 'https://esri.bintray.com/arcgis' }
-        maven {
-            // url ’http://esri.bintray.com/arcgis'
-            url 'http://android:8080/artifactory/arcgis'
-        }
+        maven { url 'https://esri.bintray.com/arcgis' }
         google()
     }
 }
