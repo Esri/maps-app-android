@@ -24,6 +24,13 @@ android {
         }
     }
     useLibrary 'org.apache.http.legacy'
+
+    android {
+        compileOptions {
+            sourceCompatibility 1.8
+            targetCompatibility 1.8
+        }
+    }
 }
 
 dependencies {
@@ -34,7 +41,7 @@ dependencies {
     implementation 'com.android.support:design:28.0.0'
 
     // ArcGIS Android API
-    implementation 'com.esri.arcgisruntime:arcgis-android:100.4.0'
+    implementation 'com.esri.arcgisruntime:arcgis-android:100.5.0'
     // square libs
     implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
