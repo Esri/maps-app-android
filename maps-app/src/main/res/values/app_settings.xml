@@ -6,7 +6,4 @@
 
     <!-- This redirect URI is the default value for https://www.arcgis.com -->
     <string name="redirect_uri">my-ags-app://auth</string>
-
-    <string name="testPartialName">goo</string>
-    <string name="localAddressNearYou">1005 W Burnside Ave Portland OR</string>
 </resources>
