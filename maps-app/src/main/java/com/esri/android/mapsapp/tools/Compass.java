@@ -30,13 +30,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.util.Log;
 import android.view.View;
-import com.esri.android.mapsapp.MapFragment;
 import com.esri.android.mapsapp.R;
 
 /**

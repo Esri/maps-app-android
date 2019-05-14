@@ -192,11 +192,6 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 			@Override
 			public void run() {
 				if (portal.getLoadStatus() == LoadStatus.LOADED) {
-					PortalInfo portalInformation = portal.getPortalInfo();
-					String portalName = portalInformation.getPortalName(); // Returns
-																			// 'ArcGIS
-																			// Online'
-					PortalUser user = portal.getUser();
 					mProgressDialog.dismiss();
 					AccountManager.getInstance().setPortal(portal);
 					finish();
@@ -210,7 +205,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
             // Append error message with relevant error code.
             errorMessage = message + " Error code " + errorCode.toString();
             //403 thrown when user hits Cancel in Auth Popup window so we don't display a toast.
-            if (errorCode.intValue()!=403){
+            if (errorCode !=403){
               Toast.makeText(activity, errorMessage, Toast.LENGTH_LONG).show();
             }
           }else{ // No error code

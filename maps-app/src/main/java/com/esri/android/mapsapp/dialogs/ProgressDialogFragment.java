@@ -70,17 +70,6 @@ public class ProgressDialogFragment extends DialogFragment {
 	 * @param activity
 	 * @param message
 	 * @param tag
-	 */
-	public static void showDialog(Activity activity, String message, String tag) {
-		showDialog(activity, message, tag, true);
-	}
-
-	/**
-	 * Helper method to show a progress dialog with a message.
-	 *
-	 * @param activity
-	 * @param message
-	 * @param tag
 	 * @param cancelable
 	 */
 	public static void showDialog(Activity activity, String message, String tag, boolean cancelable) {
@@ -92,20 +81,6 @@ public class ProgressDialogFragment extends DialogFragment {
 		progressDlg.setCancelable(cancelable);
 
 		progressDlg.show(activity.getFragmentManager(), tag);
-	}
-
-	/**
-	 * Helper method to hide a progress dialog.
-	 *
-	 * @param activity
-	 * @param tag
-	 */
-	public static void hideDialog(Activity activity, String tag) {
-		FragmentManager fM = activity.getFragmentManager();
-		DialogFragment dlg = (DialogFragment) fM.findFragmentByTag(tag);
-		if (dlg != null) {
-			dlg.dismiss();
-		}
 	}
 
 	@Override

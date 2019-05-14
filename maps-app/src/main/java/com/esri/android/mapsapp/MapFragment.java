@@ -158,9 +158,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	// Margins parameters for search view
 	private static final int TOP_MARGIN_SEARCH = 55;
 	private static List<SuggestResult> mSuggestionsList;
-	// Spatial references used for projecting points
-	private final SpatialReference mWm = SpatialReference.create(102100);
-	private final SpatialReference mEgs = SpatialReference.create(4326);
 	Compass mCompass;
 	ViewGroup.LayoutParams compassFrameParams;
 	ImageButton navButton;
@@ -196,7 +193,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private RouteTask mRouteTask;
 	private ArcGISMap mMap;
 	private Basemap mBasemap;
-	private boolean suggestionClickFlag;
 	private GeocodeResult mGeocodedLocation;
 
 	public MapFragment() {
@@ -340,16 +336,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-
-		switch (item.getItemId()) {
-
-			default :
-				return super.onOptionsItemSelected(item);
-		}
-	}
-
-	@Override
 	public void onPause() {
 		super.onPause();
 
@@ -423,22 +409,18 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 					webmap.setBasemap(basemapWebMap);
 				}
 
-				if (webmap != null) {
-					getActivity().runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							final MapView mapView = (MapView) mMapContainer.findViewById(R.id.map);
-							mapView.setMap(webmap);
-							setMapView(mapView);
-							setClickListenerForFloatingActionButton(mapView);
-							addGraphicLayers();
+				getActivity().runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						final MapView mapView = (MapView) mMapContainer.findViewById(R.id.map);
+						mapView.setMap(webmap);
+						setMapView(mapView);
+						setClickListenerForFloatingActionButton(mapView);
+						addGraphicLayers();
 
-						}
-					});
+					}
+				});
 
-				} else {
-					throw new Exception("Failed to load web map.");
-				}
 				return null;
 			}
 		});
@@ -543,7 +525,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 */
 	private void showRoutingDialogFragment() {
 
-		suggestionClickFlag = false;
 		// Show RoutingDialogFragment to get routing start and end points.
 		// This calls back to onGetRoute() to do the routing.
 		RoutingDialogFragment routingFrag = new RoutingDialogFragment();
@@ -695,7 +676,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				int indexColumnSuggestion = cursor.getColumnIndex(COLUMN_NAME_ADDRESS);
 				final String address = cursor.getString(indexColumnSuggestion);
 
-				suggestionClickFlag = true;
 				// Find the Location of the suggestion
 				geoCodeSuggestedLocation(address);
 
@@ -748,13 +728,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 		mLocator.addDoneLoadingListener(new Runnable() {
 			@Override public void run() {
-				// Does this locator support suggestions?
-				if (mLocator.getLoadStatus().name() != LoadStatus.LOADED.name()){
-					//Log.i(TAG,"##### " + mLocator.getLoadStatus().name());
-				} else if (!mLocator.getLocatorInfo().isSupportsSuggestions()){
+				// Quick exit if location doesn't support suggestions
+				if (!mLocator.getLocatorInfo().isSupportsSuggestions()){
 					return;
 				}
-				//og.i(TAG,"****** " + mLocator.getLoadStatus().name());
 				final ListenableFuture<List<SuggestResult>> suggestionsFuture = mLocator.suggestAsync(query, suggestParams);
 				// Attach a done listener that executes upon completion of the async call
 				suggestionsFuture.addDoneListener(new Runnable() {
@@ -861,11 +838,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
       }
     }
     if (matchedSuggestion != null) {
-			final SuggestResult matchedAddress = matchedSuggestion;
-      // Prepare the GeocodeParameters for geocoding the address
+		// Prepare the GeocodeParameters for geocoding the address
       locatorParams(FIND_PLACE);
 
-      final ListenableFuture<List<GeocodeResult>> locFuture = mLocator.geocodeAsync(matchedAddress, mGeocodeParams);
+      final ListenableFuture<List<GeocodeResult>> locFuture = mLocator.geocodeAsync(matchedSuggestion, mGeocodeParams);
 			// Attach a done listener that executes upon completion of the async call
       locFuture.addDoneListener(new Runnable() {
         @Override
@@ -1151,7 +1127,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				// Remove the search result view
 				mMapContainer.removeView(mSearchResult);
 
-				suggestionClickFlag = false;
 				// Add the search box view
 				showSearchBoxLayout();
 
@@ -1299,7 +1274,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mRouteTask = new RouteTask(getActivity(),routeTaskURL);
 		mEndLocationName = destinationName;
 		Log.i(TAG, mRouteTask.getUri());
-		Point endPoint = null;
+		Point endPoint;
 
 		try {
 			// Geocode start position or use My Location (from GPS)

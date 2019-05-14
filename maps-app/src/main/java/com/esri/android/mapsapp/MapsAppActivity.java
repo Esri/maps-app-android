@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -40,7 +39,6 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -82,28 +80,11 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	private static final String TAG = MapsAppActivity.class.getSimpleName();
 	public  DrawerLayout mDrawerLayout;
 	private final List<DrawerItem> mDrawerItems = new ArrayList<>();
-	ContentBrowserFragment mBrowseFragment;
 	/**
 	 * The list of menu items in the navigation drawer
 	 */
 	@BindView(R.id.maps_app_activity_left_drawer) ListView mDrawerList;
 	private View mLayout;
-
-	/**
-	 * Gets the state of Airplane Mode.
-	 *
-	 * @param context
-	 * @return true if enabled.
-	 */
-	@SuppressWarnings("deprecation")
-	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-	private static boolean isAirplaneModeOn(Context context) {
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-			return Settings.System.getInt(context.getContentResolver(), Settings.System.AIRPLANE_MODE_ON, 0) != 0;
-		} else {
-			return Settings.Global.getInt(context.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
-		}
-	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -142,11 +123,10 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 		}else if (!gpsEnabled) {
 			Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 			showDialog(gpsIntent, REQUEST_LOCATION_SETTINGS, getString(R.string.location_tracking_off));
-		}else if(!internetConnected)	{
+		}else {
 			Intent internetIntent = new Intent(Settings.ACTION_WIFI_SETTINGS);
 			showDialog(internetIntent, REQUEST_WIFI_SETTINGS, getString(R.string.wireless_off));
 		}
-
 	}
 
 	/**

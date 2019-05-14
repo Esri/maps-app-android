@@ -29,7 +29,6 @@ import java.util.List;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;

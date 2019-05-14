@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -55,7 +54,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 	private static final String TAG = "BasemapsDialogFragment";
 	private static final String TAG_BASEMAP_SEARCH_PROGRESS_DIALOG = "TAG_BASEMAP_SEARCH_PROGRESS_DIALOG";
 	private static final int REQUEST_CODE_PROGRESS_DIALOG = 1;
-	private final List<PortalItem> mPortalItems = new ArrayList<PortalItem>();
+	private final List<PortalItem> mPortalItems = new ArrayList<>();
 	private ProgressDialogFragment mProgressDialog;
 	private BasemapsDialogListener mBasemapsDialogListener;
 	private BasemapsAdapter mBasemapsAdapter;
@@ -123,32 +122,30 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 	private void fetchBasemapItems() {
 		// Show a progress dialog
 		mProgressDialog.show(getActivity().getFragmentManager(), TAG_BASEMAP_SEARCH_PROGRESS_DIALOG);
-		List<BasemapItem> cachedContents = null;
 		// If user is signed in, check if we've already
 		// downloaded their basemaps
 		if (AccountManager.getInstance().isSignedIn()) {
-			if(itemsLoadedFromCache(PRIVATE_BASEMAPS)){
+			if (itemsLoadedFromCache(PRIVATE_BASEMAPS)) {
 				mProgressDialog.dismiss();
-				return;
-			}else{
+			} else {
 				getBasemapsFromUserPortal();
 			}
 		} else { // user is not signed in, but have
 			// they previously retrieved public
 			// basemaps from AGOL
-			if(itemsLoadedFromCache(PUBLIC_BASEMAPS)){
+			if (itemsLoadedFromCache(PUBLIC_BASEMAPS)) {
 				mProgressDialog.dismiss();
-				return;
-			}else{ // get basemaps from AGOL
+			} else { // get basemaps from AGOL
 				final Portal portal = AccountManager.getInstance().getAGOLPortal();
-				if (portal.getPortalInfo() == null){
+				if (portal.getPortalInfo() == null) {
 					portal.addDoneLoadingListener(new Runnable() {
-						@Override public void run() {
+						@Override
+						public void run() {
 							loadBasemapsFromAGOL(portal);
 						}
 					});
 					portal.loadAsync();
-				}else{
+				} else {
 					loadBasemapsFromAGOL(portal);
 				}
 			}
@@ -241,9 +238,7 @@ public class BasemapsDialogFragment extends DialogFragment implements BasemapsAd
 			@Override public void run() {
 				try {
 					PortalQueryResultSet<PortalGroup> groupResults = groupFuture.get();
-					if (groupResults.getResults().isEmpty()) {
-						// Handle UI response for empty results
-					} else {
+					if (!groupResults.getResults().isEmpty()) {
 						PortalGroup basemapGroup = groupResults.getResults().get(0);
 						String groupId = basemapGroup.getGroupId();
 						// Build a new query param object to retrieve basemaps for given group

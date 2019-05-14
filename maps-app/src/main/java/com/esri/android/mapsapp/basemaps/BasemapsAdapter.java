@@ -46,19 +46,10 @@ public class BasemapsAdapter extends BaseAdapter {
 	// hold onto a copy of all basemap items
 	List<BasemapItem> items;
 
-	public BasemapsAdapter(Context c) {
-		mContext = c;
-	}
-
 	public BasemapsAdapter(Context c, ArrayList<BasemapItem> portalItems, BasemapsAdapterClickListener listener) {
 		mContext = c;
 		items = portalItems;
 		mOnClickListener = listener;
-	}
-
-	@Override
-	public void notifyDataSetChanged() {
-		super.notifyDataSetChanged();
 	}
 
 	@Override
