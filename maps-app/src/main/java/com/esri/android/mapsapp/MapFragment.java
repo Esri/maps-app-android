@@ -259,7 +259,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				mBasemap = new Basemap(defaultBaseMapURL);
 				mMap = new ArcGISMap(mBasemap);
 
-        MapFragment.mMapView = (MapView) mMapContainer.findViewById(R.id.map);
+        MapFragment.mMapView = mMapContainer.findViewById(R.id.map);
 
         MapFragment.mMapView.setMap(mMap);
 
@@ -300,7 +300,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	 * @param mapView
 	 */
 	private void setClickListenerForFloatingActionButton(final MapView mapView) {
-		final FloatingActionButton fab = (FloatingActionButton) mMapContainer.findViewById(R.id.fab);
+		final FloatingActionButton fab = mMapContainer.findViewById(R.id.fab);
 		fab.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -412,7 +412,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				getActivity().runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						final MapView mapView = (MapView) mMapContainer.findViewById(R.id.map);
+						final MapView mapView = mMapContainer.findViewById(R.id.map);
 						mapView.setMap(webmap);
 						setMapView(mapView);
 						setClickListenerForFloatingActionButton(mapView);
@@ -586,10 +586,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Inflating the layout from the xml file
 		mSearchBox = mInflater.inflate(R.layout.searchview, null);
 		// Inflate navigation drawer button on SearchView
-		navButton = (ImageButton) mSearchBox.findViewById(R.id.btn_nav_menu);
+		navButton = mSearchBox.findViewById(R.id.btn_nav_menu);
 		// Get the navigation drawer from Activity
-		mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.maps_app_activity_drawer_layout);
-		mDrawerList = (ListView) getActivity().findViewById(R.id.maps_app_activity_left_drawer);
+		mDrawerLayout = getActivity().findViewById(R.id.maps_app_activity_drawer_layout);
+		mDrawerList = getActivity().findViewById(R.id.maps_app_activity_left_drawer);
 
 		// Set click listener to open/close drawer
 		navButton.setOnClickListener(new OnClickListener() {
@@ -608,9 +608,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mSearchBox.setLayoutParams(mlayoutParams);
 
 		// Initializing the searchview and the image view
-		mSearchview = (SearchView) mSearchBox.findViewById(R.id.searchView1);
+		mSearchview = mSearchBox.findViewById(R.id.searchView1);
 
-		ImageView iv_route = (ImageView) mSearchBox.findViewById(R.id.imageView1);
+		ImageView iv_route = mSearchBox.findViewById(R.id.imageView1);
 
 		mSearchview.setIconifiedByDefault(false);
 		mSearchview.setQueryHint(SEARCH_HINT);
@@ -1111,7 +1111,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mSearchResult.setLayoutParams(mlayoutParams);
 
 		// Initialize the textview and set its text
-		TextView tv = (TextView) mSearchResult.findViewById(R.id.textView1);
+		TextView tv = mSearchResult.findViewById(R.id.textView1);
 		tv.setTypeface(null, Typeface.BOLD);
 		tv.setText(address);
 
@@ -1119,7 +1119,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mMapContainer.addView(mSearchResult);
 
 		// Setup the listener for the "cancel" icon
-		ImageView iv_cancel = (ImageView) mSearchResult.findViewById(R.id.imageView3);
+		ImageView iv_cancel = mSearchResult.findViewById(R.id.imageView3);
 		iv_cancel.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -1137,7 +1137,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		});
 
 		// Set up the listener for the "Get Directions" icon
-		ImageView iv_route = (ImageView) mSearchResult.findViewById(R.id.imageView2);
+		ImageView iv_route = mSearchResult.findViewById(R.id.imageView2);
 		iv_route.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -1187,11 +1187,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 			mEndLocationName = mEndLocationName.substring(0, index_to);
 
 		// Initialize the textvieww and display the text
-		TextView tv_from = (TextView) mSearchResult.findViewById(R.id.tv_from);
+		TextView tv_from = mSearchResult.findViewById(R.id.tv_from);
 		tv_from.setTypeface(null, Typeface.BOLD);
 		tv_from.setText(" " + mStartLocationName);
 
-		TextView tv_to = (TextView) mSearchResult.findViewById(R.id.tv_to);
+		TextView tv_to = mSearchResult.findViewById(R.id.tv_to);
 		tv_to.setTypeface(null, Typeface.BOLD);
 		tv_to.setText(" " + mEndLocationName);
 
@@ -1201,11 +1201,11 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		distance = Math.round(distance * 10.0) / 10.0;
 		time = Math.round(time * 10.0) / 10.0;
 
-		TextView tv_time = (TextView) mSearchResult.findViewById(R.id.tv_time);
+		TextView tv_time = mSearchResult.findViewById(R.id.tv_time);
 		tv_time.setTypeface(null, Typeface.BOLD);
 		tv_time.setText(time + " mins");
 
-		TextView tv_dist = (TextView) mSearchResult.findViewById(R.id.tv_dist);
+		TextView tv_dist = mSearchResult.findViewById(R.id.tv_dist);
 		tv_dist.setTypeface(null, Typeface.BOLD);
 		tv_dist.setText(" (" + distance + " meters)");
 
@@ -1213,7 +1213,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mMapContainer.addView(mSearchResult);
 
 		// Setup the listener for the "Cancel" icon
-		ImageView iv_cancel = (ImageView) mSearchResult.findViewById(R.id.imageView3);
+		ImageView iv_cancel = mSearchResult.findViewById(R.id.imageView3);
 		iv_cancel.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -1229,7 +1229,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		});
 
 		// Set up the listener for the "Show Directions" icon
-		ImageView iv_directions = (ImageView) mSearchResult.findViewById(R.id.imageView2);
+		ImageView iv_directions = mSearchResult.findViewById(R.id.imageView2);
 		iv_directions.setOnClickListener(new OnClickListener() {
 
 			@Override

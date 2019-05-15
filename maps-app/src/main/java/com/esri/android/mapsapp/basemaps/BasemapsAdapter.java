@@ -78,7 +78,7 @@ public class BasemapsAdapter extends BaseAdapter {
 		}
 
 		// Create view for the thumbnail
-		ImageView image = (ImageView) newView.findViewById(R.id.basemap_grid_item_thumbnail_imageview);
+		ImageView image = newView.findViewById(R.id.basemap_grid_item_thumbnail_imageview);
 		image.setImageBitmap(items.get(position).itemThumbnail);
 
 		// Register listener for clicks on the thumbnail
@@ -90,7 +90,7 @@ public class BasemapsAdapter extends BaseAdapter {
 		});
 
 		// Set the title and return the view we've created
-		TextView text = (TextView) newView.findViewById(R.id.basemap_grid_item_title_textview);
+		TextView text = newView.findViewById(R.id.basemap_grid_item_title_textview);
 		text.setText(items.get(position).item.getTitle());
 		return newView;
 	}

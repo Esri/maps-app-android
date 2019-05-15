@@ -253,7 +253,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	 * Initializes the navigation drawer.
 	 */
 	private void setupDrawer() {
-		mDrawerLayout = (DrawerLayout) findViewById(R.id.maps_app_activity_drawer_layout);
+		mDrawerLayout = findViewById(R.id.maps_app_activity_drawer_layout);
 
 		// Set the list's click listener
 		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
@@ -364,10 +364,10 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 			// user info
 			LinearLayout userInfoView = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_user_layout,
 					null);
-			TextView textView = (TextView) userInfoView.findViewById(R.id.drawer_item_fullname_textview);
+			TextView textView = userInfoView.findViewById(R.id.drawer_item_fullname_textview);
 			textView.setText(AccountManager.getInstance().getPortalUser().getFullName());
 
-			textView = (TextView) userInfoView.findViewById(R.id.drawer_item_username_textview);
+			textView = userInfoView.findViewById(R.id.drawer_item_username_textview);
 			textView.setText(AccountManager.getInstance().getPortalUser().getUsername());
 
 			item = new DrawerItem(userInfoView, null);
@@ -376,8 +376,8 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 			// Sign Out
 
 			LinearLayout view_signOut = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
-			TextView text_drawer_signOut = (TextView) view_signOut.findViewById(R.id.drawer_item_textview);
-			ImageView icon_drawer_signOut = (ImageView) view_signOut.findViewById(R.id.drawer_item_icon);
+			TextView text_drawer_signOut = view_signOut.findViewById(R.id.drawer_item_textview);
+			ImageView icon_drawer_signOut = view_signOut.findViewById(R.id.drawer_item_icon);
 
 			text_drawer_signOut.setText(getString(R.string.sign_out));
 			icon_drawer_signOut.setImageResource(R.drawable.ic_profile);
@@ -392,8 +392,8 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 
 			// My Maps
 			LinearLayout view_myMaps = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
-			TextView text_drawer_myMaps = (TextView) view_myMaps.findViewById(R.id.drawer_item_textview);
-			ImageView icon_drawer_myMaps = (ImageView) view_myMaps.findViewById(R.id.drawer_item_icon);
+			TextView text_drawer_myMaps = view_myMaps.findViewById(R.id.drawer_item_textview);
+			ImageView icon_drawer_myMaps = view_myMaps.findViewById(R.id.drawer_item_icon);
 
 			text_drawer_myMaps.setText(getString(R.string.my_maps));
 			icon_drawer_myMaps.setImageResource(R.drawable.ic_map32);
@@ -409,8 +409,8 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 
 			// Adding the Sign In item in the drawer
 			LinearLayout view_signIn = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
-			TextView text_drawer_signIn = (TextView) view_signIn.findViewById(R.id.drawer_item_textview);
-			ImageView icon_drawer_signIn = (ImageView) view_signIn.findViewById(R.id.drawer_item_icon);
+			TextView text_drawer_signIn = view_signIn.findViewById(R.id.drawer_item_textview);
+			ImageView icon_drawer_signIn = view_signIn.findViewById(R.id.drawer_item_icon);
 
 			text_drawer_signIn.setText(getString(R.string.sign_in));
 			icon_drawer_signIn.setImageResource(R.drawable.ic_profile);
@@ -426,8 +426,8 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 
 		// Adding the basemap item in the drawer
 		LinearLayout view_basemap = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
-		TextView text_drawer_basemap = (TextView) view_basemap.findViewById(R.id.drawer_item_textview);
-		ImageView icon_drawer_basemap = (ImageView) view_basemap.findViewById(R.id.drawer_item_icon);
+		TextView text_drawer_basemap = view_basemap.findViewById(R.id.drawer_item_textview);
+		ImageView icon_drawer_basemap = view_basemap.findViewById(R.id.drawer_item_icon);
 		text_drawer_basemap.setText(getString(R.string.menu_basemaps));
 		icon_drawer_basemap.setImageResource(R.drawable.action_basemaps);
 		item = new DrawerItem(view_basemap, new DrawerItem.OnClickListener() {

@@ -84,8 +84,8 @@ public class RoutingDialogFragment extends DialogFragment {
 		View view = inflater.inflate(R.layout.routing_layout, container, false);
 		getDialog().setTitle(R.string.title_routing_dialog);
 		// Initialize searchviews
-		mStartText = (SearchView) view.findViewById(R.id.startPoint);
-		mEndText = (SearchView) view.findViewById(R.id.endPoint);
+		mStartText = view.findViewById(R.id.startPoint);
+		mEndText = view.findViewById(R.id.endPoint);
 
 		mStartText.setIconifiedByDefault(false);
 		mEndText.setIconifiedByDefault(false);
@@ -97,11 +97,11 @@ public class RoutingDialogFragment extends DialogFragment {
 		// Change default search icons for the search view
 		int startIconId = mStartText.getContext().getResources().getIdentifier("android:id/search_mag_icon", null,
 				null);
-		ImageView start_icon = (ImageView) mStartText.findViewById(startIconId);
+		ImageView start_icon = mStartText.findViewById(startIconId);
 		start_icon.setImageResource(R.drawable.pin_circle_red);
 
 		int endIconId = mEndText.getContext().getResources().getIdentifier("android:id/search_mag_icon", null, null);
-		ImageView end_icon = (ImageView) mEndText.findViewById(endIconId);
+		ImageView end_icon = mEndText.findViewById(endIconId);
 		end_icon.setImageResource(R.drawable.pin_circle_blue);
 
 		mStartText.setQuery(MY_LOCATION, false);
@@ -110,9 +110,9 @@ public class RoutingDialogFragment extends DialogFragment {
 		if (mEndPointDefault != null) {
 			mEndText.setQuery(mEndPointDefault, false);
 		}
-		ImageView swap = (ImageView) view.findViewById(R.id.iv_interchange);
+		ImageView swap = view.findViewById(R.id.iv_interchange);
 
-		Button routeButton = (Button) view.findViewById(R.id.getRouteButton);
+		Button routeButton = view.findViewById(R.id.getRouteButton);
 		// Set up onClick listener for the "Get Route" button
 		routeButton.setOnClickListener(new View.OnClickListener() {
 

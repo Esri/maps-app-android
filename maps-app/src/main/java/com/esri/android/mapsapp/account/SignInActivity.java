@@ -73,7 +73,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 
 		setContentView(R.layout.sign_in_activity_portal_url_layout);
 
-		mPortalUrlEditText = (EditText) findViewById(R.id.sign_in_activity_portal_url_edittext);
+		mPortalUrlEditText = findViewById(R.id.sign_in_activity_portal_url_edittext);
 		mPortalUrlEditText.addTextChangedListener(this);
 
 		mContinueButton = findViewById(R.id.sign_in_activity_continue_button);
