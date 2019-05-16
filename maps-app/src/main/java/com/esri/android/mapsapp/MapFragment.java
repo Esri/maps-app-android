@@ -50,7 +50,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -181,7 +180,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private MatrixCursor mSuggestionCursor;
 	private MotionEvent mLongPressEvent;
 	private ProgressDialogFragment mProgressDialog;
-	@SuppressWarnings("rawtypes")
 	private View mSearchBox;
 	private LocatorTask mLocator;
 	private View mSearchResult;

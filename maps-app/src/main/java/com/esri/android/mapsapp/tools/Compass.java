@@ -34,10 +34,7 @@ import android.view.View;
 import com.esri.android.mapsapp.R;
 
 /**
- * The implementation of compass. There are two modes of operation for rotating
- * the compass, one is using device motion sensors and latter using the pinch
- * listeners.
- * 
+ * The implementation of a compass showing the relative rotation of the map.
  */
 public class Compass extends View {
 

@@ -73,8 +73,8 @@ public class BasemapsAdapter extends BaseAdapter {
 		// Inflate view unless we have an old one to reuse
 		View newView = convertView;
 		if (convertView == null) {
-			LayoutInflater inflator = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			newView = inflator.inflate(R.layout.basemap_image, null);
+			LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			newView = inflater.inflate(R.layout.basemap_image, null);
 		}
 
 		// Create view for the thumbnail

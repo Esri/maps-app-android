@@ -277,10 +277,6 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	}
 
 	/**
-	 * opens a default map.
-	 */
-
-	/**
 	 * Opens the content browser that shows the user's maps.
 	 */
 	private void showContentBrowser() {
