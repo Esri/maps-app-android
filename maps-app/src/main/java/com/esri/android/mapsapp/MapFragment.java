@@ -48,8 +48,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -147,19 +145,21 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private static final String ROUTE = "Route";
 
 	private static final String REVERSE_GEOCODE = "Reverse Geocode";
-	// The circle area specified by search_radius and input lat/lon serves
+
+    private static final int TOP_MARGIN_SEARCH = 55;
+
+  // The circle area specified by search_radius and input lat/lon serves
 	// searching purpose.
 	// It is also used to construct the extent which map zooms to after the
 	// first
 	// GPS fix is retrieved.
-	public static MapView mMapView;
-	private static LayoutParams mlayoutParams;
+	public MapView mMapView;
+	private LayoutParams mlayoutParams;
 	// Margins parameters for search view
-	private static final int TOP_MARGIN_SEARCH = 55;
 	private static List<SuggestResult> mSuggestionsList;
 	Compass mCompass;
-	ViewGroup.LayoutParams compassFrameParams;
-	ImageButton navButton;
+	ViewGroup.LayoutParams mCompassFrameParams;
+	ImageButton mNavButton;
 	DrawerLayout mDrawerLayout;
 	ListView mDrawerList;
 	private String mPortalItemId;
@@ -212,8 +212,6 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		setHasOptionsMenu(true);
-
 		// Restore any previous state
 		Bundle args = savedInstanceState != null ? savedInstanceState : getArguments();
 		if (args != null) {
@@ -257,22 +255,23 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				mBasemap = new Basemap(defaultBaseMapURL);
 				mMap = new ArcGISMap(mBasemap);
 
-        MapFragment.mMapView = mMapContainer.findViewById(R.id.map);
+				mMapView = mMapContainer.findViewById(R.id.map);
 
-        MapFragment.mMapView.setMap(mMap);
+				mMapView.setMap(mMap);
 
-				setMapView(MapFragment.mMapView);
+				setMapView(mMapView);
 
 				// Set up click listener on floating action button
-				setClickListenerForFloatingActionButton(MapFragment.mMapView);
+				setClickListenerForFloatingActionButton(mMapView);
 
 				// add graphics layer
 				addGraphicLayers();
 
-        // synchronize the compass icon as the map changes
+				// synchronize the compass icon as the map changes
 				mMapView.addViewpointChangedListener(new ViewpointChangedListener() {
-					@Override public void viewpointChanged(ViewpointChangedEvent visibleAreaChangedEvent) {
-						mCompass.setRotationAngle(((MapView)visibleAreaChangedEvent.getSource()).getMapRotation());
+					@Override
+					public void viewpointChanged(ViewpointChangedEvent visibleAreaChangedEvent) {
+						mCompass.setRotationAngle(((MapView) visibleAreaChangedEvent.getSource()).getMapRotation());
 					}
 				});
 			}
@@ -319,19 +318,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 				}
 				Log.i(MapFragment.TAG, "Auto pan mode is " + mLocationDisplay.getAutoPanMode().name());
 				Log.i(MapFragment.TAG,"Compass rotation is " + mCompass.getRotation());
-				Log.i(MapFragment.TAG, "Map rotation is " + MapFragment.mMapView.getMapRotation());
+				Log.i(MapFragment.TAG, "Map rotation is " + mMapView.getMapRotation());
 			}
     });
   }
-
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		super.onCreateOptionsMenu(menu, inflater);
-
-		// Inflate the menu items for use in the action bar
-		inflater.inflate(R.menu.action, menu);
-
-	}
 
 	@Override
 	public void onPause() {
@@ -489,17 +479,17 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mCompass.setRotationAngle(45);
 		int HEIGHT = 240;
 		int WIDTH = 240;
-		compassFrameParams = new LayoutParams(WIDTH, HEIGHT, Gravity.RIGHT);
+		mCompassFrameParams = new LayoutParams(WIDTH, HEIGHT, Gravity.RIGHT);
 
 		int TOP_MARGIN_COMPASS = TOP_MARGIN_SEARCH + height + 45;
 
 		int LEFT_MARGIN_COMPASS = 0;
 		int BOTTOM_MARGIN_COMPASS = 0;
 		int RIGHT_MARGIN_COMPASS = 0;
-		((MarginLayoutParams) compassFrameParams).setMargins(LEFT_MARGIN_COMPASS, TOP_MARGIN_COMPASS,
+		((MarginLayoutParams) mCompassFrameParams).setMargins(LEFT_MARGIN_COMPASS, TOP_MARGIN_COMPASS,
 				RIGHT_MARGIN_COMPASS, BOTTOM_MARGIN_COMPASS);
 
-		mCompass.setLayoutParams(compassFrameParams);
+		mCompass.setLayoutParams(mCompassFrameParams);
 
 		mCompass.setVisibility(View.GONE);
 
@@ -584,13 +574,13 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Inflating the layout from the xml file
 		mSearchBox = mInflater.inflate(R.layout.searchview, null);
 		// Inflate navigation drawer button on SearchView
-		navButton = mSearchBox.findViewById(R.id.btn_nav_menu);
+		mNavButton = mSearchBox.findViewById(R.id.btn_nav_menu);
 		// Get the navigation drawer from Activity
 		mDrawerLayout = getActivity().findViewById(R.id.maps_app_activity_drawer_layout);
 		mDrawerList = getActivity().findViewById(R.id.maps_app_activity_left_drawer);
 
 		// Set click listener to open/close drawer
-		navButton.setOnClickListener(new OnClickListener() {
+		mNavButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
@@ -608,20 +598,19 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// Initializing the searchview and the image view
 		mSearchview = mSearchBox.findViewById(R.id.searchView1);
 
-		ImageView iv_route = mSearchBox.findViewById(R.id.imageView1);
+		ImageView ivRoute = mSearchBox.findViewById(R.id.imageView1);
 
 		mSearchview.setIconifiedByDefault(false);
 		mSearchview.setQueryHint(SEARCH_HINT);
 
 		applySuggestionCursor();
 
-		// navButton = (Button)mSearchBox.findViewById(R.id.navbutton);
 
 		// Adding the layout to the map conatiner
 		mMapContainer.addView(mSearchBox);
 
 		// Setup the listener for the route onclick
-		iv_route.setOnClickListener(new OnClickListener() {
+		ivRoute.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
@@ -913,7 +902,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		mLocationLayerPointString = address;
 
 		// Zoom map to geocode result location
-    MapFragment.mMapView.setViewpointCenterAsync(resultPoint);
+    mMapView.setViewpointCenterAsync(resultPoint);
 		showSearchResultLayout(address);
 	}
 	/**
@@ -1646,7 +1635,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 							routeParameters.getStops().add(destination);
 							// We want the task to return driving directions and routes
 							routeParameters.setReturnDirections(true);
-							routeParameters.setOutputSpatialReference(MapFragment.mMapView.getSpatialReference());
+							routeParameters.setOutputSpatialReference(mMapView.getSpatialReference());
 							routeParameters.setDirectionsDistanceUnits(UnitSystem.METRIC);
 							final ListenableFuture<RouteResult> routeResFuture = mRouteTask
 									.solveRouteAsync(routeParameters);

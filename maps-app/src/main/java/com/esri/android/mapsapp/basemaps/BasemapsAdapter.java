@@ -44,22 +44,22 @@ public class BasemapsAdapter extends BaseAdapter {
 	// need context to use it to construct view
 	Context mContext;
 	// hold onto a copy of all basemap items
-	List<BasemapItem> items;
+	List<BasemapItem> mItems;
 
 	public BasemapsAdapter(Context c, ArrayList<BasemapItem> portalItems, BasemapsAdapterClickListener listener) {
 		mContext = c;
-		items = portalItems;
+		mItems = portalItems;
 		mOnClickListener = listener;
 	}
 
 	@Override
 	public int getCount() {
-		return items == null ? 0 : items.size();
+		return mItems == null ? 0 : mItems.size();
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return items.get(position);
+		return mItems.get(position);
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public class BasemapsAdapter extends BaseAdapter {
 
 		// Create view for the thumbnail
 		ImageView image = newView.findViewById(R.id.basemap_grid_item_thumbnail_imageview);
-		image.setImageBitmap(items.get(position).itemThumbnail);
+		image.setImageBitmap(mItems.get(position).itemThumbnail);
 
 		// Register listener for clicks on the thumbnail
 		image.setOnClickListener(new OnClickListener() {
@@ -91,7 +91,7 @@ public class BasemapsAdapter extends BaseAdapter {
 
 		// Set the title and return the view we've created
 		TextView text = newView.findViewById(R.id.basemap_grid_item_title_textview);
-		text.setText(items.get(position).item.getTitle());
+		text.setText(mItems.get(position).item.getTitle());
 		return newView;
 	}
 
