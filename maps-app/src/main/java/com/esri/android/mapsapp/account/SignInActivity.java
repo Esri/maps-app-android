@@ -41,7 +41,6 @@ import com.esri.arcgisruntime.io.JsonEmbeddedException;
 import com.esri.arcgisruntime.loadable.LoadStatus;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalInfo;
-import com.esri.arcgisruntime.portal.PortalUser;
 import com.esri.arcgisruntime.security.AuthenticationManager;
 import com.esri.arcgisruntime.security.DefaultAuthenticationChallengeHandler;
 import com.esri.arcgisruntime.security.OAuthConfiguration;
@@ -73,7 +72,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 
 		setContentView(R.layout.sign_in_activity_portal_url_layout);
 
-		mPortalUrlEditText = (EditText) findViewById(R.id.sign_in_activity_portal_url_edittext);
+		mPortalUrlEditText = findViewById(R.id.sign_in_activity_portal_url_edittext);
 		mPortalUrlEditText.addTextChangedListener(this);
 
 		mContinueButton = findViewById(R.id.sign_in_activity_continue_button);
@@ -192,11 +191,6 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
 			@Override
 			public void run() {
 				if (portal.getLoadStatus() == LoadStatus.LOADED) {
-					PortalInfo portalInformation = portal.getPortalInfo();
-					String portalName = portalInformation.getPortalName(); // Returns
-																			// 'ArcGIS
-																			// Online'
-					PortalUser user = portal.getUser();
 					mProgressDialog.dismiss();
 					AccountManager.getInstance().setPortal(portal);
 					finish();
@@ -210,7 +204,7 @@ public class SignInActivity extends Activity implements OnClickListener, TextWat
             // Append error message with relevant error code.
             errorMessage = message + " Error code " + errorCode.toString();
             //403 thrown when user hits Cancel in Auth Popup window so we don't display a toast.
-            if (errorCode.intValue()!=403){
+            if (errorCode !=403){
               Toast.makeText(activity, errorMessage, Toast.LENGTH_LONG).show();
             }
           }else{ // No error code

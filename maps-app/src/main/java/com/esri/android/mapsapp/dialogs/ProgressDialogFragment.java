@@ -28,7 +28,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -62,50 +61,6 @@ public class ProgressDialogFragment extends DialogFragment {
 
 		dlg.setArguments(args);
 		return dlg;
-	}
-
-	/**
-	 * Helper method to show a progress dialog with a message.
-	 *
-	 * @param activity
-	 * @param message
-	 * @param tag
-	 */
-	public static void showDialog(Activity activity, String message, String tag) {
-		showDialog(activity, message, tag, true);
-	}
-
-	/**
-	 * Helper method to show a progress dialog with a message.
-	 *
-	 * @param activity
-	 * @param message
-	 * @param tag
-	 * @param cancelable
-	 */
-	public static void showDialog(Activity activity, String message, String tag, boolean cancelable) {
-		ProgressDialogFragment progressDlg = new ProgressDialogFragment();
-
-		Bundle args = new Bundle();
-		args.putString(ProgressDialogFragment.KEY_PROGRESS_MESSAGE, message);
-		progressDlg.setArguments(args);
-		progressDlg.setCancelable(cancelable);
-
-		progressDlg.show(activity.getFragmentManager(), tag);
-	}
-
-	/**
-	 * Helper method to hide a progress dialog.
-	 *
-	 * @param activity
-	 * @param tag
-	 */
-	public static void hideDialog(Activity activity, String tag) {
-		FragmentManager fM = activity.getFragmentManager();
-		DialogFragment dlg = (DialogFragment) fM.findFragmentByTag(tag);
-		if (dlg != null) {
-			dlg.dismiss();
-		}
 	}
 
 	@Override

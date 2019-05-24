@@ -44,31 +44,22 @@ public class BasemapsAdapter extends BaseAdapter {
 	// need context to use it to construct view
 	Context mContext;
 	// hold onto a copy of all basemap items
-	List<BasemapItem> items;
-
-	public BasemapsAdapter(Context c) {
-		mContext = c;
-	}
+	List<BasemapItem> mItems;
 
 	public BasemapsAdapter(Context c, ArrayList<BasemapItem> portalItems, BasemapsAdapterClickListener listener) {
 		mContext = c;
-		items = portalItems;
+		mItems = portalItems;
 		mOnClickListener = listener;
 	}
 
 	@Override
-	public void notifyDataSetChanged() {
-		super.notifyDataSetChanged();
-	}
-
-	@Override
 	public int getCount() {
-		return items == null ? 0 : items.size();
+		return mItems == null ? 0 : mItems.size();
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return items.get(position);
+		return mItems.get(position);
 	}
 
 	@Override
@@ -82,13 +73,13 @@ public class BasemapsAdapter extends BaseAdapter {
 		// Inflate view unless we have an old one to reuse
 		View newView = convertView;
 		if (convertView == null) {
-			LayoutInflater inflator = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			newView = inflator.inflate(R.layout.basemap_image, null);
+			LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			newView = inflater.inflate(R.layout.basemap_image, null);
 		}
 
 		// Create view for the thumbnail
-		ImageView image = (ImageView) newView.findViewById(R.id.basemap_grid_item_thumbnail_imageview);
-		image.setImageBitmap(items.get(position).itemThumbnail);
+		ImageView image = newView.findViewById(R.id.basemap_grid_item_thumbnail_imageview);
+		image.setImageBitmap(mItems.get(position).itemThumbnail);
 
 		// Register listener for clicks on the thumbnail
 		image.setOnClickListener(new OnClickListener() {
@@ -99,8 +90,8 @@ public class BasemapsAdapter extends BaseAdapter {
 		});
 
 		// Set the title and return the view we've created
-		TextView text = (TextView) newView.findViewById(R.id.basemap_grid_item_title_textview);
-		text.setText(items.get(position).item.getTitle());
+		TextView text = newView.findViewById(R.id.basemap_grid_item_title_textview);
+		text.setText(mItems.get(position).item.getTitle());
 		return newView;
 	}
 

@@ -5,7 +5,6 @@ starter for your organizations mapping app built with [ArcGIS Runtime SDK for An
  You can use the Maps App as is, or extend it using the ArcGIS Runtime SDK for Android.
  
  Visit Esri's[ **example app site** ](https://developers.arcgis.com/example-apps/maps-app-android/?utm_source=github&utm_medium=web&utm_campaign=example_apps_maps_app_android)to read more about this app and how the Runtime features are implemented.
- Join our[ **GeoNet community** ](https://community.esri.com/groups/arcgis-example-apps)and keep up to date on the latest discussions about example-apps!
 
 
 ## Features		
@@ -70,7 +69,7 @@ Once you have forked the repo, you can make a clone
 ### Configuring a Remote for a Fork
 If you make changes in the fork and would like to [sync](https://help.github.com/articles/syncing-a-fork/) those changes with the upstream repository, you must first [configure the remote](https://help.github.com/articles/configuring-a-remote-for-a-fork/). This will be required when you have created local branches and would like to make a [pull request](https://help.github.com/articles/creating-a-pull-request) to your upstream branch.
 
-1. In the Terminal (for Mac users) or command prompt (fow Windows and Linus users) type ```git remote -v``` to list the current configured remote repo for your fork.
+1. In the Terminal (for Mac users) or command prompt (for Windows and Linux users) type ```git remote -v``` to list the current configured remote repo for your fork.
 2. ```git remote add upstream https://github.com/Esri/maps-app-android.git``` to specify new remote upstream repository that will be synced with the fork. You can type ```git remote -v``` to verify the new upstream.
 
 If there are changes made in the Original repository, you can sync the fork to keep it updated with upstream repository.
@@ -80,17 +79,7 @@ If there are changes made in the Original repository, you can sync the fork to k
 3. ```git checkout master``` to checkout your fork's local master branch.
 4. ```git merge upstream/master``` to sync your local `master' branch with `upstream/master`. **Note**: Your local changes will be retained and your fork's master branch will be in sync with the upstream repository.
 
-### Testing With Robotium
-The project includes a small suite of Robotium tests that test various features of the application.  The Robotium tests for the maps-app will run best on an attached device, rather than in the emulator.  You will need to adjust the values in the app_settings.xml file to reflect your specific auth credentials and any local addresses the tests use.  Use the following steps to configure your environment for running the tests.
-
-1.  Attach a non-emulated Android device to your computer.
-2.  Ensure location services are enabled on the Android device.
-3.  Ensure you have internet connectivity on the Android device.
-4.  Change the following entries in your values/app_settings.xml (username, password, testPartialName, localAddressNearYou).
-5.  Right-click on the MapAppRobotiumTests.java file in Android Studio and select Run 'MapAppRobotiumTests'.
-
 ## Requirements
-* [JDK 6 or higher](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
 * [Android Studio](http://developer.android.com/sdk/index.html)
 
 ## Resources
@@ -101,7 +90,6 @@ The project includes a small suite of Robotium tests that test various features 
 * [Google+](https://plus.google.com/+esri/posts)
 * [twitter@ArcGISRuntime](https://twitter.com/ArcGISRuntime)
 * [twitter@esri](http://twitter.com/esri)
-* [Robotium](https://github.com/RobotiumTech/robotium) and [Robotium Javadoc](http://recorder.robotium.com/javadoc/)
 
 ## Issues
 Find a bug or want to request a new feature enhancement?  Let us know by submitting an issue.

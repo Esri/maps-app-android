@@ -29,7 +29,6 @@ import java.util.List;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -79,7 +78,7 @@ public class DirectionsDialogFragment extends DialogFragment {
 		getDialog().setTitle(R.string.title_directions_dialog);
 
 		// Setup list adapter
-		ListView listView = (ListView) view.findViewById(R.id.directions_list_view);
+		ListView listView = view.findViewById(R.id.directions_list_view);
 		listView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -141,14 +140,14 @@ public class DirectionsDialogFragment extends DialogFragment {
 
 			// Configure the view for this item
 			DirectionManeuver direction = getItem(position);
-			ImageView imageView = (ImageView) v.findViewById(R.id.directions_maneuver_imageview);
+			ImageView imageView = v.findViewById(R.id.directions_maneuver_imageview);
 			Drawable drawable = getRoutingIcon(direction.getManeuverType());
 			if (drawable != null) {
 				imageView.setImageDrawable(drawable);
 			}
-			TextView textView = (TextView) v.findViewById(R.id.directions_text_textview);
+			TextView textView = v.findViewById(R.id.directions_text_textview);
 			textView.setText(direction.getDirectionText());
-			textView = (TextView) v.findViewById(R.id.directions_length_textview);
+			textView = v.findViewById(R.id.directions_length_textview);
 			String lengthString = String.format("%.1f meters", direction.getLength());
 			textView.setText(lengthString);
 			return v;

@@ -66,7 +66,7 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.content_browser_fragment_layout, null);
 
-		mMapGrid = (GridView) view.findViewById(R.id.content_browser_fragment_gridview);
+		mMapGrid = view.findViewById(R.id.content_browser_fragment_gridview);
 		mMapGrid.setVisibility(View.GONE);
 
 		mNoMapsInfo = view.findViewById(R.id.content_browser_fragment_no_maps_layout);
@@ -223,8 +223,8 @@ public class ContentBrowserFragment extends Fragment implements OnClickListener 
 				view.setOnClickListener(ContentBrowserFragment.this);
 				view.setTag(viewHolder);
 
-				viewHolder.title = (TextView) view.findViewById(R.id.map_item_title_textView);
-				viewHolder.thumbnailImageView = (ImageView) view.findViewById(R.id.map_item_thumbnail_imageView);
+				viewHolder.title = view.findViewById(R.id.map_item_title_textView);
+				viewHolder.thumbnailImageView = view.findViewById(R.id.map_item_thumbnail_imageView);
 			} else {
 				viewHolder = (ViewHolder) view.getTag();
 			}

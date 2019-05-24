@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -40,7 +39,6 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -82,28 +80,11 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	private static final String TAG = MapsAppActivity.class.getSimpleName();
 	public  DrawerLayout mDrawerLayout;
 	private final List<DrawerItem> mDrawerItems = new ArrayList<>();
-	ContentBrowserFragment mBrowseFragment;
 	/**
 	 * The list of menu items in the navigation drawer
 	 */
 	@BindView(R.id.maps_app_activity_left_drawer) ListView mDrawerList;
 	private View mLayout;
-
-	/**
-	 * Gets the state of Airplane Mode.
-	 *
-	 * @param context
-	 * @return true if enabled.
-	 */
-	@SuppressWarnings("deprecation")
-	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-	private static boolean isAirplaneModeOn(Context context) {
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-			return Settings.System.getInt(context.getContentResolver(), Settings.System.AIRPLANE_MODE_ON, 0) != 0;
-		} else {
-			return Settings.Global.getInt(context.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
-		}
-	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -142,11 +123,10 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 		}else if (!gpsEnabled) {
 			Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 			showDialog(gpsIntent, REQUEST_LOCATION_SETTINGS, getString(R.string.location_tracking_off));
-		}else if(!internetConnected)	{
+		}else {
 			Intent internetIntent = new Intent(Settings.ACTION_WIFI_SETTINGS);
 			showDialog(internetIntent, REQUEST_WIFI_SETTINGS, getString(R.string.wireless_off));
 		}
-
 	}
 
 	/**
@@ -273,7 +253,7 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 	 * Initializes the navigation drawer.
 	 */
 	private void setupDrawer() {
-		mDrawerLayout = (DrawerLayout) findViewById(R.id.maps_app_activity_drawer_layout);
+		mDrawerLayout = findViewById(R.id.maps_app_activity_drawer_layout);
 
 		// Set the list's click listener
 		mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
@@ -295,10 +275,6 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 			showMap(null, null);
 		}
 	}
-
-	/**
-	 * opens a default map.
-	 */
 
 	/**
 	 * Opens the content browser that shows the user's maps.
@@ -384,10 +360,10 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 			// user info
 			LinearLayout userInfoView = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_user_layout,
 					null);
-			TextView textView = (TextView) userInfoView.findViewById(R.id.drawer_item_fullname_textview);
+			TextView textView = userInfoView.findViewById(R.id.drawer_item_fullname_textview);
 			textView.setText(AccountManager.getInstance().getPortalUser().getFullName());
 
-			textView = (TextView) userInfoView.findViewById(R.id.drawer_item_username_textview);
+			textView = userInfoView.findViewById(R.id.drawer_item_username_textview);
 			textView.setText(AccountManager.getInstance().getPortalUser().getUsername());
 
 			item = new DrawerItem(userInfoView, null);
@@ -396,8 +372,8 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 			// Sign Out
 
 			LinearLayout view_signOut = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
-			TextView text_drawer_signOut = (TextView) view_signOut.findViewById(R.id.drawer_item_textview);
-			ImageView icon_drawer_signOut = (ImageView) view_signOut.findViewById(R.id.drawer_item_icon);
+			TextView text_drawer_signOut = view_signOut.findViewById(R.id.drawer_item_textview);
+			ImageView icon_drawer_signOut = view_signOut.findViewById(R.id.drawer_item_icon);
 
 			text_drawer_signOut.setText(getString(R.string.sign_out));
 			icon_drawer_signOut.setImageResource(R.drawable.ic_profile);
@@ -412,8 +388,8 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 
 			// My Maps
 			LinearLayout view_myMaps = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
-			TextView text_drawer_myMaps = (TextView) view_myMaps.findViewById(R.id.drawer_item_textview);
-			ImageView icon_drawer_myMaps = (ImageView) view_myMaps.findViewById(R.id.drawer_item_icon);
+			TextView text_drawer_myMaps = view_myMaps.findViewById(R.id.drawer_item_textview);
+			ImageView icon_drawer_myMaps = view_myMaps.findViewById(R.id.drawer_item_icon);
 
 			text_drawer_myMaps.setText(getString(R.string.my_maps));
 			icon_drawer_myMaps.setImageResource(R.drawable.ic_map32);
@@ -429,8 +405,8 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 
 			// Adding the Sign In item in the drawer
 			LinearLayout view_signIn = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
-			TextView text_drawer_signIn = (TextView) view_signIn.findViewById(R.id.drawer_item_textview);
-			ImageView icon_drawer_signIn = (ImageView) view_signIn.findViewById(R.id.drawer_item_icon);
+			TextView text_drawer_signIn = view_signIn.findViewById(R.id.drawer_item_textview);
+			ImageView icon_drawer_signIn = view_signIn.findViewById(R.id.drawer_item_icon);
 
 			text_drawer_signIn.setText(getString(R.string.sign_in));
 			icon_drawer_signIn.setImageResource(R.drawable.ic_profile);
@@ -446,8 +422,8 @@ public class MapsAppActivity extends AppCompatActivity implements ActivityCompat
 
 		// Adding the basemap item in the drawer
 		LinearLayout view_basemap = (LinearLayout) getLayoutInflater().inflate(R.layout.drawer_item_layout, null);
-		TextView text_drawer_basemap = (TextView) view_basemap.findViewById(R.id.drawer_item_textview);
-		ImageView icon_drawer_basemap = (ImageView) view_basemap.findViewById(R.id.drawer_item_icon);
+		TextView text_drawer_basemap = view_basemap.findViewById(R.id.drawer_item_textview);
+		ImageView icon_drawer_basemap = view_basemap.findViewById(R.id.drawer_item_icon);
 		text_drawer_basemap.setText(getString(R.string.menu_basemaps));
 		icon_drawer_basemap.setImageResource(R.drawable.action_basemaps);
 		item = new DrawerItem(view_basemap, new DrawerItem.OnClickListener() {
