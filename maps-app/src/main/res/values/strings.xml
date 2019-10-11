@@ -32,7 +32,6 @@
     <string name="geocode_url">http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer</string>
 
     <!-- route service -->
-    <!--string name="routingservice_url">http://sampleserver6.arcgisonline.com/arcgis/rest/services/NetworkAnalysis/SanDiego/NAServer/Route</string-->
     <string name="routingservice_url">https://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World/</string>
 
     <!-- place search hint -->

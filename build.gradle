@@ -18,6 +18,17 @@ allprojects {
 }
 // Define versions in a single place
 ext {
+    // Sdk and tools
+    minSdkVersion = 19
+    targetSdkVersion = 28
+    compileSdkVersion = 28
+
+    // App dependencies
+    supportLibraryVersion = '28.0.0'
+    runtimeVersion = '100.6.0'
+    butterknifeVersion = '8.8.1'
+    robotiumVersion = '5.6.3'
+    httpcomponentsVersion = '4.3.5.1'
     runnerVersion = '0.5'
 
 }

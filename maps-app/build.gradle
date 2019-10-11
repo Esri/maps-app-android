@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion rootProject.ext.compileSdkVersion
 
 
     defaultConfig {
         applicationId "com.esri.android.mapsapp"
-        minSdkVersion 19
-        targetSdkVersion 28
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
 
@@ -35,27 +35,27 @@ android {
 
 dependencies {
     // android support libraries
-    implementation 'com.android.support:support-v4:28.0.0'
-    implementation 'com.android.support:appcompat-v7:28.0.'
-    implementation 'com.android.support:cardview-v7:28.0.0'
-    implementation 'com.android.support:design:28.0.0'
+    implementation "com.android.support:support-v4:$rootProject.supportLibraryVersion"
+    implementation "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
+    implementation "com.android.support:cardview-v7:$rootProject.supportLibraryVersion"
+    implementation "com.android.support:design:$rootProject.supportLibraryVersion"
 
     // ArcGIS Android API
-    implementation 'com.esri.arcgisruntime:arcgis-android:100.6.0'
+    implementation "com.esri.arcgisruntime:arcgis-android:$rootProject.runtimeVersion"
     // square libs
-    implementation 'com.jakewharton:butterknife:8.8.1'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    implementation "com.jakewharton:butterknife:$rootProject.butterknifeVersion"
+    annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.butterknifeVersion"
 
     // Android Testing Support Library's runner and rules
-    androidTestImplementation ("com.android.support.test:runner:$rootProject.ext.runnerVersion"){
+    androidTestImplementation ("com.android.support.test:runner:$rootProject.runnerVersion"){
         exclude module: 'support-annotations'
     }
-    androidTestImplementation ("com.android.support.test:rules:$rootProject.ext.runnerVersion"){
+    androidTestImplementation ("com.android.support.test:rules:$rootProject.runnerVersion"){
         exclude module: 'support-annotations'
     }
 
     // Robotium dependencies
-    androidTestImplementation 'com.jayway.android.robotium:robotium-solo:5.6.3'
+    androidTestImplementation "com.jayway.android.robotium:robotium-solo:$rootProject.robotiumVersion"
 
-    implementation group: 'org.apache.httpcomponents' , name: 'httpclient-android' , version: '4.3.5.1'
+    implementation group: 'org.apache.httpcomponents' , name: 'httpclient-android' , version: "$rootProject.httpcomponentsVersion"
 }
