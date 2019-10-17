@@ -6,8 +6,8 @@ android {
 
     defaultConfig {
         applicationId "com.esri.android.mapsapp"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
         testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
 
