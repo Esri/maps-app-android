@@ -1,6 +1,6 @@
 ## Description
 
-Get your organization's authoritative map data into the hands of your workers with this ArcGIS Runtime Android app. The application you build can include a custom web map from your [ArcGIS Online organization](https://doc.arcgis.com/en/arcgis-online/reference/what-is-agol.htm). For example, a web map from the [Living Atlas](https://livingatlas.arcgis.com/en/browse/?#d=1&type=maps) can be used as a starting place for your app. The maps-app also includes examples of place search and routing capabilities using either ArcGIS Online's powerful services or your own services. It also leverages your organizations configured basemaps to allow users to switch between the basemap that make sense for them.
+Get your organization's authoritative map data into the hands of your workers with this ArcGIS Runtime Android app. The application you build can include a custom web map from your [ArcGIS Online organization](https://doc.arcgis.com/en/arcgis-online/reference/what-is-agol.htm). For example, a web map from the [Living Atlas](https://livingatlas.arcgis.com/en/browse/?#d=1&type=maps) can be used as a starting place for your app. The Maps App also includes examples of place search and routing capabilities using either ArcGIS Online's powerful services or your own services. It also leverages your organizations configured basemaps to allow users to switch between the basemap that make sense for them.
 
 This example application is open source so grab the code at [GitHub](https://github.com/Esri/maps-app-android) and either configure the app for your organization, or just learn how to integrate similar capabilities into your own app!
 
@@ -8,7 +8,7 @@ This example application is open source so grab the code at [GitHub](https://git
 
 You can author your own web maps from ArcGIS Online or ArcGIS Pro and share them in your app via your ArcGIS Online organization, this is the central power of the Web GIS model built into ArcGIS. Building an app which uses a web map allows the cartography and map configuration to be completed in ArcGIS Online rather than in code. This then allows the map to change over time, without any code changes or app updates. Learn more about the benefits of developing with web maps [here](https://developers.arcgis.com/web-map-specification/). Also, learn about authoring web maps in [ArcGIS Online](http://doc.arcgis.com/en/arcgis-online/create-maps/make-your-first-map.htm) and [ArcGIS Pro](http://pro.arcgis.com/en/pro-app/help/mapping/map-authoring/author-a-basemap.htm).
 
-Loading web maps in code is really easy. The maps app loads a web map from a portal (which may require the user to sign in, see the identity section below) with the following code:
+Loading web maps in code is really easy. The Maps App loads a web map from a portal (which may require the user to sign in, see the identity section below) with the following code:
 
 ```java
 Portal portal = new Portal("http://<your portal url>");
@@ -149,7 +149,7 @@ mLocator.loadAsync();
 
 ## Geocoding
 
-Once a suggestion in the list has been selected by the user, the suggested address is geocoded using the `geocodeAsync` method of the LocatorTask. Along with the address, specific [geocoding parameters](https://developers.arcgis.com/android/latest/guide/search-for-places-geocoding-.htm#ESRI_SECTION2_48C5C281B21B4BF1BBBDBCEA71F105B9) can be set to tune the results. For example, in the maps app, we set the preferred location and refine that further by setting a boundary of the area to search for matching addresses.
+Once a suggestion in the list has been selected by the user, the suggested address is geocoded using the `geocodeAsync` method of the LocatorTask. Along with the address, specific [geocoding parameters](https://developers.arcgis.com/android/latest/guide/search-for-places-geocoding-.htm#ESRI_SECTION2_48C5C281B21B4BF1BBBDBCEA71F105B9) can be set to tune the results. For example, in the Maps App, we set the preferred location and refine that further by setting a boundary of the area to search for matching addresses.
 
 ```java
 mGeocodeParams = new GeocodeParameters();
@@ -232,9 +232,9 @@ private void reverseGeocode(Point point) {
 
 ## Route
 
-Getting navigation directions in the maps-app is just as easy in the [Runtime SDK](https://developers.arcgis.com/features/directions/) as it is on [ArcGIS Online](http://doc.arcgis.com/en/arcgis-online/use-maps/get-directions.htm). You can [customize](http://doc.arcgis.com/en/arcgis-online/administer/configure-services.htm#ESRI_SECTION1_567C344D5DEE444988CA2FE5193F3CAD) your navigation services for your organization, add new travel modes that better reflect your organization’s workflows, or remove travel modes that are not suitable for your organization’s workflows.
+Getting navigation directions in the Maps App is just as easy in the [Runtime SDK](https://developers.arcgis.com/features/directions/) as it is on [ArcGIS Online](http://doc.arcgis.com/en/arcgis-online/use-maps/get-directions.htm). You can [customize](http://doc.arcgis.com/en/arcgis-online/administer/configure-services.htm#ESRI_SECTION1_567C344D5DEE444988CA2FE5193F3CAD) your navigation services for your organization, add new travel modes that better reflect your organization’s workflows, or remove travel modes that are not suitable for your organization’s workflows.
 
-Navigating from point to point in the Map App is enabled in two ways. In either scenario, the origin and destination must be geocoded before routing can be attempted. In the maps-app, routing requires you to provide credentials to your Portal or ArcGIS Online organization. As mentioned earlier in the Identity section above, we use the DefaultAuthenticationChallengeHandler to manage the authentication process.
+Navigating from point to point in the Map App is enabled in two ways. In either scenario, the origin and destination must be geocoded before routing can be attempted. In the Maps App, routing requires you to provide credentials to your Portal or ArcGIS Online organization. As mentioned earlier in the Identity section above, we use the DefaultAuthenticationChallengeHandler to manage the authentication process.
 
 ```java
 // As soon as the route task is instantiated, an authentication challenge is issued.
