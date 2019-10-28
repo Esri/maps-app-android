@@ -20,7 +20,7 @@ This Maps App repo is an Android Studio Project and App Module that can be direc
 
 * Login to [ArcGIS for Developers](https://developers.arcgis.com/) and [register](https://developers.arcgis.com/applications/#/) your app.  
 
-![](Register1.png)
+![](/docs/images/Register1.png)
 * Once you've registered your version of the maps-app, grab a copy of the client id from the registration and set the client id in the applications app_settings.xml file.  
 
 ```xml
@@ -38,7 +38,7 @@ This Maps App repo is an Android Studio Project and App Module that can be direc
 ```
 * As part of the registration process, add a redirect uri for your app.  Navigate to the Redirect URIs section at the bottom of the registration page and set the redirect uri to `my-ags-app://auth`.  This redirect uri is the default redirect for `https://www.arcgis.com`.
 
-![](Register2.png)
+![](/docs/images/Register2.png)
 * Note that the scheme for the `DefaultOAuthIntentReceiver` in the Android Manifest file is derived from the redirect uri.
 ```xml
         <activity
