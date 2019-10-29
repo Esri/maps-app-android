@@ -72,7 +72,7 @@ The process of accessing token secured services with a challenge handler is illu
 5. If the user is successfully authenticated, a credential (token) is included in requests to the secured service.
 6. The identity manager stores the credential for this portal and all requests for secured content includes the token in the request.
 
-The DefaultAuthenticationChallengeHandler class takes care of steps 1-6 in the diagram above. For an application to use this pattern, follow these [guides](https://developers.arcgis.com/authentication/signing-in-arcgis-online-users/) to register your app.
+The `DefaultAuthenticationChallengeHandler` class takes care of steps 1-6 in the diagram above. For an application to use this pattern, follow these [guides](https://developers.arcgis.com/authentication/signing-in-arcgis-online-users/) to register your app.
 
 ```java
 // Add these four lines to your Android fragment or activity
@@ -82,7 +82,7 @@ AuthenticationManager.setAuthenticationChallengeHandler(authenticationChallengeH
 AuthenticationManager.addOAuthConfiguration(oAuthConfiguration);
 ```
 
-Any time a secured service issues an authentication challenge, the DefaultAuthenticationChallengeHandler and the corresponding DefaultOAuthIntentReceiver work together to broker the authentication transaction. In addition to the two lines above, the Android manifest.xml file must define a DefaultOAuthIntentReceiver that receives intents once a user has entered their credentials.
+Any time a secured service issues an authentication challenge, the `DefaultAuthenticationChallengeHandler` and the corresponding `DefaultOAuthIntentReceiver` work together to broker the authentication transaction. In addition to the two lines above, the Android manifest.xml file must define a `DefaultOAuthIntentReceiver` that receives intents once a user has entered their credentials.
 
 ```xml
 <activity>
@@ -103,16 +103,16 @@ Note the value for android:scheme in the XML. This is [redirect URI](https://dev
 
 ## Place search
 
-[Geocoding](https://developers.arcgis.com/android/latest/guide/search-for-places-geocoding-.htm#ESRI_SECTION1_406F4F35F62C465ABC52F3FF04BB6B04) lets you transform an address or a place name to a specific geographic location. The reverse lets you use a geographic location to find a description of the location, like a postal address or place name. In the Maps App, we use a [LocatorTask](https://developers.arcgis.com/android/latest/guide/search-for-places-geocoding-.htm#ESRI_SECTION1_62AE6A47EB4B403ABBC72337A1255F8A) to perform geocoding and reverse geocoding functions provided by [Esri's World Geocoding Service](https://developers.arcgis.com/features/geocoding/). The LocatorTask has various asynchronous methods that we use to provide address suggestions when searching for places or geocoding locations.
+[Geocoding](https://developers.arcgis.com/android/latest/guide/search-for-places-geocoding-.htm#ESRI_SECTION1_406F4F35F62C465ABC52F3FF04BB6B04) lets you transform an address or a place name to a specific geographic location. The reverse lets you use a geographic location to find a description of the location, like a postal address or place name. In the Maps App, we use a [LocatorTask](https://developers.arcgis.com/android/latest/guide/search-for-places-geocoding-.htm#ESRI_SECTION1_62AE6A47EB4B403ABBC72337A1255F8A) to perform geocoding and reverse geocoding functions provided by [Esri's World Geocoding Service](https://developers.arcgis.com/features/geocoding/). The `LocatorTask` has various asynchronous methods that we use to provide address suggestions when searching for places or geocoding locations.
 
-In the Maps App, LocatorTasks are initialized using an online locator provided by an ArcGIS service.
+In the Maps App, `LocatorTask`s are initialized using an online locator provided by an ArcGIS service.
 
 ```java
 // The Locator Task class variable is initialized using the ArcGIS World Geocoding Server.
 mLocator = new LocatorTask(getString("http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer");
 ```
 
-You can also provision your own [custom geocode service](https://doc.arcgis.com/en/arcgis-online/administer/configure-services.htm#ESRI_SECTION1_0A9A071A7AB748028C8213D1D863FA18) to support your organization. Before using the LocatorTask to geocode or search for places, the LocatorTask must be LOADED. The loadable pattern is described [here](https://developers.arcgis.com/android/latest/guide/loadable-pattern.htm). LocatorTask operations are performed asynchronously using ListenableFutures, an implementation of Java’s Future interface. ListenableFutures add the ability to attach a listener that runs upon completion of the task. One of the first user interactions the Maps App supports is suggesting places near the device location.
+You can also provision your own [custom geocode service](https://doc.arcgis.com/en/arcgis-online/administer/configure-services.htm#ESRI_SECTION1_0A9A071A7AB748028C8213D1D863FA18) to support your organization. Before using the `LocatorTask` to geocode or search for places, the `LocatorTask` must be `LOADED`. The loadable pattern is described [here](https://developers.arcgis.com/android/latest/guide/loadable-pattern.htm). `LocatorTask` operations are performed asynchronously using `ListenableFutures`, an implementation of Java’s Future interface. `ListenableFutures` add the ability to attach a listener that runs upon completion of the task. One of the first user interactions the Maps App supports is suggesting places near the device location.
 
 ## Place suggestions
 
@@ -149,7 +149,7 @@ mLocator.loadAsync();
 
 ## Geocoding
 
-Once a suggestion in the list has been selected by the user, the suggested address is geocoded using the `geocodeAsync` method of the LocatorTask. Along with the address, specific [geocoding parameters](https://developers.arcgis.com/android/latest/guide/search-for-places-geocoding-.htm#ESRI_SECTION2_48C5C281B21B4BF1BBBDBCEA71F105B9) can be set to tune the results. For example, in the Maps App, we set the preferred location and refine that further by setting a boundary of the area to search for matching addresses.
+Once a suggestion in the list has been selected by the user, the suggested address is geocoded using the `geocodeAsync` method of the `LocatorTask`. Along with the address, specific [geocoding parameters](https://developers.arcgis.com/android/latest/guide/search-for-places-geocoding-.htm#ESRI_SECTION2_48C5C281B21B4BF1BBBDBCEA71F105B9) can be set to tune the results. For example, in the Maps App, we set the preferred location and refine that further by setting a boundary of the area to search for matching addresses.
 
 ```java
 mGeocodeParams = new GeocodeParameters();
@@ -185,7 +185,7 @@ On long press                    | Reverse geocode result
 :-------------------------------:|:-------------------------------------:
 <img src="/docs/images/reverse_geocode.png" width="300"  />|<img src="/doc/images/reverse_geocode2.png" width="300"  />
 
-We’ve extended the DefaultMapViewOnTouchListener and implemented logic for onUp motion event.
+We’ve extended the `DefaultMapViewOnTouchListener` and implemented logic for `onUp` motion event.
 
 ```java
 @Override
@@ -234,14 +234,14 @@ private void reverseGeocode(Point point) {
 
 Getting navigation directions in the Maps App is just as easy in the [Runtime SDK](https://developers.arcgis.com/features/directions/) as it is on [ArcGIS Online](http://doc.arcgis.com/en/arcgis-online/use-maps/get-directions.htm). You can [customize](http://doc.arcgis.com/en/arcgis-online/administer/configure-services.htm#ESRI_SECTION1_567C344D5DEE444988CA2FE5193F3CAD) your navigation services for your organization, add new travel modes that better reflect your organization’s workflows, or remove travel modes that are not suitable for your organization’s workflows.
 
-Navigating from point to point in the Map App is enabled in two ways. In either scenario, the origin and destination must be geocoded before routing can be attempted. In the Maps App, routing requires you to provide credentials to your Portal or ArcGIS Online organization. As mentioned earlier in the Identity section above, we use the DefaultAuthenticationChallengeHandler to manage the authentication process.
+Navigating from point to point in the Map App is enabled in two ways. In either scenario, the origin and destination must be geocoded before routing can be attempted. In the Maps App, routing requires you to provide credentials to your Portal or ArcGIS Online organization. As mentioned earlier in the Identity section above, we use the `DefaultAuthenticationChallengeHandler` to manage the authentication process.
 
 ```java
 // As soon as the route task is instantiated, an authentication challenge is issued.
 mRouteTask = new RouteTask("http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer");
 ```
 
-You can instantiate a new RouteParameters object by using the generateDefaultParametersAsync() method on your RouteTask object. Using this method will set the appropriate default settings for routing, add the stops and request route directions, and allow the units of measure for the directions to be specified.
+You can instantiate a new `RouteParameters` object by using the `generateDefaultParametersAsync()` method on your RouteTask object. Using this method will set the appropriate default settings for routing, add the stops and request route directions, and allow the units of measure for the directions to be specified.
 
 ```java
 /**
