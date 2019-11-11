@@ -2,7 +2,7 @@
 
 Get your organization's authoritative map data into the hands of your workers with this ArcGIS Runtime Android app. The application you build can include a custom web map from your [ArcGIS Online organization](https://doc.arcgis.com/en/arcgis-online/reference/what-is-agol.htm). For example, a web map from the [Living Atlas](https://livingatlas.arcgis.com/en/browse/?#d=1&type=maps) can be used as a starting place for your app. The Maps App also includes examples of place search and routing capabilities using either ArcGIS Online's powerful services or your own services. It also leverages your organization's configured basemaps to allow users to switch between the basemaps that make sense for them.
 
-Grab the source code at https://github.com/Esri/maps-app-android to configure the app for your organization, or to learn how to integrate similar capabilities into your own app!
+Grab the source code to configure the app for your organization, or to learn how to integrate similar capabilities into your own app!
 
 ## Using web maps
 
@@ -183,7 +183,7 @@ The Map App uses the built-in map magnifier to help users fine tune a location o
 
 On long press                    | Reverse geocode result
 :-------------------------------:|:-------------------------------------:
-<img src="/docs/images/reverse_geocode.png" width="300"  />|<img src="/doc/images/reverse_geocode2.png" width="300"  />
+<img src="/docs/images/reverse_geocode.png" width="300"  />|<img src="/docs/images/reverse_geocode2.png" width="300"  />
 
 We’ve extended the `DefaultMapViewOnTouchListener` and implemented logic for `onUp` motion event.
 
