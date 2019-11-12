@@ -93,7 +93,6 @@ If there are changes made in the Original repository, you can sync the fork to k
 
 ## Resources
 
-* [The Maps-App](https://github.com/Esri/maps-app-android/blob/master/maps-app/README.md)
 * [ArcGIS Runtime SDK for Android Developers Site](https://developers.arcgis.com/android/)
 * [ArcGIS Mobile Blog](http://blogs.esri.com/esri/arcgis/category/mobile/)
 * [ArcGIS Developer Blog](http://blogs.esri.com/esri/arcgis/category/developer/)
