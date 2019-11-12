@@ -1,13 +1,12 @@
-# Maps-App Android
+# Maps App Android
 
 This repo provides an example app for Android devices called Maps App that can be used as a 
-starter for your organizations mapping app built with [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/android/). 
- You can use the Maps App as is, or extend it using the ArcGIS Runtime SDK for Android.
+starter for your organization's mapping app built with [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/android/). You can use the Maps App as is, or extend it using the ArcGIS Runtime SDK for Android.
  
- Visit Esri's[ **example app site** ](https://developers.arcgis.com/example-apps/maps-app-android/?utm_source=github&utm_medium=web&utm_campaign=example_apps_maps_app_android)to read more about this app and how the Runtime features are implemented.
+Visit Esri's [**open source apps site**](https://developers.arcgis.com/example-apps/maps-app-android/) to read more about this app and how the Runtime features are implemented.
 
+## Features
 
-## Features		
  * Dynamically switch basemaps		
  * Place search		
  * Routing		
@@ -16,11 +15,13 @@ starter for your organizations mapping app built with [ArcGIS Runtime SDK for An
  * Sign into an ArcGIS account
  
 ## Development Instructions
+
 This Maps App repo is an Android Studio Project and App Module that can be directly cloned and imported into Android Studio. In addition, you'll need to follow the steps below to obtain your client id and redirect uri. Both are required for leveraging all the features of the app.
 
-* Login to [ArcGIS for Developers](https://developers.arcgis.com/) and [register](https://developers.arcgis.com/applications/#/) your app.  
+* Log in to [ArcGIS for Developers](https://developers.arcgis.com/) and [register](https://developers.arcgis.com/applications/#/) your app.  
 
-![](Register1.png)
+![](/docs/images/Register1.png)
+
 * Once you've registered your version of the maps-app, grab a copy of the client id from the registration and set the client id in the applications app_settings.xml file.  
 
 ```xml
@@ -36,10 +37,13 @@ This Maps App repo is an Android Studio Project and App Module that can be direc
     <string name="testPartialName">vo</string>
 </resources>
 ```
+
 * As part of the registration process, add a redirect uri for your app.  Navigate to the Redirect URIs section at the bottom of the registration page and set the redirect uri to `my-ags-app://auth`.  This redirect uri is the default redirect for `https://www.arcgis.com`.
 
-![](Register2.png)
+![](/docs/images/Register2.png)
+
 * Note that the scheme for the `DefaultOAuthIntentReceiver` in the Android Manifest file is derived from the redirect uri.
+
 ```xml
         <activity
             android:name="com.esri.arcgisruntime.security.DefaultOAuthIntentReceiver"
@@ -53,20 +57,24 @@ This Maps App repo is an Android Studio Project and App Module that can be direc
                 <data android:scheme="my-ags-app"/>
             </intent-filter>
         </activity>
- ```
+```
 
 ### Fork the repo
+
 **Fork** the [Maps App Android](https://github.com/Esri/maps-app-android/fork) repo
 
 ### Clone the repo
+
 Once you have forked the repo, you can make a clone
 
 #### Command line Git
+
 1. [Clone the Maps App repo](https://help.github.com/articles/fork-a-repo#step-2-clone-your-fork)
 2. ```cd``` into the ```maps-app-android``` folder
 3. Make your changes and create a [pull request](https://help.github.com/articles/creating-a-pull-request)
 
 ### Configuring a Remote for a Fork
+
 If you make changes in the fork and would like to [sync](https://help.github.com/articles/syncing-a-fork/) those changes with the upstream repository, you must first [configure the remote](https://help.github.com/articles/configuring-a-remote-for-a-fork/). This will be required when you have created local branches and would like to make a [pull request](https://help.github.com/articles/creating-a-pull-request) to your upstream branch.
 
 1. In the Terminal (for Mac users) or command prompt (for Windows and Linux users) type ```git remote -v``` to list the current configured remote repo for your fork.
@@ -80,10 +88,11 @@ If there are changes made in the Original repository, you can sync the fork to k
 4. ```git merge upstream/master``` to sync your local `master' branch with `upstream/master`. **Note**: Your local changes will be retained and your fork's master branch will be in sync with the upstream repository.
 
 ## Requirements
+
 * [Android Studio](http://developer.android.com/sdk/index.html)
 
 ## Resources
-* [The Maps-App](https://github.com/Esri/maps-app-android/blob/master/maps-app/README.md)
+
 * [ArcGIS Runtime SDK for Android Developers Site](https://developers.arcgis.com/android/)
 * [ArcGIS Mobile Blog](http://blogs.esri.com/esri/arcgis/category/mobile/)
 * [ArcGIS Developer Blog](http://blogs.esri.com/esri/arcgis/category/developer/)
@@ -92,9 +101,11 @@ If there are changes made in the Original repository, you can sync the fork to k
 * [twitter@esri](http://twitter.com/esri)
 
 ## Issues
+
 Find a bug or want to request a new feature enhancement?  Let us know by submitting an issue.
 
 ## Contributing
+
 Anyone and everyone is welcome to [contribute](https://github.com/Esri/maps-app-android/blob/master/CONTRIBUTING.md). We do accept pull requests.
 
 1. Get involved
@@ -103,6 +114,7 @@ Anyone and everyone is welcome to [contribute](https://github.com/Esri/maps-app-
 4. Improve documentation
 
 ## Licensing
+
 Copyright 2016 Esri
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
