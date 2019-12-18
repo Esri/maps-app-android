@@ -33,7 +33,7 @@ ext {
     butterknifeVersion = '10.2.0'
     robotiumVersion = '5.6.3'
     httpcomponentsVersion = '4.3.5.1'
-    runnerVersion = '0.5'
+    runnerVersion = '1.1.0'
 
 }
 

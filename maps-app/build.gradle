@@ -47,10 +47,10 @@ dependencies {
     annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.butterknifeVersion"
 
     // Android Testing Support Library's runner and rules
-    androidTestImplementation ('androidx.test:runner:1.1.0'){
+    androidTestImplementation ("androidx.test:runner:$rootProject.runnerVersion"){
         exclude module: 'support-annotations'
     }
-    androidTestImplementation ('androidx.test:rules:1.1.0'){
+    androidTestImplementation ("androidx.test:rules:$rootProject.runnerVersion"){
         exclude module: 'support-annotations'
     }
 
