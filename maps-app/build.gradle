@@ -8,7 +8,7 @@ android {
         applicationId "com.esri.android.mapsapp"
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
-        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 
     packagingOptions {
@@ -34,11 +34,11 @@ android {
 }
 
 dependencies {
-    // android support libraries
-    implementation "com.android.support:support-v4:$rootProject.supportLibraryVersion"
-    implementation "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
-    implementation "com.android.support:cardview-v7:$rootProject.supportLibraryVersion"
-    implementation "com.android.support:design:$rootProject.supportLibraryVersion"
+    // android libraries
+    implementation "androidx.legacy:legacy-support-v4:$rootProject.legacyLibraryVersion"
+    implementation "androidx.appcompat:appcompat:$rootProject.appcompatLibraryVersion"
+    implementation "androidx.cardview:cardview:$rootProject.cardviewLibraryVersion"
+    implementation "com.google.android.material:material:$rootProject.materialLibraryVersion"
 
     // ArcGIS Android API
     implementation "com.esri.arcgisruntime:arcgis-android:$rootProject.runtimeVersion"
@@ -47,10 +47,10 @@ dependencies {
     annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.butterknifeVersion"
 
     // Android Testing Support Library's runner and rules
-    androidTestImplementation ("com.android.support.test:runner:$rootProject.runnerVersion"){
+    androidTestImplementation ("androidx.test:runner:$rootProject.runnerVersion"){
         exclude module: 'support-annotations'
     }
-    androidTestImplementation ("com.android.support.test:rules:$rootProject.runnerVersion"){
+    androidTestImplementation ("androidx.test:rules:$rootProject.runnerVersion"){
         exclude module: 'support-annotations'
     }
 
