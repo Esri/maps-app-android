@@ -1,3 +1,8 @@
+# Release 1.0.4
+
+- Update Android minimum API Level required for the application to run to 21
+- Update app launcher icons to include adaptive and legacy launcher icons
+
 # Release 1.0.3
 
 - Support for ArcGIS Runtime SDK for Android 100.7.0
