@@ -22,7 +22,7 @@
  *
  */
 
-package com.esri.android.mapsapp.dialogs;
+package com.esri.arcgisruntime.opensourceapps.mapsapp.dialogs;
 
 import android.app.Activity;
 import android.app.Dialog;

@@ -22,33 +22,20 @@
  *
  */
 
-package com.esri.android.mapsapp.util;
+package com.esri.arcgisruntime.opensourceapps.mapsapp.basemaps;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import android.graphics.Bitmap;
 
-/**
- * Singleton that implements a thread pool to execute tasks asynchronously.
- */
-public class TaskExecutor {
+import com.esri.arcgisruntime.portal.PortalItem;
 
-	private static final int POOL_SIZE = 3;
+public class BasemapItem {
 
-	private static TaskExecutor sInstance;
+	public PortalItem item;
 
-	private final ExecutorService mPool = Executors.newFixedThreadPool(POOL_SIZE);
+	public Bitmap itemThumbnail;
 
-	private TaskExecutor() {
-	}
-
-	public static TaskExecutor getInstance() {
-		if (sInstance == null) {
-			sInstance = new TaskExecutor();
-		}
-		return sInstance;
-	}
-
-	public ExecutorService getThreadPool() {
-		return mPool;
+	public BasemapItem(PortalItem item, Bitmap bt) {
+		this.item = item;
+		itemThumbnail = bt;
 	}
 }

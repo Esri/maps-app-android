@@ -22,7 +22,7 @@
  *
  */
 
-package com.esri.android.mapsapp.util;
+package com.esri.arcgisruntime.opensourceapps.mapsapp.util;
 
 /**
  * Helper class for string operations.

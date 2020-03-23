@@ -22,7 +22,7 @@
  *
  */
 
-package com.esri.android.mapsapp.location;
+package com.esri.arcgisruntime.opensourceapps.mapsapp.location;
 
 import java.util.List;
 
@@ -43,7 +43,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.esri.android.mapsapp.R;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.R;
 import com.esri.arcgisruntime.tasks.networkanalysis.DirectionManeuver;
 import com.esri.arcgisruntime.tasks.networkanalysis.DirectionManeuverType;
 

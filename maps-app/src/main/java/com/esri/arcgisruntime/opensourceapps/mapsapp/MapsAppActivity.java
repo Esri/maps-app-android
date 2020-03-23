@@ -22,7 +22,7 @@
  *
  */
 
-package com.esri.android.mapsapp;
+package com.esri.arcgisruntime.opensourceapps.mapsapp;
 
 
 import java.util.ArrayList;
@@ -63,9 +63,9 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import com.esri.android.mapsapp.account.AccountManager;
-import com.esri.android.mapsapp.account.SignInActivity;
-import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.account.AccountManager;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.account.SignInActivity;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.basemaps.BasemapsDialogFragment;
 
 /**
  * Entry point into the Maps App.

@@ -22,7 +22,7 @@
  *
  */
 
-package com.esri.android.mapsapp.location;
+package com.esri.arcgisruntime.opensourceapps.mapsapp.location;
 
 import android.app.DialogFragment;
 import android.os.Bundle;
@@ -34,7 +34,7 @@ import android.widget.ImageView;
 import android.widget.SearchView;
 
 import android.widget.SearchView.OnQueryTextListener;
-import com.esri.android.mapsapp.R;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.R;
 
 public class RoutingDialogFragment extends DialogFragment {
 	public static final String ARG_END_POINT_DEFAULT = "EndPointDefault";

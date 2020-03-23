@@ -1,4 +1,4 @@
-/* Copyright 1995-2014 Esri
+/* Copyright 1995-2016 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,37 +22,24 @@
  *
  */
 
-package com.esri.android.mapsapp;
+package com.esri.arcgisruntime.opensourceapps.mapsapp.basemaps;
 
-import android.view.View;
-import android.widget.LinearLayout;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
- * Represents an item in the navigation drawer list.
+ * singleton to persist BasemapItem data
  */
-public class DrawerItem {
-	private final OnClickListener mListener;
-	private final LinearLayout mView;
+public class PersistBasemaps {
 
-	public DrawerItem(LinearLayout view, OnClickListener listener) {
-		mView = view;
-		mListener = listener;
-	}
+  public static PersistBasemaps getInstance(){
+    return ourInstance;
+  }
 
-	/**
-	 * Invokes the OnClickListener registered with this DrawerItem.
-	 */
-	public void onClicked() {
-		if (mListener != null) {
-			mListener.onClick();
-		}
-	}
+  public final HashMap<String, ArrayList<BasemapItem>> storage = new HashMap<>();
 
-	public View getView() {
-		return mView;
-	}
+  private PersistBasemaps(){}
 
-	public interface OnClickListener {
-		void onClick();
-	}
+  private static final PersistBasemaps ourInstance = new PersistBasemaps();
+
 }

@@ -22,7 +22,7 @@
  *
  */
 
-package com.esri.android.mapsapp;
+package com.esri.arcgisruntime.opensourceapps.mapsapp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,9 +40,9 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.*;
 
-import com.esri.android.mapsapp.account.AccountManager;
-import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
-import com.esri.android.mapsapp.util.TaskExecutor;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.account.AccountManager;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.dialogs.ProgressDialogFragment;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.util.TaskExecutor;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalItem;

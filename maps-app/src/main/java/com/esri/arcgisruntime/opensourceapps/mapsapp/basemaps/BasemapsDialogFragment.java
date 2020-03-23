@@ -22,7 +22,7 @@
  *
  */
 
-package com.esri.android.mapsapp.basemaps;
+package com.esri.arcgisruntime.opensourceapps.mapsapp.basemaps;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,10 +39,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 
-import com.esri.android.mapsapp.R;
-import com.esri.android.mapsapp.account.AccountManager;
-import com.esri.android.mapsapp.basemaps.BasemapsAdapter.BasemapsAdapterClickListener;
-import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.R;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.account.AccountManager;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.basemaps.BasemapsAdapter.BasemapsAdapterClickListener;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.dialogs.ProgressDialogFragment;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;
 import com.esri.arcgisruntime.portal.*;
 
