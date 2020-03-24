@@ -22,7 +22,7 @@
  *
  */
 
-package com.esri.android.mapsapp;
+package com.esri.arcgisruntime.opensourceapps.mapsapp;
 
 import java.net.MalformedURLException;
 import java.util.List;
@@ -65,15 +65,15 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.esri.android.mapsapp.account.AccountManager;
-import com.esri.android.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogListener;
-import com.esri.android.mapsapp.dialogs.ProgressDialogFragment;
-import com.esri.android.mapsapp.location.DirectionsDialogFragment;
-import com.esri.android.mapsapp.location.DirectionsDialogFragment.DirectionsDialogListener;
-import com.esri.android.mapsapp.location.RoutingDialogFragment;
-import com.esri.android.mapsapp.location.RoutingDialogFragment.RoutingDialogListener;
-import com.esri.android.mapsapp.tools.Compass;
-import com.esri.android.mapsapp.util.TaskExecutor;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.account.AccountManager;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.basemaps.BasemapsDialogFragment.BasemapsDialogListener;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.dialogs.ProgressDialogFragment;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.location.DirectionsDialogFragment;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.location.DirectionsDialogFragment.DirectionsDialogListener;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.location.RoutingDialogFragment;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.location.RoutingDialogFragment.RoutingDialogListener;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.tools.Compass;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.util.TaskExecutor;
 
 import com.esri.arcgisruntime.UnitSystem;
 import com.esri.arcgisruntime.concurrent.ListenableFuture;

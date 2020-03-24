@@ -1,4 +1,4 @@
-/* Copyright 1995-2016 Esri
+/* Copyright 1995-2014 Esri
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,24 +22,33 @@
  *
  */
 
-package com.esri.android.mapsapp.basemaps;
+package com.esri.arcgisruntime.opensourceapps.mapsapp.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
- * singleton to persist BasemapItem data
+ * Singleton that implements a thread pool to execute tasks asynchronously.
  */
-public class PersistBasemaps {
+public class TaskExecutor {
 
-  public static PersistBasemaps getInstance(){
-    return ourInstance;
-  }
+	private static final int POOL_SIZE = 3;
 
-  public final HashMap<String, ArrayList<BasemapItem>> storage = new HashMap<>();
+	private static TaskExecutor sInstance;
 
-  private PersistBasemaps(){}
+	private final ExecutorService mPool = Executors.newFixedThreadPool(POOL_SIZE);
 
-  private static final PersistBasemaps ourInstance = new PersistBasemaps();
+	private TaskExecutor() {
+	}
 
+	public static TaskExecutor getInstance() {
+		if (sInstance == null) {
+			sInstance = new TaskExecutor();
+		}
+		return sInstance;
+	}
+
+	public ExecutorService getThreadPool() {
+		return mPool;
+	}
 }

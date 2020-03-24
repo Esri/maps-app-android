@@ -22,7 +22,7 @@
  *
  */
 
-package com.esri.android.mapsapp.basemaps;
+package com.esri.arcgisruntime.opensourceapps.mapsapp.basemaps;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.esri.android.mapsapp.R;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.R;
 
 public class BasemapsAdapter extends BaseAdapter {
 

@@ -22,7 +22,7 @@
  *
  */
 
-package com.esri.android.mapsapp.tools;
+package com.esri.arcgisruntime.opensourceapps.mapsapp.tools;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -31,7 +31,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.view.View;
-import com.esri.android.mapsapp.R;
+import com.esri.arcgisruntime.opensourceapps.mapsapp.R;
 
 /**
  * The implementation of a compass showing the relative rotation of the map.

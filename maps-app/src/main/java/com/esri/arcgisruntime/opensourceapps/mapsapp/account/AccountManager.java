@@ -22,7 +22,7 @@
  *
  */
 
-package com.esri.android.mapsapp.account;
+package com.esri.arcgisruntime.opensourceapps.mapsapp.account;
 
 import com.esri.arcgisruntime.portal.Portal;
 import com.esri.arcgisruntime.portal.PortalInfo;

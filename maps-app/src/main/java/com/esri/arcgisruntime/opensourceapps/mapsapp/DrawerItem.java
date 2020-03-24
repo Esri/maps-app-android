@@ -22,20 +22,37 @@
  *
  */
 
-package com.esri.android.mapsapp.basemaps;
+package com.esri.arcgisruntime.opensourceapps.mapsapp;
 
-import android.graphics.Bitmap;
+import android.view.View;
+import android.widget.LinearLayout;
 
-import com.esri.arcgisruntime.portal.PortalItem;
+/**
+ * Represents an item in the navigation drawer list.
+ */
+public class DrawerItem {
+	private final OnClickListener mListener;
+	private final LinearLayout mView;
 
-public class BasemapItem {
+	public DrawerItem(LinearLayout view, OnClickListener listener) {
+		mView = view;
+		mListener = listener;
+	}
 
-	public PortalItem item;
+	/**
+	 * Invokes the OnClickListener registered with this DrawerItem.
+	 */
+	public void onClicked() {
+		if (mListener != null) {
+			mListener.onClick();
+		}
+	}
 
-	public Bitmap itemThumbnail;
+	public View getView() {
+		return mView;
+	}
 
-	public BasemapItem(PortalItem item, Bitmap bt) {
-		this.item = item;
-		itemThumbnail = bt;
+	public interface OnClickListener {
+		void onClick();
 	}
 }
