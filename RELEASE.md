@@ -1,3 +1,7 @@
+# Release 1.0.7
+
+- Support for ArcGIS Runtime SDK for Android 100.8.0
+
 # Release 1.0.6
 
 - Update app package name
