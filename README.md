@@ -1,9 +1,28 @@
 # Maps App Android
 
-This repo provides an example app for Android devices called Maps App that can be used as a 
+This repo provides an example app for Android devices called Maps App that can be used as a
 starter for your organization's mapping app built with [ArcGIS Runtime SDK for Android](https://developers.arcgis.com/android/). You can use the Maps App as is, or extend it using the ArcGIS Runtime SDK for Android.
- 
-Visit Esri's [**open source apps site**](https://developers.arcgis.com/example-apps/maps-app-android/) to read more about this app and how the Runtime features are implemented.
+
+Visit Esri's [**open source apps site**](https://developers.arcgis.com/example-apps/maps-app/) to read more about this app and how the Runtime features are implemented.
+
+<!-- MDTOC maxdepth:6 firsth1:0 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
+
+- [Features](#features)   
+- [Detailed Documentation](#detailed-documentation)   
+- [Development Instructions](#development-instructions)   
+   - [Fork the repo](#fork-the-repo)   
+   - [Clone the repo](#clone-the-repo)   
+      - [Command line Git](#command-line-git)   
+   - [Configuring a Remote for a Fork](#configuring-a-remote-for-a-fork)   
+- [Requirements](#requirements)   
+- [Resources](#resources)   
+- [Issues](#issues)   
+- [Contributing](#contributing)   
+- [MDTOC](#mdtoc)   
+- [Licensing](#licensing)   
+
+<!-- /MDTOC -->
+---
 
 ## Features
 
@@ -13,7 +32,11 @@ Visit Esri's [**open source apps site**](https://developers.arcgis.com/example-a
  * Geocode addresses		
  * Reverse geocode		
  * Sign into an ArcGIS account
- 
+
+## Detailed Documentation
+
+Read the [docs](./docs/README.md) for a detailed explanation of the application, including its architecture and how it leverages the ArcGIS platform, as well as how you can begin using the app right away.
+
 ## Development Instructions
 
 This Maps App repo is an Android Studio Project and App Module that can be directly cloned and imported into Android Studio. In addition, you'll need to follow the steps below to obtain your client id and redirect uri. Both are required for leveraging all the features of the app.
@@ -112,6 +135,10 @@ Anyone and everyone is welcome to [contribute](https://github.com/Esri/maps-app-
 2. Report issues
 3. Contribute code
 4. Improve documentation
+
+## MDTOC
+
+Generation a table of contents in this repository was performed using the [MDTOC package for Atom](https://atom.io/packages/atom-mdtoc).
 
 ## Licensing
 

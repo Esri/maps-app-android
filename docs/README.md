@@ -1,10 +1,27 @@
+# Contents
+
+<!-- MDTOC maxdepth:6 firsth1:0 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
+
+- [Description](#description)   
+   - [Using web maps](#using-web-maps)   
+   - [Accessing your organization's basemaps](#accessing-your-organizations-basemaps)   
+   - [Identity](#identity)   
+   - [Place search](#place-search)   
+   - [Place suggestions](#place-suggestions)   
+   - [Geocoding](#geocoding)   
+   - [Reverse geocoding](#reverse-geocoding)   
+   - [Route](#route)   
+
+<!-- /MDTOC -->
+---
+
 ## Description
 
 Get your organization's authoritative map data into the hands of your workers with this ArcGIS Runtime Android app. The application you build can include a custom web map from your [ArcGIS Online organization](https://doc.arcgis.com/en/arcgis-online/reference/what-is-agol.htm). For example, a web map from the [Living Atlas](https://livingatlas.arcgis.com/en/browse/?#d=1&type=maps) can be used as a starting place for your app. The Maps App also includes examples of place search and routing capabilities using either ArcGIS Online's powerful services or your own services. It also leverages your organization's configured basemaps to allow users to switch between the basemaps that make sense for them.
 
 Grab the source code to configure the app for your organization, or to learn how to integrate similar capabilities into your own app!
 
-## Using web maps
+### Using web maps
 
 You can author your own web maps from ArcGIS Online or ArcGIS Pro and share them in your app via your ArcGIS Online organization. This is the central power of the Web GIS model built into ArcGIS. Building an app which uses a web map allows the cartography and map configuration to be completed in ArcGIS Online rather than in code. This allows the map to change over time, without any code changes or app updates. Learn more about the benefits of developing with web maps [here](https://developers.arcgis.com/web-map-specification/). You can also learn about authoring web maps in [ArcGIS Online](http://doc.arcgis.com/en/arcgis-online/create-maps/make-your-first-map.htm) and [ArcGIS Pro](http://pro.arcgis.com/en/pro-app/help/mapping/map-authoring/author-a-basemap.htm).
 
@@ -16,7 +33,7 @@ Map map = new Map(portal, "<your map id>");
 mapView.setMap(map);
 ```
 
-## Accessing your organization's basemaps
+### Accessing your organization's basemaps
 
 As an administrator of an ArcGIS Online organization or Portal, you can configure the basemaps that your users can switch between via a [group](http://doc.arcgis.com/en/arcgis-online/share-maps/share-items.htm). Applications can leverage this configuration using the [Portal API](https://developers.arcgis.com/android/latest/guide/access-the-arcgis-platform.htm#ESRI_SECTION2_B8EDBBD3D4F1499C80AF43CFA73B8292). The Maps App does this by an asynchronous call to find the group containing web maps in the basemap gallery. With the returned group id, the collection of basemaps is retrieved from the portal.
 
@@ -57,7 +74,7 @@ groupFuture.addDoneListener(new Runnable() {
 });
 ```
 
-## Identity
+### Identity
 
 The Maps App leverages the ArcGIS [identity](https://developers.arcgis.com/authentication/) model to provide access to resources via the the [named user](https://developers.arcgis.com/authentication/#named-user-login) login pattern. During the routing workflow, the app prompts you for your organization’s ArcGIS Online credentials used to obtain a token later consumed by the Portal and routing service. The ArcGIS Runtime SDKs provide a simple-to-use API for dealing with ArcGIS logins.
 
@@ -101,7 +118,7 @@ Any time a secured service issues an authentication challenge, the `DefaultAuthe
 
 Note the value for android:scheme in the XML. This is [redirect URI](https://developers.arcgis.com/authentication/browser-based-user-logins/#configuring-a-redirect-uri) that you configured when you registered your app [here](https://developers.arcgis.com/dashboard/). For more details on the user authorization flow, see the [Authorize REST API](https://developers.arcgis.com/rest/users-groups-and-items/authorize.htm).
 
-## Place search
+### Place search
 
 [Geocoding](https://developers.arcgis.com/android/latest/guide/search-for-places-geocoding-.htm#ESRI_SECTION1_406F4F35F62C465ABC52F3FF04BB6B04) lets you transform an address or a place name to a specific geographic location. The reverse lets you use a geographic location to find a description of the location, like a postal address or place name. In the Maps App, we use a [LocatorTask](https://developers.arcgis.com/android/latest/guide/search-for-places-geocoding-.htm#ESRI_SECTION1_62AE6A47EB4B403ABBC72337A1255F8A) to perform geocoding and reverse geocoding functions provided by [Esri's World Geocoding Service](https://developers.arcgis.com/features/geocoding/). The `LocatorTask` has various asynchronous methods that we use to provide address suggestions when searching for places or geocoding locations.
 
@@ -114,7 +131,7 @@ mLocator = new LocatorTask(getString("http://geocode.arcgis.com/arcgis/rest/serv
 
 You can also provision your own [custom geocode service](https://doc.arcgis.com/en/arcgis-online/administer/configure-services.htm#ESRI_SECTION1_0A9A071A7AB748028C8213D1D863FA18) to support your organization. Before using the `LocatorTask` to geocode or search for places, the `LocatorTask` must be `LOADED`. The loadable pattern is described [here](https://developers.arcgis.com/android/latest/guide/loadable-pattern.htm). `LocatorTask` operations are performed asynchronously using `ListenableFutures`, an implementation of Java’s Future interface. `ListenableFutures` add the ability to attach a listener that runs upon completion of the task. One of the first user interactions the Maps App supports is suggesting places near the device location.
 
-## Place suggestions
+### Place suggestions
 
 Typing the first few letters of a place into the Map App search box (e.g. “Voodoo Doughnut”) shows a number of suggestions near the device’s location
 
@@ -147,7 +164,7 @@ mLocator.addDoneLoadingListener(new Runnable() {
 mLocator.loadAsync();
 ```
 
-## Geocoding
+### Geocoding
 
 Once a suggestion in the list has been selected by the user, the suggested address is geocoded using the `geocodeAsync` method of the `LocatorTask`. Along with the address, specific [geocoding parameters](https://developers.arcgis.com/android/latest/guide/search-for-places-geocoding-.htm#ESRI_SECTION2_48C5C281B21B4BF1BBBDBCEA71F105B9) can be set to tune the results. For example, in the Maps App, we set the preferred location and refine that further by setting a boundary of the area to search for matching addresses.
 
@@ -177,7 +194,7 @@ locFuture.addDoneListener(new Runnable() {
 });
 ```
 
-## Reverse geocoding
+### Reverse geocoding
 
 The Map App uses the built-in map magnifier to help users fine tune a location on the map for reverse geocoding. The magnifier appears after a long-press on the map view. Once the long-press is released, the map point is reverse geocoded.
 
@@ -230,7 +247,7 @@ private void reverseGeocode(Point point) {
 }
 ```
 
-## Route
+### Route
 
 Getting navigation directions in the Maps App is just as easy in the [Runtime SDK](https://developers.arcgis.com/features/directions/) as it is on [ArcGIS Online](http://doc.arcgis.com/en/arcgis-online/use-maps/get-directions.htm). You can [customize](http://doc.arcgis.com/en/arcgis-online/administer/configure-services.htm#ESRI_SECTION1_567C344D5DEE444988CA2FE5193F3CAD) your navigation services for your organization, add new travel modes that better reflect your organization’s workflows, or remove travel modes that are not suitable for your organization’s workflows.
 
