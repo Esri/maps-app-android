@@ -9,6 +9,8 @@ android {
         minSdkVersion rootProject.minSdkVersion
         targetSdkVersion rootProject.targetSdkVersion
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        versionCode = 1
+        versionName = '1.0.8'
     }
 
     packagingOptions {
