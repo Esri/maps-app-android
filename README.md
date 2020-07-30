@@ -138,7 +138,7 @@ Anyone and everyone is welcome to [contribute](https://github.com/Esri/maps-app-
 
 ## MDTOC
 
-Generation a table of contents in this repository was performed using the [MDTOC package for Atom](https://atom.io/packages/atom-mdtoc).
+Generating table of contents for documents in this repository was performed using the [MDTOC package for Atom](https://atom.io/packages/atom-mdtoc).
 
 ## Licensing
 
