@@ -1,3 +1,8 @@
+# Release 1.0.8
+
+- Adds doc table of contents to root README.md and docs/index.md
+- Renames docs/index.md to [docs/README.md](/docs/README.md)
+
 # Release 1.0.7
 
 - Support for ArcGIS Runtime SDK for Android 100.8.0
@@ -21,7 +26,7 @@
 
 # Release 1.0.2
 
-- Comprehensive [app documentation](/docs/index.md) from the ArcGIS for Developers site.
+- Comprehensive [app documentation](/docs/README.md) from the ArcGIS for Developers site.
 
 # Release 1.0.1
 
