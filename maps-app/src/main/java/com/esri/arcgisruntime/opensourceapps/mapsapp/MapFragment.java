@@ -25,6 +25,7 @@
 package com.esri.arcgisruntime.opensourceapps.mapsapp;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -454,7 +455,7 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 
 		// Setup use of magnifier on a long press on the map
-		mMapView.setMagnifierEnabled(true);
+		mMapView.getInteractionOptions().setMagnifierEnabled(true);
 		mLongPressEvent = null;
 
 		// Setup OnTouchListener to detect and act on long-press
@@ -891,7 +892,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		// create marker symbol to represent location
 		Bitmap icon = BitmapFactory.decodeResource(getActivity().getResources(), R.drawable.pin_circle_red);
 		BitmapDrawable drawable = new BitmapDrawable(getActivity().getResources(), icon);
-		PictureMarkerSymbol resultSymbol = new PictureMarkerSymbol(drawable);
+		PictureMarkerSymbol resultSymbol = null;
+		try {
+			resultSymbol = PictureMarkerSymbol.createAsync(drawable).get();
+		} catch (InterruptedException | ExecutionException exception) {
+			Log.e(TAG, "PictureMarkerSymbol failed to load: " + exception.getMessage());
+		}
 		// create graphic object for resulting location
 		Graphic resultLocGraphic = new Graphic(resultPoint, resultSymbol);
 		// add graphic to location layer
@@ -1431,7 +1437,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 		BitmapDrawable bitmapDrawable = (BitmapDrawable) ContextCompat.getDrawable(
 				getActivity().getApplicationContext(),
 				endPoint ? R.drawable.pin_circle_blue : R.drawable.pin_circle_red);
-		PictureMarkerSymbol destinationSymbol = new PictureMarkerSymbol(bitmapDrawable);
+		PictureMarkerSymbol destinationSymbol = null;
+		try {
+			destinationSymbol = PictureMarkerSymbol.createAsync(bitmapDrawable).get();
+		} catch (InterruptedException | ExecutionException exception) {
+			Log.e(TAG, "PictureMarkerSymbol failed to load: " + exception.getMessage());
+		}
 		// NOTE: marker's bounds not set till marker is used to create
 		// destinationSymbol
 		float offsetY = convertPixelsToDp(getActivity(),
@@ -1492,7 +1503,12 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 
 			BitmapDrawable bitmapDrawable = (BitmapDrawable) ContextCompat
 					.getDrawable(getActivity().getApplicationContext(), R.drawable.pin_circle_red);
-			PictureMarkerSymbol destinationSymbol = new PictureMarkerSymbol(bitmapDrawable);
+			PictureMarkerSymbol destinationSymbol = null;
+			try {
+				destinationSymbol = PictureMarkerSymbol.createAsync(bitmapDrawable).get();
+			} catch (InterruptedException | ExecutionException exception) {
+				Log.e(TAG, "PictureMarkerSymbol failed to load: " + exception.getMessage());
+			}
 			mLocationLayer.getGraphics().add(new Graphic(mFoundLocation, destinationSymbol));
 
 			// center the map to result location
@@ -1632,8 +1648,10 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 						try {
 							RouteParameters routeParameters = routeTaskFuture.get();
 							// Add a stop for origin and destination
-							routeParameters.getStops().add(origin);
-							routeParameters.getStops().add(destination);
+							List<Stop> stops = new ArrayList<>();
+							stops.add(origin);
+							stops.add(destination);
+							routeParameters.setStops(stops);
 							// We want the task to return driving directions and routes
 							routeParameters.setReturnDirections(true);
 							routeParameters.setOutputSpatialReference(mMapView.getSpatialReference());
