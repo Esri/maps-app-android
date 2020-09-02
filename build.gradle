@@ -13,6 +13,7 @@ allprojects {
     repositories {
         jcenter()
         maven { url 'https://esri.bintray.com/arcgis' }
+        maven { url 'http://olympus.esri.com/artifactory/arcgisruntime-repo/' }
         google()
     }
 }
@@ -29,7 +30,7 @@ ext {
     materialLibraryVersion = '1.0.0'
     legacyLibraryVersion = '1.0.0'
 
-    runtimeVersion = '100.8.0'
+    runtimeVersion = '100.9.0'
     butterknifeVersion = '10.2.0'
     robotiumVersion = '5.6.3'
     httpcomponentsVersion = '4.3.5.1'
