@@ -1,3 +1,8 @@
+# Release 1.0.9
+
+- Support for ArcGIS Runtime SDK for Android 100.9.0
+- Cleanup usage of deprecated ArcGIS Runtime API
+
 # Release 1.0.8
 
 - Adds doc table of contents to root README.md and docs/index.md
