@@ -1588,8 +1588,9 @@ public class MapFragment extends Fragment implements BasemapsDialogListener,
 	private class LocationListener implements LocationDisplay.LocationChangedListener {
 
 		@Override public void onLocationChanged(LocationDisplay.LocationChangedEvent locationChangedEvent) {
-			if (locationChangedEvent.getLocation().getPosition() != null){
-				mLocation = locationChangedEvent.getLocation().getPosition();
+			if (locationChangedEvent.getLocation().getPosition() != null) {
+				mLocation = new Point(locationChangedEvent.getLocation().getPosition().getX(),
+						locationChangedEvent.getLocation().getPosition().getY());
 			}
 		}
 	}
