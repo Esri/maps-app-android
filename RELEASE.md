@@ -1,6 +1,6 @@
 # Release 1.0.10
 
-- Updates doc to avoid all use of `http:`
+- Updates project to favor the use of secured `https` rather than `http`
 - Updates Bintray maven reference for ArcGIS Runtime SDK for Android in gradle scripts
 
 # Release 1.0.9
