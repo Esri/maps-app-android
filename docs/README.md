@@ -35,7 +35,7 @@ mapView.setMap(map);
 
 ### Accessing your organization's basemaps
 
-As an administrator of an ArcGIS Online organization or Portal, you can configure the basemaps that your users can switch between via a [group](http://doc.arcgis.com/en/arcgis-online/share-maps/share-items.htm). Applications can leverage this configuration using the [Portal API](https://developers.arcgis.com/android/latest/guide/access-the-arcgis-platform.htm#ESRI_SECTION2_B8EDBBD3D4F1499C80AF43CFA73B8292). The Maps App does this by an asynchronous call to find the group containing web maps in the basemap gallery. With the returned group id, the collection of basemaps is retrieved from the portal.
+As an administrator of an ArcGIS Online organization or Portal, you can configure the basemaps that your users can switch between via a [group](http://doc.arcgis.com/en/arcgis-online/share-maps/share-items.htm). Applications can leverage this configuration using the [Portal API](https://developers.arcgis.com/android/arcgis-organization-portals/). The Maps App does this by an asynchronous call to find the group containing web maps in the basemap gallery. With the returned group id, the collection of basemaps is retrieved from the portal.
 
 ```java
 PortalQueryParams queryParams = new PortalQueryParams();
@@ -129,7 +129,7 @@ In the Maps App, `LocatorTask`s are initialized using an online locator provided
 mLocator = new LocatorTask(getString("http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer");
 ```
 
-You can also provision your own [custom geocode service](https://doc.arcgis.com/en/arcgis-online/administer/configure-services.htm#ESRI_SECTION1_0A9A071A7AB748028C8213D1D863FA18) to support your organization. Before using the `LocatorTask` to geocode or search for places, the `LocatorTask` must be `LOADED`. The loadable pattern is described [here](https://developers.arcgis.com/android/latest/guide/loadable-pattern.htm). `LocatorTask` operations are performed asynchronously using `ListenableFutures`, an implementation of Java’s Future interface. `ListenableFutures` add the ability to attach a listener that runs upon completion of the task. One of the first user interactions the Maps App supports is suggesting places near the device location.
+You can also provision your own [custom geocode service](https://doc.arcgis.com/en/arcgis-online/administer/configure-services.htm#ESRI_SECTION1_0A9A071A7AB748028C8213D1D863FA18) to support your organization. Before using the `LocatorTask` to geocode or search for places, the `LocatorTask` must be `LOADED`. The loadable pattern is described [here](https://developers.arcgis.com/android/programming-patterns/loadable/). `LocatorTask` operations are performed asynchronously using `ListenableFutures`, an implementation of Java’s Future interface. `ListenableFutures` add the ability to attach a listener that runs upon completion of the task. One of the first user interactions the Maps App supports is suggesting places near the device location.
 
 ### Place suggestions
 
@@ -166,7 +166,7 @@ mLocator.loadAsync();
 
 ### Geocoding
 
-Once a suggestion in the list has been selected by the user, the suggested address is geocoded using the `geocodeAsync` method of the `LocatorTask`. Along with the address, specific [geocoding parameters](https://developers.arcgis.com/android/latest/guide/search-for-places-geocoding-.htm#ESRI_SECTION2_48C5C281B21B4BF1BBBDBCEA71F105B9) can be set to tune the results. For example, in the Maps App, we set the preferred location and refine that further by setting a boundary of the area to search for matching addresses.
+Once a suggestion in the list has been selected by the user, the suggested address is geocoded using the `geocodeAsync` method of the `LocatorTask`. Along with the address, specific [geocoding parameters](https://developers.arcgis.com/android/api-reference/reference/com/esri/arcgisruntime/tasks/geocode/GeocodeParameters.html) can be set to tune the results. For example, in the Maps App, we set the preferred location and refine that further by setting a boundary of the area to search for matching addresses.
 
 ```java
 mGeocodeParams = new GeocodeParameters();
