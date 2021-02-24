@@ -35,7 +35,7 @@ mapView.setMap(map);
 
 ### Accessing your organization's basemaps
 
-As an administrator of an ArcGIS Online organization or Portal, you can configure the basemaps that your users can switch between via a [group](http://doc.arcgis.com/en/arcgis-online/share-maps/share-items.htm). Applications can leverage this configuration using the [Portal API](https://developers.arcgis.com/android/arcgis-organization-portals). The Maps App does this by an asynchronous call to find the group containing web maps in the basemap gallery. With the returned group id, the collection of basemaps is retrieved from the portal.
+As an administrator of an ArcGIS Online organization or Portal, you can configure the basemaps that your users can switch between via a [group](http://doc.arcgis.com/en/arcgis-online/share-maps/share-items.htm). Applications can leverage this configuration using the [Portal API](https://developers.arcgis.com/android/arcgis-organization-portals/). The Maps App does this by an asynchronous call to find the group containing web maps in the basemap gallery. With the returned group id, the collection of basemaps is retrieved from the portal.
 
 ```java
 PortalQueryParams queryParams = new PortalQueryParams();
@@ -129,7 +129,7 @@ In the Maps App, `LocatorTask`s are initialized using an online locator provided
 mLocator = new LocatorTask(getString("http://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer");
 ```
 
-You can also provision your own [custom geocode service](https://doc.arcgis.com/en/arcgis-online/administer/configure-services.htm#ESRI_SECTION1_0A9A071A7AB748028C8213D1D863FA18) to support your organization. Before using the `LocatorTask` to geocode or search for places, the `LocatorTask` must be `LOADED`. The loadable pattern is described [here](https://developers.arcgis.com/android/programming-patterns/loadable). `LocatorTask` operations are performed asynchronously using `ListenableFutures`, an implementation of Java’s Future interface. `ListenableFutures` add the ability to attach a listener that runs upon completion of the task. One of the first user interactions the Maps App supports is suggesting places near the device location.
+You can also provision your own [custom geocode service](https://doc.arcgis.com/en/arcgis-online/administer/configure-services.htm#ESRI_SECTION1_0A9A071A7AB748028C8213D1D863FA18) to support your organization. Before using the `LocatorTask` to geocode or search for places, the `LocatorTask` must be `LOADED`. The loadable pattern is described [here](https://developers.arcgis.com/android/programming-patterns/loadable/). `LocatorTask` operations are performed asynchronously using `ListenableFutures`, an implementation of Java’s Future interface. `ListenableFutures` add the ability to attach a listener that runs upon completion of the task. One of the first user interactions the Maps App supports is suggesting places near the device location.
 
 ### Place suggestions
 
