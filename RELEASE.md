@@ -1,3 +1,7 @@
+# Release 1.0.12
+
+- Support for ArcGIS Runtime SDK for Android 100.11.0
+
 # Release 1.0.11
 
 - Support for ArcGIS Runtime SDK for Android 100.10.0
